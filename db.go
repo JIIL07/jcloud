@@ -19,7 +19,7 @@ func sqlOpen(path string) (*sql.DB, error) {
 			extension TEXT,
 			filesize INTEGER,
             status TEXT,
-			text TEXT
+			data BLOB
 		)
 	`)
 	return db, err

@@ -1,5 +1,10 @@
 package main
 
+import (
+	"bufio"
+	"os"
+)
+
 type Info struct {
 	Id        int
 	Filename  string
@@ -9,6 +14,12 @@ type Info struct {
 	Text      string
 }
 
+type SearchInfo struct {
+	fullNotation string
+	name         string
+	ext          string
+}
+
 var Statuses = []string{
 	"Created",
 	"Modified",
@@ -16,3 +27,5 @@ var Statuses = []string{
 	"Renamed",
 }
 var info Info
+var search SearchInfo
+var reader = bufio.NewReader(os.Stdin)

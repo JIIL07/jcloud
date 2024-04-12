@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-func splitName(name string) []string {
+func splitName(name string) (string, string) {
 	split := strings.Split(name, ".")
-	return split
+	return split[0], split[1]
 }
 func getName() error {
 	fmt.Print("Filename: ")
@@ -37,8 +37,11 @@ func Search(db *sql.DB) (*sql.Rows, error) {
 }
 func Form() (string, string, string) {
 	fmt.Print("File to search: ")
-	var temp string
-	fmt.Scan(&temp)
-	file := splitName(temp)
-	return `SELECT * FROM files WHERE filename = ? AND extension = ? `, file[0], "." + file[1]
+	search.fullNotation, _ = reader.ReadString('\n')
+	search.fullNotation = strings.TrimSpace(search.fullNotation)
+	search.name, search.ext = splitName(search.fullNotation)
+	return `SELECT * FROM files WHERE filename = ? AND extension = ? `, search.name, "." + search.ext
+}
+func Write(*sql.Rows) {
+
 }
