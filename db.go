@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -14,7 +15,7 @@ func sqlOpen(path string) (*sql.DB, error) {
 	}
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS files (
-			id INTEGER PRIMARY KEY ,
+			id INTEGER PRIMARY KEY AUTOINCREMENT ,
 			filename TEXT,
 			extension TEXT,
 			filesize INTEGER,
@@ -24,15 +25,18 @@ func sqlOpen(path string) (*sql.DB, error) {
 	`)
 	return db, err
 }
-func sqlAdd(db *sql.DB, file []string) error {
-	info.Filename = file[0]
-	info.Extension = "." + file[1]
-	info.Filesize = len(info.Text)
+func sqlAdd(db *sql.DB) error {
+	GetName("add")
+	err = GetData()
+	if err != nil {
+		return err
+	}
+	info.Filesize = len(info.Data)
 	info.Status = Statuses[0]
-	_, err := db.Exec(`INSERT INTO files
-	(id, filename, extension, filesize, status, text)
+	_, err = db.Exec(`INSERT INTO files
+	(filename, extension, filesize, status, data)
 	VALUES
-	(?,?,?,?,?,?)`, info.Id, info.Filename, info.Extension, info.Filesize, info.Status, info.Text)
+	(?,?,?,?,?)`, info.Filename, info.Extension, info.Filesize, info.Status, info.Data)
 	return err
 }
 func sqlDelete(db *sql.DB, id int) error {
@@ -40,18 +44,46 @@ func sqlDelete(db *sql.DB, id int) error {
 	return err
 }
 func sqlShow(db *sql.DB) error {
-	rows, err := db.Query("SELECT * FROM files LIMIT -1 OFFSET 1")
+	rows, err := db.Query("SELECT * FROM files")
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var info Info
-		err := rows.Scan(&info.Id, &info.Filename, &info.Extension, &info.Filesize, &info.Status, &info.Text)
+		err := rows.Scan(&info.Id, &info.Filename, &info.Extension, &info.Filesize, &info.Status, &info.Data)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%d %s %s %d %s %s\n", info.Id, info.Filename, info.Extension, info.Filesize, info.Status, info.Text)
+		fmt.Printf("%d %s %s %d %s %s\n", info.Id, info.Filename, info.Extension, info.Filesize, info.Status, info.Data)
+	}
+	return nil
+}
+func sqlSearch(db *sql.DB) (*sql.Rows, error) {
+	GetName("search")
+	rows, err := Find(db, search.name, search.ext)
+	return rows, err
+}
+func sqlCreateFile(db *sql.DB) error {
+	GetName("file create")
+	rows, err := Find(db, createFile.name, createFile.ext)
+	if err != nil {
+		return err
+	}
+	if rows != nil {
+		err := rows.Scan(new(interface{}), new(interface{}), new(interface{}), new(interface{}), new(interface{}), &info.Data)
+		if err != nil {
+			return err
+		}
+		file, err := os.Create(createFile.fullNotation)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		_, err = file.Write(info.Data)
+		if err != nil {
+			return err
+		}
+
 	}
 	return nil
 }

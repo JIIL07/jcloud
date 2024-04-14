@@ -6,12 +6,19 @@ import (
 )
 
 type Info struct {
+	Fullname  string
 	Id        int
 	Filename  string
 	Extension string
 	Filesize  int
 	Status    string
-	Text      string
+	Data      []byte
+}
+
+type Upgateinfo struct {
+	fullNotation string
+	name         string
+	ext          string
 }
 
 type SearchInfo struct {
@@ -20,12 +27,21 @@ type SearchInfo struct {
 	ext          string
 }
 
+type CreateFile struct {
+	fullNotation string
+	name         string
+	ext          string
+}
+
 var Statuses = []string{
 	"Created",
-	"Modified",
-	"Deleted",
+	"Has data in",
 	"Renamed",
 }
 var info Info
 var search SearchInfo
+var update Upgateinfo
+var createFile CreateFile
+
 var reader = bufio.NewReader(os.Stdin)
+var err error
