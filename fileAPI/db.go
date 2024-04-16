@@ -1,4 +1,4 @@
-package main
+package file
 
 import (
 	"database/sql"
@@ -6,9 +6,10 @@ import (
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/olekukonko/tablewriter"
 )
 
-func sqlOpen(path string) (*sql.DB, error) {
+func Open(path string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, err
@@ -25,7 +26,7 @@ func sqlOpen(path string) (*sql.DB, error) {
 	`)
 	return db, err
 }
-func sqlAdd(db *sql.DB) error {
+func Add(db *sql.DB) error {
 	GetName("add")
 	err = GetData()
 	if err != nil {
@@ -39,33 +40,46 @@ func sqlAdd(db *sql.DB) error {
 	(?,?,?,?,?)`, info.Filename, info.Extension, info.Filesize, info.Status, info.Data)
 	return err
 }
-func sqlDelete(db *sql.DB, id int) error {
+func Delete(db *sql.DB, id int) error {
 	_, err := db.Exec("DELETE FROM files WHERE id = ?", id)
 	return err
 }
-func sqlShow(db *sql.DB) error {
+func Show(db *sql.DB) error {
 	rows, err := db.Query("SELECT * FROM files")
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(false)
+	table.SetColWidth(1024)
+	table.SetHeader([]string{"id", "filename", "extension", "size", "status"})
+	// Данные для таблицы
 	for rows.Next() {
-		err := rows.Scan(&info.Id, &info.Filename, &info.Extension, &info.Filesize, &info.Status, &info.Data)
+		err := rows.Scan(&info.Id, &info.Filename, &info.Extension, &info.Filesize, &info.Status, new(interface{}))
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%d %s %s %d %s %s\n", info.Id, info.Filename, info.Extension, info.Filesize, info.Status, info.Data)
+		values := []interface{}{info.Id, info.Filename, info.Extension, info.Filesize, info.Status}
+		data := make([]string, len(values))
+		for i, v := range values {
+			data[i] = fmt.Sprintf("%v", v)
+		}
+		table.Append(data)
 	}
+	table.Render()
 	return nil
 }
-func sqlSearch(db *sql.DB) (*sql.Rows, error) {
+func Search(db *sql.DB) (*sql.Rows, error) {
 	GetName("search")
-	rows, err := Find(db, search.name, search.ext)
+	rows, err := Find(db, temp.name, temp.ext)
 	return rows, err
 }
-func sqlCreateFile(db *sql.DB) error {
+func CreateFile(db *sql.DB) error {
 	GetName("file create")
-	rows, err := Find(db, createFile.name, createFile.ext)
+	rows, err := Find(db, temp.name, temp.ext)
 	if err != nil {
 		return err
 	}
@@ -74,7 +88,7 @@ func sqlCreateFile(db *sql.DB) error {
 		if err != nil {
 			return err
 		}
-		file, err := os.Create(createFile.fullNotation)
+		file, err := os.Create(temp.fullNotation)
 		if err != nil {
 			return err
 		}

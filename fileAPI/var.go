@@ -1,4 +1,4 @@
-package main
+package file
 
 import (
 	"bufio"
@@ -6,28 +6,17 @@ import (
 )
 
 type Info struct {
-	Fullname  string
 	Id        int
 	Filename  string
 	Extension string
 	Filesize  int
 	Status    string
 	Data      []byte
+
+	Fullname string
 }
 
-type Upgateinfo struct {
-	fullNotation string
-	name         string
-	ext          string
-}
-
-type SearchInfo struct {
-	fullNotation string
-	name         string
-	ext          string
-}
-
-type CreateFile struct {
+type TempInfo struct {
 	fullNotation string
 	name         string
 	ext          string
@@ -39,9 +28,9 @@ var Statuses = []string{
 	"Renamed",
 }
 var info Info
-var search SearchInfo
-var update Upgateinfo
-var createFile CreateFile
+var temp TempInfo
 
 var reader = bufio.NewReader(os.Stdin)
 var err error
+
+var SomeVariable string

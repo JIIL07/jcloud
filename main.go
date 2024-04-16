@@ -1,14 +1,11 @@
 package main
 
 import (
-	"log"
+	file "Dev/project/fileAPI"
 )
 
 func main() {
-	dbPath := "sql\\files.db"
-	db, err := sqlOpen(dbPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	db, _ := file.Open("sql\\files.db")
 	defer db.Close()
+	file.Show(db)
 }

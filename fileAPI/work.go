@@ -1,4 +1,4 @@
-package main
+package file
 
 import (
 	"bytes"
@@ -26,20 +26,20 @@ func GetName(key string) {
 	case "search":
 		{
 			fmt.Print("File to search: ")
-			fmt.Scan(&search.fullNotation)
-			search.name, search.ext = SplitName(search.fullNotation)
+			fmt.Scan(&temp.fullNotation)
+			temp.name, temp.ext = SplitName(temp.fullNotation)
 		}
 	case "write":
 		{
 			fmt.Print("File to update: ")
-			fmt.Scan(&search.fullNotation)
-			update.name, update.ext = SplitName(update.fullNotation)
+			fmt.Scan(&temp.fullNotation)
+			temp.name, temp.ext = SplitName(temp.fullNotation)
 		}
 	case "file create":
 		{
 			fmt.Print("File to create: ")
-			fmt.Scan(&createFile.fullNotation)
-			createFile.name, createFile.ext = SplitName(createFile.fullNotation)
+			fmt.Scan(&temp.fullNotation)
+			temp.name, temp.ext = SplitName(temp.fullNotation)
 		}
 	default:
 		{
@@ -89,9 +89,6 @@ func Form() string {
 }
 
 func Write(db *sql.DB) error {
-	_, err = db.Exec(`UPDATE files SET data = ?, status = ? WHERE filename = ?`, info.Data, Statuses[1], update.name)
-	return err
-}
-func RunFile(fileToRun string) error {
+	_, err = db.Exec(`UPDATE files SET data = ?, status = ? WHERE filename = ?`, info.Data, Statuses[1], temp.name)
 	return err
 }
