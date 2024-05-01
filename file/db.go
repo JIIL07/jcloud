@@ -52,11 +52,8 @@ func Show(db *sql.DB) error {
 	defer rows.Close()
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetAutoWrapText(false)
-	table.SetAutoFormatHeaders(false)
-	table.SetColWidth(1024)
+
 	table.SetHeader([]string{"id", "filename", "extension", "size", "status"})
-	// Данные для таблицы
 	for rows.Next() {
 		err := rows.Scan(&info.Id, &info.Filename, &info.Extension, &info.Filesize, &info.Status, new(interface{}))
 		if err != nil {
@@ -97,7 +94,6 @@ func CreateFile(db *sql.DB) error {
 		if err != nil {
 			return err
 		}
-
 	}
 	return nil
 }

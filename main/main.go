@@ -1,7 +1,7 @@
 package main
 
 import (
-	file "Dev/project/fileAPI"
+	"project/file"
 )
 
 func main() {
