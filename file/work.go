@@ -1,6 +1,7 @@
 package file
 
 import (
+	"bufio"
 	"bytes"
 	"database/sql"
 	"fmt"
@@ -48,6 +49,7 @@ func GetName(key string) {
 	}
 }
 func GetData() error {
+	var reader = bufio.NewReader(os.Stdin)
 	fmt.Print("Data to read \033[32m(Press Ctrl+Z to end reading)\033[0m: ")
 	info.Data, err = reader.ReadBytes('\x04')
 	if err == io.EOF {
