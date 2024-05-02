@@ -9,11 +9,15 @@ import (
 )
 
 func main() {
-	db, err := file.Open("files.db")
+	db, err := file.Init("files.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
+	err = file.CreateTable(db, "files")
+	if err != nil {
+		log.Fatal(err)
+	}
 	scanner := bufio.NewScanner(os.Stdin)
 outerLoop:
 	for {
@@ -31,14 +35,14 @@ outerLoop:
 				fmt.Println("File added successfully")
 
 			case "list files":
-				err := file.Show(db, "files")
+				err := file.List(db, "files")
 				if err != nil {
 					fmt.Println(err)
 					break innerLoop
 				}
 
 			case "list deleted":
-				err := file.Show(db, "deleted")
+				err := file.List(db, "deleted")
 				if err != nil {
 					fmt.Println(err)
 					break innerLoop
