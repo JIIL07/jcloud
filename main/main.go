@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
 	"project/file"
 )
 
@@ -12,7 +14,66 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	file.Show(db, "files")
-	fmt.Println("DELETED FILES")
-	file.Show(db, "deleted")
+	scanner := bufio.NewScanner(os.Stdin)
+outerLoop:
+	for {
+		fmt.Println("Enter command:")
+	innerLoop:
+		for scanner.Scan() {
+			command := scanner.Text()
+			switch command {
+			case "add":
+				err := file.Add(db)
+				if err != nil {
+					fmt.Println(err)
+					break innerLoop
+				}
+				fmt.Println("File added successfully")
+
+			case "list files":
+				err := file.Show(db, "files")
+				if err != nil {
+					fmt.Println(err)
+					break innerLoop
+				}
+
+			case "list deleted":
+				err := file.Show(db, "deleted")
+				if err != nil {
+					fmt.Println(err)
+					break innerLoop
+				}
+
+			case "delete":
+				err := file.Delete(db)
+				if err != nil {
+					fmt.Println(err)
+					break innerLoop
+				}
+				fmt.Println("File deleted successfully")
+			case "search":
+				err := file.Search(db)
+				if err != nil {
+					fmt.Println(err)
+					break innerLoop
+				}
+			case "write":
+				err := file.WriteData(db)
+				if err != nil {
+					fmt.Println(err)
+					break innerLoop
+				}
+				fmt.Println("File written successfully")
+			case "exit":
+				break outerLoop
+			default:
+				fmt.Println("Unknown command")
+			}
+			fmt.Println("Enter command:")
+		}
+		if err := scanner.Err(); err != nil {
+			fmt.Println("Error reading from input:", err)
+		}
+	}
+
 }

@@ -9,22 +9,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Info struct {
-	Id        int
-	Filename  string
-	Extension string
-	Filesize  int
-	Status    string
-	Data      []byte
-
-	Fullname string
-}
-type TempInfo struct {
-	fullNotation string
-	name         string
-	ext          string
-}
-
 var Statuses = []string{
 	"Created",
 	"Has data in",
@@ -33,7 +17,6 @@ var Statuses = []string{
 }
 
 var info Info
-var temp TempInfo
 var err error
 
 func Open(path string) (*sql.DB, error) {
@@ -70,51 +53,57 @@ func Open(path string) (*sql.DB, error) {
 	return db, err
 }
 func Add(db *sql.DB) error {
-	GetName("add")
-	err = GetData()
+	info.GetNameExt()
+	exists, err := exists(db, info.Filename, info.Extension)
 	if err != nil {
 		return err
 	}
-	info.Filesize = len(info.Data)
-	info.Status = Statuses[0]
-	_, err = db.Exec(`INSERT INTO files
-	(filename, extension, filesize, status, data)
-	VALUES
-	(?,?,?,?,?)`, info.Filename, info.Extension, info.Filesize, info.Status, info.Data)
-	return err
+	if !exists {
+		info.Filesize = len(info.Data)
+		info.Status = Statuses[0]
+		_, err = db.Exec(`INSERT INTO files (filename, extension, filesize, status, data) VALUES (?,?,?,?,?)`,
+			info.Filename, info.Extension, info.Filesize, info.Status, info.Data)
+		return err
+	}
+	return nil
 }
-func Delete(db *sql.DB, id int) error {
-	err := db.QueryRow("SELECT * FROM files WHERE id = ?", id).Scan(&info.Id,
-		&info.Filename, &info.Extension, &info.Filesize, &info.Status, &info.Data)
+func Delete(db *sql.DB) error {
+	info.GetNameExt()
+	err := db.QueryRow("SELECT * FROM files WHERE filename = ? AND extension = ?",
+		info.Filename, info.Extension).Scan(&info.Id, &info.Filename,
+		&info.Extension, &info.Filesize, &info.Status, &info.Data)
+
 	if err != nil {
-		return fmt.Errorf("query row error: %v", err)
+		return fmt.Errorf("\033[91mquery row error: %v\033[0m", err)
 	}
 
 	tx, err := db.Begin()
 	if err != nil {
-		return fmt.Errorf("begin transaction error: %v", err)
+		return fmt.Errorf("\033[91mbegin transaction error: %v\033[0m", err)
 	}
 
 	_, err = tx.Exec("INSERT INTO deleted (id, filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?, ?)",
 		info.Id, info.Filename, info.Extension, info.Filesize, "Deteled", info.Data)
 	if err != nil {
 		tx.Rollback()
-		return fmt.Errorf("insert error: %v", err)
+		return fmt.Errorf("\033[91minsert error: %v\033[0m", err)
 	}
 
-	_, err = tx.Exec("DELETE FROM files WHERE id = ?", id)
+	_, err = tx.Exec("DELETE FROM files WHERE filename = ? AND extension = ?",
+		info.Filename, info.Extension)
 	if err != nil {
 		tx.Rollback()
-		return fmt.Errorf("delete error: %v", err)
+		return fmt.Errorf("\033[91mdelete error: %v\033[0m", err)
 	}
 
 	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("commit transaction error: %v", err)
+		return fmt.Errorf("\033[91mcommit transaction error: %v\033[0m", err)
 	}
 
 	return nil
 
 }
+
 func Show(db *sql.DB, tablename string) error {
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s", tablename))
 	if err != nil {
@@ -134,14 +123,31 @@ func Show(db *sql.DB, tablename string) error {
 	}
 	return nil
 }
-func Search(db *sql.DB) (*sql.Rows, error) {
-	GetName("search")
-	rows, err := Find(db, temp.name, temp.ext)
-	return rows, err
+func Search(db *sql.DB) error {
+	info.GetNameExt()
+	rows, err := find(db, info.Filename, info.Extension)
+	if err != nil {
+		return err
+	}
+	err = rows.Scan(new(interface{}), &info.Filename, &info.Extension, new(interface{}), new(interface{}), &info.Data)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("\033[32m%v.%v\033[0m\nData:\n%v\n",
+		info.Filename, info.Extension, strings.TrimSpace(string(info.Data)))
+	return nil
 }
+func WriteData(db *sql.DB) error {
+	info.GetNameExt()
+	info.GetData()
+	_, err = db.Exec(`UPDATE files SET data = ? WHERE filename = ? AND extension = ?`, info.Data, info.Filename, info.Extension)
+	return err
+}
+
 func CreateFile(db *sql.DB) error {
-	GetName("file create")
-	rows, err := Find(db, temp.name, temp.ext)
+	info.GetNameExt()
+	rows, err := find(db, info.Filename, info.Extension)
 	if err != nil {
 		return err
 	}
@@ -150,7 +156,7 @@ func CreateFile(db *sql.DB) error {
 		if err != nil {
 			return err
 		}
-		file, err := os.Create(temp.fullNotation)
+		file, err := os.Create(info.Fullname)
 		if err != nil {
 			return err
 		}

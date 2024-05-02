@@ -14,7 +14,7 @@
 \    \         ; ;   |.' ;   |.' '---'      
  \    \      ,'  '---'   '---'              
   "---....--'                               
-```                                     
+```
 # File Storage System in Go using SQLite3
 
 This project is a file storage system that uses SQLite3 as a database to manage user files. Implemented in the Go programming language, this system provides a basic API for interacting with file data stored in the database.
@@ -43,7 +43,6 @@ You will need the following installed on your system:
    ```bash
    git clone https://github.com/JIIL07/sql.git
    cd sql
-
 2. **Build**
     ```bash
     go build -o file.exe #You can use any other name for .exe file
