@@ -8,17 +8,26 @@ import (
 	"project/file"
 )
 
+var dbHandler file.SQLiteDB
+
 func main() {
-	db, err := file.Init("files.db")
+	db, err := dbHandler.Init("files.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	err = file.CreateTable(db, "files")
+
+	ctx := file.FileContext{
+		DB:   db,
+		Info: &file.Info{},
+	}
+
+	err = dbHandler.CreateTable(db, "files")
 	if err != nil {
 		log.Fatal(err)
 	}
 	scanner := bufio.NewScanner(os.Stdin)
+
 outerLoop:
 	for {
 		fmt.Println("Enter command:")
@@ -27,7 +36,15 @@ outerLoop:
 			command := scanner.Text()
 			switch command {
 			case "add":
-				err := file.Add(db)
+				err := ctx.Add()
+				if err != nil {
+					fmt.Println(err)
+					break innerLoop
+				}
+				fmt.Println("File added successfully")
+
+			case "addfile":
+				err := ctx.AddFile()
 				if err != nil {
 					fmt.Println(err)
 					break innerLoop
@@ -35,41 +52,51 @@ outerLoop:
 				fmt.Println("File added successfully")
 
 			case "list files":
-				err := file.List(db, "files")
+				err := ctx.List("files")
 				if err != nil {
 					fmt.Println(err)
 					break innerLoop
 				}
 
 			case "list deleted":
-				err := file.List(db, "deleted")
+				err := ctx.List("deleted")
 				if err != nil {
 					fmt.Println(err)
 					break innerLoop
 				}
 
 			case "delete":
-				err := file.Delete(db)
+				err := ctx.Delete()
 				if err != nil {
 					fmt.Println(err)
 					break innerLoop
 				}
 				fmt.Println("File deleted successfully")
 			case "search":
-				err := file.Search(db)
+				err := ctx.Search()
 				if err != nil {
 					fmt.Println(err)
 					break innerLoop
 				}
+
 			case "write":
-				err := file.WriteData(db)
+				err := ctx.WriteData()
 				if err != nil {
 					fmt.Println(err)
 					break innerLoop
 				}
 				fmt.Println("File written successfully")
+
+			case "datain":
+				err := ctx.DataIn()
+				if err != nil {
+					fmt.Println(err)
+					break innerLoop
+				}
+
 			case "exit":
 				break outerLoop
+
 			default:
 				fmt.Println("Unknown command")
 			}
