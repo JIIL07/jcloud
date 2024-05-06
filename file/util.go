@@ -12,31 +12,32 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
+// find retrieves a set of rows from the 'files' table matching the specified filename and extension.
 func find(db *sql.DB, fln, ext string) (*sql.Rows, error) {
-	rows, err := db.Query(`SELECT * FROM files WHERE filename = ? AND extension = ?`, fln, ext)
+	query := `SELECT * FROM files WHERE filename = ? AND extension = ?`
+	rows, err := db.Query(query, fln, ext)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute query: %v", err)
 	}
 	if !rows.Next() {
 		rows.Close()
-		return nil, fmt.Errorf("no rows found")
+		return nil, fmt.Errorf("no files found")
 	}
 	return rows, nil
 }
 
+// exists checks whether a file with the given filename and extension already exists in the database.
 func exists(db *sql.DB, fln, ext string) (bool, error) {
-	var exists bool
 	query := `SELECT EXISTS(SELECT 1 FROM files WHERE filename = ? AND extension = ?)`
+	var exists bool
 	err := db.QueryRow(query, fln, ext).Scan(&exists)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to check existence: %v", err)
 	}
-	if exists {
-		return false, fmt.Errorf("such file already exists")
-	}
-	return false, nil
+	return exists, nil
 }
 
+// openExplorer opens the file explorer based on the operating system.
 func openExplorer(path string) error {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
@@ -49,12 +50,10 @@ func openExplorer(path string) error {
 	default:
 		return fmt.Errorf("unsupported platform")
 	}
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("failed to open explorer: %v", err)
-	}
-	return nil
+	return cmd.Start()
 }
 
+// createTempDir creates a temporary directory for file operations.
 func createTempDir() (string, error) {
 	tempDir, err := os.MkdirTemp("", "package_files_TEMPDIR")
 	if err != nil {
@@ -63,6 +62,7 @@ func createTempDir() (string, error) {
 	return tempDir, nil
 }
 
+// waitFile waits for a new file to be created in the specified directory using file system notifications.
 func waitFile(tempDir string) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -79,7 +79,6 @@ func waitFile(tempDir string) error {
 					return
 				}
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					log.Printf("Detected new file: %s", event.Name)
 					done <- true
 				}
 			case err, ok := <-watcher.Errors:
@@ -99,6 +98,7 @@ func waitFile(tempDir string) error {
 	return nil
 }
 
+// processFile processes the newly created file in the specified directory.
 func processFile(tempDir string) (*Info, error) {
 	files, err := os.ReadDir(tempDir)
 	if err != nil {
@@ -116,7 +116,6 @@ func processFile(tempDir string) (*Info, error) {
 
 	info := &Info{Fullname: fileEntry.Name()}
 	info.Split()
-	fmt.Println(info.Filename, info.Extension)
 
 	fileData, err := os.ReadFile(filepath.Join(tempDir, info.Fullname))
 	if err != nil {
