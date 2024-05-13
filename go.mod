@@ -1,4 +1,4 @@
-module github.com/JIIL07/cloudFiles
+module github.com/JIIL07/cloudFiles-manager
 
 go 1.22.0
 
