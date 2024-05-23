@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"project/file"
+
+	file "github.com/JIIL07/cloudFiles-manager"
 )
 
 var dbHandler file.SQLiteDB
