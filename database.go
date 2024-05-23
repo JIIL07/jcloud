@@ -1,4 +1,4 @@
-package file
+package cloudfiles
 
 import (
 	"database/sql"
@@ -8,17 +8,14 @@ import (
 )
 
 type Database interface {
-	Init(name string) (*sql.DB, error)
+	Init() (*sql.DB, error)
 	CreateTable(db *sql.DB, name string) error
 }
 
 type SQLiteDB struct{}
 
-func (s *SQLiteDB) Init(name string) (*sql.DB, error) {
-	if !isValidDBName(name) {
-		return nil, fmt.Errorf("invalid DB file name: %s", name)
-	}
-	return sql.Open("sqlite3", name)
+func (s *SQLiteDB) Init() (*sql.DB, error) {
+	return sql.Open("sqlite3", ":memory:")
 }
 
 func (s *SQLiteDB) CreateTable(db *sql.DB, name string) error {
