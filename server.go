@@ -9,8 +9,9 @@ import (
 
 var db *sql.DB
 var s *SQLiteDB
+var ctx *FileContext
 
-func InitDB() {
+func InitDB() *sql.DB {
 	var err error
 	db, err = s.Init()
 	if err != nil {
@@ -25,25 +26,14 @@ func InitDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	return db
 }
 
 func GetItemsHandler(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT id, name FROM files")
+	items, err := ctx.List("files")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	defer rows.Close()
-
-	var items []map[string]interface{}
-	for rows.Next() {
-		var id int
-		var name string
-		rows.Scan(&id, &name)
-		items = append(items, map[string]interface{}{
-			"id":   id,
-			"name": name,
-		})
 	}
 
 	w.Header().Set("Content-Type", "application/json")
