@@ -70,23 +70,27 @@ func (ctx *FileContext) Delete() error {
 	return nil
 }
 
-func (ctx *FileContext) List(tablename string) error {
-	rows, err := ctx.DB.Query(fmt.Sprintf("SELECT * FROM %s", tablename))
+func (ctx *FileContext) List(tablename string) ([]map[string]interface{}, error) {
+	rows, err := ctx.DB.Query(fmt.Sprintf("SELECT filename, extension FROM %s", tablename))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer rows.Close()
-	id := 1
+	var id int = 1
+	var items []map[string]interface{}
 	for rows.Next() {
-		err := rows.Scan(new(interface{}), &ctx.Info.Filename, &ctx.Info.Extension,
-			new(interface{}), new(interface{}), new(interface{}))
+		err := rows.Scan(&ctx.Info.Filename, &ctx.Info.Extension)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		fmt.Printf("id:%v %v.%v\n", id, ctx.Info.Filename, ctx.Info.Extension)
+		items = append(items, map[string]interface{}{
+			"id":        id,
+			"filename":  ctx.Info.Filename,
+			"extension": ctx.Info.Extension,
+		})
 		id++
 	}
-	return nil
+	return items, nil
 }
 
 func (ctx *FileContext) DataIn() error {

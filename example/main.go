@@ -2,31 +2,26 @@ package main
 
 import (
 	"bufio"
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	file "github.com/JIIL07/cloudFiles-manager"
 )
 
-var dbHandler file.SQLiteDB
+var db *sql.DB
 
 func main() {
-	db, err := dbHandler.Init("files.db")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+	db = file.InitDB()
 
-	ctx := file.FileContext{
+	var ctx = file.FileContext{
 		DB:   db,
 		Info: &file.Info{},
 	}
 
-	err = dbHandler.CreateTable(db, "files")
-	if err != nil {
-		log.Fatal(err)
-	}
 	scanner := bufio.NewScanner(os.Stdin)
 
 outerLoop:
@@ -53,14 +48,15 @@ outerLoop:
 				fmt.Println("File added successfully")
 
 			case "list files":
-				err := ctx.List("files")
+				items, err := ctx.List("files")
 				if err != nil {
 					fmt.Println(err)
 					break innerLoop
 				}
+				fmt.Println(items)
 
 			case "list deleted":
-				err := ctx.List("deleted")
+				_, err := ctx.List("deleted")
 				if err != nil {
 					fmt.Println(err)
 					break innerLoop
@@ -107,4 +103,22 @@ outerLoop:
 			fmt.Println("Error reading from input:", err)
 		}
 	}
+
+	openServer(&ctx)
+}
+
+func openServer(ctx *file.FileContext) {
+
+	http.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
+		items, err := ctx.List("files")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(items)
+	})
+	log.Fatal(http.ListenAndServe(":8080", nil))
+
 }

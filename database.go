@@ -15,7 +15,11 @@ type Database interface {
 type SQLiteDB struct{}
 
 func (s *SQLiteDB) Init() (*sql.DB, error) {
-	return sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
 }
 
 func (s *SQLiteDB) CreateTable(db *sql.DB, name string) error {
