@@ -107,5 +107,4 @@ outerLoop:
 			fmt.Println("Error reading from input:", err)
 		}
 	}
-
 }
