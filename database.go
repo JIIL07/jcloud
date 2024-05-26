@@ -10,7 +10,7 @@ import (
 type SQLiteDB struct{}
 
 func (s *SQLiteDB) Init() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite3", "../files.db")
 
 	if err != nil {
 		return nil, err

@@ -2,8 +2,12 @@ package cloudfiles
 
 import (
 	"database/sql"
-	"encoding/json"
+	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 )
 
 type ServerContext struct {
@@ -20,38 +24,50 @@ func NewServerContext(db *sql.DB) *ServerContext {
 	}
 }
 
-func (s *ServerContext) SetFilesHandler(ctx *FileContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		items, err := ctx.List("files")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(items)
-	}
+type config struct {
+	port int
 }
 
-func (s *ServerContext) SetDeletedFilesHandler(ctx *FileContext) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		items, err := ctx.List("files")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(items)
-	}
+type application struct {
+	config config
+	logger *slog.Logger
 }
 
 func (s *ServerContext) Start() error {
-	go func() error {
-		http.HandleFunc("/files", s.SetFilesHandler(s.Ctx))
-		http.HandleFunc("/deletedfiles", s.SetDeletedFilesHandler(s.Ctx))
-		err := http.ListenAndServe(":8080", nil)
-		return err
-	}()
-	return nil
+	var cfg config
+
+	port := os.Getenv("PORT")
+	intPort, err := strconv.Atoi(port)
+	if err != nil {
+		intPort = 8080
+	}
+
+	// Set the port to run the API on
+	cfg.port = intPort
+
+	// create the logger
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	app := &application{
+		config: cfg,
+		logger: logger,
+	}
+
+	// create the server
+	srv := &http.Server{
+		Addr:         fmt.Sprintf(":%d", cfg.port),
+		Handler:      app.routes(s),
+		IdleTimeout:  45 * time.Second,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+	}
+
+	logger.Info("server started", "addr", srv.Addr)
+
+	err = srv.ListenAndServe()
+	logger.Error(err.Error())
+	os.Exit(1)
+
+	return err
 }
