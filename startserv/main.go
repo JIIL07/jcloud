@@ -16,9 +16,7 @@ func main() {
 	defer db.Close()
 
 	server := cloudfiles.NewServerContext(db)
-
 	if err := server.Start(); err != nil {
 		log.Fatal(err)
 	}
-
 }
