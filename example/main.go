@@ -2,24 +2,43 @@ package main
 
 import (
 	"bufio"
-	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
+	"sync"
 
-	file "github.com/JIIL07/cloudFiles-manager"
+	cloudfiles "github.com/JIIL07/cloudFiles-manager"
 )
 
-var db *sql.DB
+var (
+	ctx    *cloudfiles.FileContext
+	server *cloudfiles.ServerContext
+	mu     sync.Mutex
+)
 
 func main() {
-	db = file.InitDB()
 
-	var ctx = file.FileContext{
-		DB:   db,
-		Info: &file.Info{},
+	sqliteDB := &cloudfiles.SQLiteDB{}
+	serverDB, err := sqliteDB.PrepareLocalDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	server = cloudfiles.NewServerContext(serverDB)
+
+	err = server.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	localDB, err := sqliteDB.PrepareLocalDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx = &cloudfiles.FileContext{
+		DB:   localDB,
+		Info: &cloudfiles.Info{},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -30,11 +49,13 @@ outerLoop:
 	innerLoop:
 		for scanner.Scan() {
 			command := scanner.Text()
+			mu.Lock()
 			switch command {
 			case "add":
 				err := ctx.Add()
 				if err != nil {
 					fmt.Println(err)
+					mu.Unlock()
 					break innerLoop
 				}
 				fmt.Println("File added successfully")
@@ -43,6 +64,7 @@ outerLoop:
 				err := ctx.AddFile()
 				if err != nil {
 					fmt.Println(err)
+					mu.Unlock()
 					break innerLoop
 				}
 				fmt.Println("File added successfully")
@@ -51,28 +73,42 @@ outerLoop:
 				items, err := ctx.List("files")
 				if err != nil {
 					fmt.Println(err)
+					mu.Unlock()
 					break innerLoop
 				}
 				fmt.Println(items)
 
 			case "list deleted":
-				_, err := ctx.List("deleted")
+				items, err := ctx.List("deleted")
 				if err != nil {
 					fmt.Println(err)
+					mu.Unlock()
 					break innerLoop
 				}
+				fmt.Println(items)
 
 			case "delete":
 				err := ctx.Delete()
 				if err != nil {
 					fmt.Println(err)
+					mu.Unlock()
 					break innerLoop
 				}
 				fmt.Println("File deleted successfully")
+
 			case "search":
 				err := ctx.Search()
 				if err != nil {
 					fmt.Println(err)
+					mu.Unlock()
+					break innerLoop
+				}
+
+			case "serversearch":
+				err := server.Ctx.Search()
+				if err != nil {
+					fmt.Println(err)
+					mu.Unlock()
 					break innerLoop
 				}
 
@@ -80,6 +116,7 @@ outerLoop:
 				err := ctx.WriteData()
 				if err != nil {
 					fmt.Println(err)
+					mu.Unlock()
 					break innerLoop
 				}
 				fmt.Println("File written successfully")
@@ -88,37 +125,31 @@ outerLoop:
 				err := ctx.DataIn()
 				if err != nil {
 					fmt.Println(err)
+					mu.Unlock()
 					break innerLoop
 				}
 
+			case "push":
+				err := cloudfiles.CopyDB(localDB, serverDB)
+				if err != nil {
+					fmt.Println("Error pushing data to server:", err)
+					mu.Unlock()
+					break innerLoop
+				}
+				fmt.Println("Data pushed to server successfully")
+
 			case "exit":
+				mu.Unlock()
 				break outerLoop
 
 			default:
 				fmt.Println("Unknown command")
 			}
+			mu.Unlock()
 			fmt.Println("Enter command:")
 		}
 		if err := scanner.Err(); err != nil {
 			fmt.Println("Error reading from input:", err)
 		}
 	}
-
-	openServer(&ctx)
-}
-
-func openServer(ctx *file.FileContext) {
-
-	http.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
-		items, err := ctx.List("files")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(items)
-	})
-	log.Fatal(http.ListenAndServe(":8080", nil))
-
 }
