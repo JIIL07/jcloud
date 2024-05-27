@@ -1,4 +1,4 @@
 *.db
 *.sqlite
 *.sqlite3
-.vercel
+*.toml

@@ -10,7 +10,7 @@ import (
 type SQLiteDB struct{}
 
 func (s *SQLiteDB) Init() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "../files.db")
+	db, err := sql.Open("sqlite3", "file::memory:?cache=shared")
 
 	if err != nil {
 		return nil, err
@@ -39,7 +39,9 @@ func (s *SQLiteDB) CreateTable(db *sql.DB, name string) error {
 		extension TEXT, 
 		filesize INTEGER, 
 		status TEXT, 
-		data BLOB)`)
+		data BLOB)
+	`)
+
 	return err
 }
 

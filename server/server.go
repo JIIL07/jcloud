@@ -1,23 +1,26 @@
-package cloudfiles
+package server
 
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	cloudfiles "github.com/JIIL07/cloudFiles-manager/client"
+	"github.com/julienschmidt/httprouter"
 )
 
 type ServerContext struct {
-	Ctx *FileContext
+	Ctx *cloudfiles.FileContext
 }
 
 func NewServerContext(db *sql.DB) *ServerContext {
-	ctx := &FileContext{
+	ctx := &cloudfiles.FileContext{
 		DB:   db,
-		Info: &Info{},
+		Info: &cloudfiles.Info{},
 	}
 	return &ServerContext{
 		Ctx: ctx,
@@ -29,8 +32,10 @@ type config struct {
 }
 
 type application struct {
-	config config
-	logger *slog.Logger
+	config    config
+	logger    *log.Logger
+	errlogger *log.Logger
+	router    *httprouter.Router
 }
 
 func (s *ServerContext) Start() error {
@@ -46,11 +51,13 @@ func (s *ServerContext) Start() error {
 	cfg.port = intPort
 
 	// create the logger
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	logger := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errlogger := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime)
 
 	app := &application{
-		config: cfg,
-		logger: logger,
+		config:    cfg,
+		logger:    logger,
+		errlogger: errlogger,
 	}
 
 	// create the server
@@ -60,14 +67,16 @@ func (s *ServerContext) Start() error {
 		IdleTimeout:  45 * time.Second,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		ErrorLog:     log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
 	}
 
-	logger.Info("server started", "addr", srv.Addr)
+	logger.Printf("Server is starting on %s\n", srv.Addr)
 
 	err = srv.ListenAndServe()
-	logger.Error(err.Error())
-	os.Exit(1)
+	if err != nil {
+		logger.Printf("Server failed to start: %v\n", err)
+		os.Exit(1)
+	}
 
 	return err
 }
