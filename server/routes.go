@@ -29,12 +29,12 @@ func HandlerAdapter(h http.HandlerFunc) httprouter.Handle {
 func (app *application) TextHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write([]byte(`
-	Welcome to the cloudfiles API. You can use the following endpoints:
-	GET /files
-	GET /deletedfiles
-	POST /addfiles
-	POST /deletefiles
-	POST /updatefiles
+Welcome to the cloudfiles API. You can use the following endpoints:
+GET /files
+GET /deletedfiles
+POST /addfiles
+POST /deletefiles
+POST /updatefiles
 	`))
 
 	app.logger.Printf("Server detected / entering")

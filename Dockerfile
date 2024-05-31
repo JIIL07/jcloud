@@ -1,11 +1,24 @@
-FROM golang:latest
+FROM golang:latest AS builder
 
-RUN apt-get update && apt-get install -y gcc
-
-COPY . /app
+ENV CGO_ENABLED=1
+ENV GOOS=linux
+ENV GOARCH=amd64
 
 WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
 
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags='-s' -o ./bin/linux_amd64/api ./run
+COPY . .
 
-CMD ["./bin/linux_amd64/api"]
+RUN apt-get update && apt-get install -y gcc
+RUN go build -o serve .
+
+FROM golang:latest
+RUN apt-get update && apt-get install -y ca-certificates bash
+WORKDIR /root/
+
+COPY --from=builder /app/serve .
+
+EXPOSE 8080
+
+CMD ["./serve"]
