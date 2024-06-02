@@ -11,7 +11,8 @@ import (
 func (app *application) routes(s *ServerContext) *httprouter.Router {
 	router := httprouter.New()
 
-	// Define the available routes
+	router.Handle(http.MethodPost, "/user", HandlerAdapter(app.UserHandler))
+	router.Handle(http.MethodGet, "/user", HandlerAdapter(app.UserHandler))
 	router.Handle(http.MethodGet, "/", HandlerAdapter(app.TextHandler))
 	router.Handle(http.MethodGet, "/files", HandlerAdapter(app.SetFilesHandler(s)))
 	router.Handle(http.MethodPost, "/addfiles", HandlerAdapter(app.AddFileHandler(s)))
@@ -28,14 +29,13 @@ func HandlerAdapter(h http.HandlerFunc) httprouter.Handle {
 
 func (app *application) TextHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte(`
-Welcome to the cloudfiles API. You can use the following endpoints:
+	w.Write([]byte(`Welcome to the cloudfiles API. You can use the following endpoints:
 GET /files
 GET /deletedfiles
 POST /addfiles
 POST /deletefiles
 POST /updatefiles
-	`))
+`))
 
 	app.logger.Printf("Server detected / entering")
 }

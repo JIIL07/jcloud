@@ -1,16 +1,27 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+
 	cmd "github.com/JIIL07/cloudFiles-manager/cmd"
-	//server "github.com/JIIL07/cloudFiles-manager/server"
 )
 
 func main() {
-	cmd.Execute()
+	reader := bufio.NewReader(os.Stdin)
 
-	// server := server.NewServerContext(db)
+	for {
+		dir, _ := os.Getwd()
+		fmt.Printf("%v>", dir)
 
-	// if err := server.Start(); err != nil {
-	// 	log.Fatal(err)
-	// }
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+
+		args := strings.Split(input, " ")
+		cmd.RootCmd.SetArgs(args[1:])
+
+		cmd.RootCmd.Execute()
+	}
 }
