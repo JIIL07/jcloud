@@ -179,51 +179,9 @@ func (ctx *FileContext) AddFile() error {
 	return err
 }
 
-func CopyDB(src, dest *sql.DB) error {
-	tables := []string{"files", "deletedfiles"}
-
-	for _, table := range tables {
-		rows, err := src.Query(fmt.Sprintf("SELECT * FROM %s", table))
-		if err != nil {
-			return err
-		}
-		defer rows.Close()
-
-		_, err = dest.Exec(fmt.Sprintf("DELETE FROM %s", table))
-		if err != nil {
-			return err
-		}
-
-		cols, err := rows.Columns()
-		if err != nil {
-			return err
-		}
-
-		colPlaceholders := make([]string, len(cols))
-		for i := range colPlaceholders {
-			colPlaceholders[i] = "?"
-		}
-
-		for rows.Next() {
-			columnPointers := make([]interface{}, len(cols))
-			columns := make([]interface{}, len(cols))
-			for i := range columns {
-				columnPointers[i] = &columns[i]
-			}
-
-			if err := rows.Scan(columnPointers...); err != nil {
-				return err
-			}
-
-			query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)",
-				table,
-				strings.Join(cols, ", "),
-				strings.Join(colPlaceholders, ", "))
-			_, err = dest.Exec(query, columns...)
-			if err != nil {
-				return err
-			}
-		}
+func NewFileContext(db *sql.DB) *FileContext {
+	return &FileContext{
+		DB:   db,
+		Info: &Info{},
 	}
-	return nil
 }
