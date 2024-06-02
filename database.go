@@ -1,4 +1,4 @@
-package file
+package cloudfiles
 
 import (
 	"database/sql"
@@ -7,18 +7,15 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type Database interface {
-	Init(name string) (*sql.DB, error)
-	CreateTable(db *sql.DB, name string) error
-}
-
 type SQLiteDB struct{}
 
-func (s *SQLiteDB) Init(name string) (*sql.DB, error) {
-	if !isValidDBName(name) {
-		return nil, fmt.Errorf("invalid DB file name: %s", name)
+func (s *SQLiteDB) Init() (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", ":memory:")
+
+	if err != nil {
+		return nil, err
 	}
-	return sql.Open("sqlite3", name)
+	return db, nil
 }
 
 func (s *SQLiteDB) CreateTable(db *sql.DB, name string) error {
@@ -36,7 +33,7 @@ func (s *SQLiteDB) CreateTable(db *sql.DB, name string) error {
 		return err
 	}
 
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS deleted 
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS deletedfiles 
 	(id INTEGER PRIMARY KEY AUTOINCREMENT, 
 		filename TEXT, 
 		extension TEXT, 
@@ -44,4 +41,16 @@ func (s *SQLiteDB) CreateTable(db *sql.DB, name string) error {
 		status TEXT, 
 		data BLOB)`)
 	return err
+}
+
+func (s *SQLiteDB) PrepareLocalDB() (*sql.DB, error) {
+	db, err := s.Init()
+	if err != nil {
+		return nil, err
+	}
+	err = s.CreateTable(db, "files")
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
 }

@@ -1,4 +1,4 @@
-package file
+package cloudfiles
 
 import (
 	"database/sql"

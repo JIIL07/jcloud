@@ -1,4 +1,4 @@
-package file
+package cloudfiles
 
 import (
 	"database/sql"
@@ -50,7 +50,7 @@ func (ctx *FileContext) Delete() error {
 		return fmt.Errorf("begin transaction error: %v", err)
 	}
 
-	_, err = tx.Exec("INSERT INTO deleted (id, filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?, ?)",
+	_, err = tx.Exec("INSERT INTO deletedfiles (id, filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?, ?)",
 		ctx.Info.Id, ctx.Info.Filename, ctx.Info.Extension, ctx.Info.Filesize, "Deleted", ctx.Info.Data)
 	if err != nil {
 		tx.Rollback()
@@ -69,24 +69,32 @@ func (ctx *FileContext) Delete() error {
 	}
 	return nil
 }
-
-func (ctx *FileContext) List(tablename string) error {
+func (ctx *FileContext) List(tablename string) ([]map[string]interface{}, error) {
 	rows, err := ctx.DB.Query(fmt.Sprintf("SELECT * FROM %s", tablename))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer rows.Close()
-	id := 1
+
+	var id int = 1
+	var items []map[string]interface{}
 	for rows.Next() {
 		err := rows.Scan(new(interface{}), &ctx.Info.Filename, &ctx.Info.Extension,
-			new(interface{}), new(interface{}), new(interface{}))
+			&ctx.Info.Filesize, &ctx.Info.Status, &ctx.Info.Data)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		fmt.Printf("id:%v %v.%v\n", id, ctx.Info.Filename, ctx.Info.Extension)
+		items = append(items, map[string]interface{}{
+			"id":        id,
+			"filename":  ctx.Info.Filename,
+			"extension": ctx.Info.Extension,
+			"filesize":  ctx.Info.Filesize,
+			"status":    ctx.Info.Status,
+			"data":      ctx.Info.Data,
+		})
 		id++
 	}
-	return nil
+	return items, nil
 }
 
 func (ctx *FileContext) DataIn() error {
@@ -169,4 +177,53 @@ func (ctx *FileContext) AddFile() error {
 	_, err = ctx.DB.Exec("INSERT INTO files (filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?)",
 		ctx.Info.Filename, ctx.Info.Extension, ctx.Info.Filesize, ctx.Info.Status, ctx.Info.Data)
 	return err
+}
+
+func CopyDB(src, dest *sql.DB) error {
+	tables := []string{"files", "deletedfiles"}
+
+	for _, table := range tables {
+		rows, err := src.Query(fmt.Sprintf("SELECT * FROM %s", table))
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+
+		_, err = dest.Exec(fmt.Sprintf("DELETE FROM %s", table))
+		if err != nil {
+			return err
+		}
+
+		cols, err := rows.Columns()
+		if err != nil {
+			return err
+		}
+
+		colPlaceholders := make([]string, len(cols))
+		for i := range colPlaceholders {
+			colPlaceholders[i] = "?"
+		}
+
+		for rows.Next() {
+			columnPointers := make([]interface{}, len(cols))
+			columns := make([]interface{}, len(cols))
+			for i := range columns {
+				columnPointers[i] = &columns[i]
+			}
+
+			if err := rows.Scan(columnPointers...); err != nil {
+				return err
+			}
+
+			query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)",
+				table,
+				strings.Join(cols, ", "),
+				strings.Join(colPlaceholders, ", "))
+			_, err = dest.Exec(query, columns...)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
