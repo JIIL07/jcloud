@@ -4,20 +4,36 @@ go 1.22.2
 
 require (
 	github.com/fsnotify/fsnotify v1.7.0
-	github.com/julienschmidt/httprouter v1.3.0
+	github.com/gorilla/mux v1.8.1
+	github.com/gorilla/sessions v1.3.0
+	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/spf13/cobra v1.8.0
 )
 
 require (
+<<<<<<< e11e69cc92d7c5a0aef5e57c3c44bea1b6154e12
 	github.com/hashicorp/hcl v1.0.0 // indirect
+=======
+	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
+>>>>>>> Big file structure update, dockerfile does not work currently, some new features in code: new server system (not complete) and new logger
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
+<<<<<<< e11e69cc92d7c5a0aef5e57c3c44bea1b6154e12
+=======
+	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3 // indirect
+)
+
+require (
+	github.com/hashicorp/hcl v1.0.0 // indirect
+>>>>>>> Big file structure update, dockerfile does not work currently, some new features in code: new server system (not complete) and new logger
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

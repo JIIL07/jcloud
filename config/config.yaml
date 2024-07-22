@@ -1,0 +1,16 @@
+env: "local" #changable to debug or prod
+
+server:
+  address: ":8080"
+  readTimeout: 5s
+  writeTimeout: 10s
+  idleTimeout: 60s
+
+database:
+  driverName: "sqlite3"
+  dataSourceName: "../../internal/storage/storage.db"
+
+
+url: "https://cloudfiles.up.railway.app"
+
+#for Macos, from directory server: export CONFIG_PATH=../../config/config.yaml
