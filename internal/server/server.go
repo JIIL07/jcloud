@@ -4,29 +4,21 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/JIIL07/cloudFiles-manager/internal/storage"
-
+	"github.com/JIIL07/cloudFiles-manager/internal/config"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func New(config ServerConfig, dbConfig storage.DBConfig) (*Server, error) {
-	storage, err := storage.InitDatabase(dbConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	srv := &Server{
+func New(c config.ServerConfig) *Server {
+	return &Server{
 		httpServer: &http.Server{
-			Addr:         config.Address,
-			Handler:      setupRouter(storage.DB),
-			ReadTimeout:  config.ReadTimeout,
-			WriteTimeout: config.WriteTimeout,
-			IdleTimeout:  config.IdleTimeout,
+			Addr:              c.Address,
+			Handler:           setupRouter(),
+			ReadTimeout:       c.ReadTimeout,
+			WriteTimeout:      c.WriteTimeout,
+			IdleTimeout:       c.IdleTimeout,
+			ReadHeaderTimeout: c.ReadTimeout,
 		},
-		db: storage.DB,
 	}
-
-	return srv, nil
 }
 
 func (s *Server) Start() error {

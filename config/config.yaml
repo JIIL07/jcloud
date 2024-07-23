@@ -8,9 +8,6 @@ server:
 
 database:
   driverName: "sqlite3"
-  dataSourceName: "../../internal/storage/storage.db"
-
+  dataSourceName: "../../storage/storage.db"
 
 url: "https://cloudfiles.up.railway.app"
-
-#for Macos, from directory server: export CONFIG_PATH=../../config/config.yaml

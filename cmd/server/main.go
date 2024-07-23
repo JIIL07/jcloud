@@ -1,9 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
+	"github.com/JIIL07/cloudFiles-manager/internal/config"
+	"github.com/JIIL07/cloudFiles-manager/internal/lib/env"
 	"github.com/JIIL07/cloudFiles-manager/internal/lib/slg"
 	"github.com/JIIL07/cloudFiles-manager/internal/logger"
 	"github.com/JIIL07/cloudFiles-manager/internal/server"
@@ -11,32 +16,47 @@ import (
 )
 
 func main() {
-	cfg := server.MustLoad()
+	//load env variables
+	env.LoadEnv()
 
+	//load config file
+	cfg := config.MustLoad()
+
+	//init logger
 	log := logger.NewLogger(cfg.Env)
 
-	storage, err := storage.InitDatabase(cfg.Database)
+	//init storage
+	s, err := storage.InitDatabase(cfg.Database)
 	if err != nil {
 		log.Error("Failed to initialize database", slg.Err(err))
 		os.Exit(1)
 	}
-	fmt.Println(storage.DB)
-	// go func() {
-	// 	if err := srv.Start(); err != nil {
-	// 		log.Fatalf("Server failed: %v", err)
-	// 	}
-	// }()
+	defer s.CloseDatabase()
 
-	// c := make(chan os.Signal, 1)
-	// signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	// <-c
+	//init server
+	srv := server.New(cfg.Server)
 
-	// ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	// defer cancel()
+	//start server
+	go func() {
+		log.Info("Server starting on port :8080")
+		if err := srv.Start(); err != nil {
+			log.Error("Server failed to start", slg.Err(err))
+			os.Exit(1)
+		}
+	}()
 
-	// if err := srv.Stop(ctx); err != nil {
-	// 	log.Fatalf("Server shutdown failed: %v", err)
-	// }
+	//graceful shutdown
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	<-c
 
-	// log.Println("Server gracefully stopped")
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	if err := srv.Stop(ctx); err != nil {
+		log.Error("Server shutdown failed", slg.Err(err))
+		os.Exit(1)
+	}
+
+	log.Info("Server gracefully stopped")
 }
