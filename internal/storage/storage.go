@@ -2,7 +2,9 @@ package storage
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"os"
 )
 
 type DBConfig struct {
@@ -14,12 +16,12 @@ type Storage struct {
 	DB *sql.DB
 }
 
-type User struct {
-	Username string `json:"Username"`
-	Email    string `json:"Email"`
-	Password string `json:"Password"`
-	Protocol string `json:"Protocol"`
-	Admin    bool   `json:"Admin"`
+type AboutUser struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Protocol string `json:"protocol"`
+	Admin    bool   `json:"admin"`
 }
 
 func InitDatabase(config DBConfig) (*Storage, error) {
@@ -46,7 +48,7 @@ func (s *Storage) CloseDatabase() error {
 }
 
 func (s *Storage) SaveNewUser() error {
-	var user = &User{}
+	var user = &AboutUser{}
 	_, err := s.DB.Exec(`INSERT INTO users 
 		(username, email, password, hashprotocol, admin) VALUES (?, ?, ?, ?, ?)`,
 		user.Username, user.Email, user.Password, user.Protocol, user.Admin,
@@ -57,19 +59,75 @@ func (s *Storage) SaveNewUser() error {
 	return nil
 }
 
-func (s *Storage) GetAllUsers() ([]User, error) {
-	var users []User
+func (s *Storage) GetAllUsers() ([]AboutUser, error) {
+	var users []AboutUser
 	rows, err := s.DB.Query(`SELECT username, email, password, hashprotocol, admin FROM users`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all users: %v", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var user = User{}
+		var user = AboutUser{}
 		if err := rows.Scan(&user.Username, &user.Email, &user.Password, &user.Protocol, &user.Admin); err != nil {
 			return nil, fmt.Errorf("failed to scan user: %v", err)
 		}
 		users = append(users, user)
 	}
 	return users, nil
+}
+
+func (s *Storage) Admin() error {
+	adminEnv := os.Getenv("ADMIN_USER")
+	if adminEnv == "" {
+		return fmt.Errorf("no such env variable ADMIN_USER")
+	}
+
+	var admin AboutUser
+
+	err := json.Unmarshal([]byte(adminEnv), &admin)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling ADMIN_USER: %v", err)
+	}
+
+	_, err = s.DB.Exec(`INSERT INTO users 
+		(username, email, password, hashprotocol, admin) VALUES (?, ?, ?, ?, ?)`,
+		admin.Username, admin.Email, admin.Password, admin.Protocol, admin.Admin,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to save admin: %v", err)
+	}
+
+	return nil
+}
+
+func (s *Storage) Query(query string) (*sql.Rows, error) {
+	return s.DB.Query(query)
+}
+
+func ParseRows(rows *sql.Rows) ([]map[string]interface{}, error) {
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+
+	var results []map[string]interface{}
+	for rows.Next() {
+		columnData := make([]interface{}, len(columns))
+		columnPointers := make([]interface{}, len(columns))
+		for i := range columnData {
+			columnPointers[i] = &columnData[i]
+		}
+
+		if err := rows.Scan(columnPointers...); err != nil {
+			return nil, err
+		}
+
+		row := make(map[string]interface{})
+		for i, col := range columns {
+			row[col] = columnData[i]
+		}
+		results = append(results, row)
+	}
+
+	return results, rows.Err()
 }

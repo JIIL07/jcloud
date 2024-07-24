@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/JIIL07/cloudFiles-manager/internal/config"
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/env"
+	jenv "github.com/JIIL07/cloudFiles-manager/internal/lib/env"
 	"github.com/JIIL07/cloudFiles-manager/internal/lib/slg"
 	"github.com/JIIL07/cloudFiles-manager/internal/logger"
 	"github.com/JIIL07/cloudFiles-manager/internal/server"
@@ -17,7 +17,7 @@ import (
 
 func main() {
 	//load env variables
-	env.LoadEnv()
+	jenv.LoadEnv()
 
 	//load config file
 	cfg := config.MustLoad()
@@ -34,7 +34,7 @@ func main() {
 	defer s.CloseDatabase()
 
 	//init server
-	srv := server.New(cfg.Server)
+	srv := server.New(cfg.Server, s)
 
 	//start server
 	go func() {

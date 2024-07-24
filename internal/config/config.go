@@ -2,7 +2,6 @@ package config
 
 import (
 	"log"
-	"net"
 	"os"
 	"time"
 
@@ -15,10 +14,6 @@ type Config struct {
 	Server   ServerConfig
 	Database storage.DBConfig
 	URL      string `yaml:"url" env-required:"true"`
-}
-
-type Connection struct {
-	IP net.IP
 }
 
 type ServerConfig struct {
