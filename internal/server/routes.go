@@ -13,15 +13,22 @@ import (
 func setupRouter(s *storage.Storage) *mux.Router {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", rootHandler).Methods("GET").Name("root")
-	router.HandleFunc("/api/v1/healthcheck", healthCheckHandler).Methods("GET").Name("healthcheck")
+	router.HandleFunc("/", rootHandler).Methods(http.MethodGet).Name("root")
+	router.HandleFunc("/api/v1/healthcheck", healthCheckHandler).Methods(http.MethodGet).Name("healthcheck")
 
 	private := router.PathPrefix("/private").Subrouter()
-	private.HandleFunc("/tools/sql", func(w http.ResponseWriter, r *http.Request) {
+	private.HandleFunc("/auth", commandline.AuthHandler).Methods(http.MethodGet)
+	private.HandleFunc("/auth/checkadmin", commandline.CheckHandler).Methods(http.MethodGet)
+	private.HandleFunc("/sql", func(w http.ResponseWriter, r *http.Request) {
 		ctx := jctx.WithContext(r.Context(), "storage", s)
 		r = r.WithContext(ctx)
 		commandline.HandleSQLQuery(w, r)
-	}).Methods("POST")
+	}).Methods(http.MethodGet)
+	private.HandleFunc("/cmd", func(w http.ResponseWriter, r *http.Request) {
+		ctx := jctx.WithContext(r.Context(), "storage", s)
+		r = r.WithContext(ctx)
+		commandline.HandleCmdExec(w, r)
+	}).Methods(http.MethodGet)
 
 	return router
 }

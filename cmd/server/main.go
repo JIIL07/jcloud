@@ -33,6 +33,9 @@ func main() {
 	}
 	defer s.CloseDatabase()
 
+	//load .env
+	jenv.LoadEnv()
+
 	//init server
 	srv := server.New(cfg.Server, s)
 

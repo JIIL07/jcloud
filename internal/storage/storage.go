@@ -5,12 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-)
 
-type DBConfig struct {
-	DriverName     string `yaml:"driverName" env-required:"true"`
-	DataSourceName string `yaml:"dataSourceName" env-required:"true"`
-}
+	"github.com/JIIL07/cloudFiles-manager/internal/config"
+)
 
 type Storage struct {
 	DB *sql.DB
@@ -24,7 +21,7 @@ type AboutUser struct {
 	Admin    bool   `json:"admin"`
 }
 
-func InitDatabase(config DBConfig) (*Storage, error) {
+func InitDatabase(config config.DBConfig) (*Storage, error) {
 	db, err := sql.Open(config.DriverName, config.DataSourceName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %v", err)

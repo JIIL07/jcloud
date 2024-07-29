@@ -5,27 +5,26 @@ import (
 	"os"
 	"time"
 
-	"github.com/JIIL07/cloudFiles-manager/internal/storage"
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
 	Env      string `yaml:"env" env-required:"true"`
 	Server   ServerConfig
-	Database storage.DBConfig
+	Database DBConfig
 	URL      string `yaml:"url" env-required:"true"`
 }
 
 type ServerConfig struct {
 	Address      string        `yaml:"address" env-default:"8080"`
-	ReadTimeout  time.Duration `yaml:"readTimeout" env-default:"5s"`
-	WriteTimeout time.Duration `yaml:"writeTimeout" env-default:"10s"`
-	IdleTimeout  time.Duration `yaml:"idleTimeout" env-default:"15s"`
+	ReadTimeout  time.Duration `yaml:"readTimeout" env-default:"10s"`
+	WriteTimeout time.Duration `yaml:"writeTimeout" env-default:"20s"`
+	IdleTimeout  time.Duration `yaml:"idleTimeout" env-default:"60s"`
 }
 
-type User struct {
-	Userame  string
-	Password string
+type DBConfig struct {
+	DriverName     string `yaml:"driverName" env-required:"true"`
+	DataSourceName string `yaml:"dataSourceName" env-required:"true"`
 }
 
 func MustLoad() *Config {

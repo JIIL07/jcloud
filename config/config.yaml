@@ -2,8 +2,8 @@ env: "local" #changable to debug or prod
 
 server:
   address: ":8080"
-  readTimeout: 5s
-  writeTimeout: 10s
+  readTimeout: 10s
+  writeTimeout: 20s
   idleTimeout: 60s
 
 database:
