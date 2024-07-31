@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/JIIL07/cloudFiles-manager/internal/config"
+	"github.com/JIIL07/cloudFiles-manager/internal/lib/cookies"
 	jenv "github.com/JIIL07/cloudFiles-manager/internal/lib/env"
 	"github.com/JIIL07/cloudFiles-manager/internal/lib/slg"
 	"github.com/JIIL07/cloudFiles-manager/internal/logger"
@@ -15,6 +16,11 @@ import (
 	"github.com/JIIL07/cloudFiles-manager/internal/storage"
 )
 
+// main is the entry point of the program. It loads environment variables,
+// loads the configuration file, initializes the logger, initializes the
+// storage, sets up a new cookie storage, initializes the server, starts the
+// server in a separate goroutine, handles graceful shutdown, and gracefully
+// stops the server.
 func main() {
 	//load env variables
 	jenv.LoadEnv()
@@ -33,8 +39,8 @@ func main() {
 	}
 	defer s.CloseDatabase()
 
-	//load .env
-	jenv.LoadEnv()
+	//setup new cookie storage
+	cookies.SetNewCookieStore()
 
 	//init server
 	srv := server.New(cfg.Server, s)

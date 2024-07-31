@@ -3,6 +3,7 @@ package commandline
 import (
 	"net/http"
 
+	"github.com/JIIL07/cloudFiles-manager/internal/lib/cookies"
 	jctx "github.com/JIIL07/cloudFiles-manager/internal/lib/ctx"
 	"github.com/JIIL07/cloudFiles-manager/internal/storage"
 )
@@ -17,9 +18,20 @@ func HandleSQLQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	store, err := cookies.Store.Get(r, "admin")
+	if err != nil {
+		respondWithError(w, err)
+		return
+	}
+
+	if store.IsNew {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Unauthorized"))
+		return
+	}
+
 	var req Request
-	req.Command = r.FormValue("command")
-	req.Token = r.FormValue("token")
+	req.Command = r.URL.Query().Get("command")
 
 	rows, err := s.Query(req.Command)
 	if err != nil {

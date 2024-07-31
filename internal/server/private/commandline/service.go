@@ -7,7 +7,7 @@ import (
 
 type Request struct {
 	Command string
-	Token   string
+	Args    string
 }
 
 type Response struct {

@@ -5,23 +5,10 @@ import (
 	"net/http"
 	"os"
 
-	jtoken "github.com/JIIL07/cloudFiles-manager/internal/lib/token"
+	"github.com/JIIL07/cloudFiles-manager/internal/lib/cookies"
 	"github.com/JIIL07/cloudFiles-manager/internal/storage"
 	"github.com/gorilla/sessions"
 )
-
-var (
-	sessionToken = jtoken.Generate(16)
-	store        = sessions.NewCookieStore([]byte(sessionToken))
-)
-
-func init() {
-	store.Options = &sessions.Options{
-		MaxAge:   86400, //24 hours
-		Secure:   false,
-		HttpOnly: true,
-	}
-}
 
 func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -42,7 +29,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if a == u.Username {
-		session, err := store.Get(r, "admin")
+		session, err := cookies.Store.Get(r, "admin")
 		if err != nil {
 			respondWithError(w, err)
 			return
@@ -67,7 +54,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CheckHandler(w http.ResponseWriter, r *http.Request) {
-	s, err := store.Get(r, "admin")
+	s, err := cookies.Store.Get(r, "admin")
 	if err != nil {
 		respondWithError(w, err)
 		return
