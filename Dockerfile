@@ -1,4 +1,4 @@
-FROM golang:latest AS builder
+FROM golang:latest
 
 ENV CGO_ENABLED=1
 ENV GOOS=linux
@@ -9,16 +9,20 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+RUN go build -o server ./cmd/server/main.go
 
-RUN apt-get update && apt-get install -y gcc
-RUN go build -o serve .
+RUN mkdir -p /app/secrets
+COPY secrets/.env /app/secrets/.env
+ENV ENV_PATH=/app/secrets/.env
 
-FROM golang:latest
-RUN apt-get update && apt-get install -y ca-certificates bash
-WORKDIR /root/
+RUN mkdir -p /app/config
+COPY config/config.yaml /app/config/config.yaml
+ENV CONFIG_PATH=/app/config/config.yaml
 
-COPY --from=builder /app/serve .
+RUN mkdir -p /app/storage
+COPY storage/storage.db /app/storage/storage.db
+ENV DATABASE_PATH=/app/storage/storage.db
 
 EXPOSE 8080
 
-CMD ["./serve"]
+CMD ["./server"]

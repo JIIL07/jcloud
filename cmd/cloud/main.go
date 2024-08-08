@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	cmd "github.com/JIIL07/cloudFiles-manager/internal/cmd"
+	"github.com/JIIL07/cloudFiles-manager/internal/cmd"
 )
 
 func main() {

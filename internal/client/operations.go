@@ -76,7 +76,7 @@ func (ctx *FileContext) List(tablename string) ([]map[string]interface{}, error)
 	}
 	defer rows.Close()
 
-	var id int = 1
+	var id = 1
 	var items []map[string]interface{}
 	for rows.Next() {
 		err := rows.Scan(new(interface{}), &ctx.Info.Filename, &ctx.Info.Extension,

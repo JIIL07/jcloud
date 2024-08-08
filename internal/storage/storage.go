@@ -2,7 +2,6 @@ package storage
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -13,16 +12,19 @@ type Storage struct {
 	DB *sql.DB
 }
 
-type AboutUser struct {
+type UserData struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	Protocol string `json:"protocol"`
-	Admin    bool   `json:"admin"`
+	Admin    int    `json:"admin"`
 }
 
-func InitDatabase(config config.DBConfig) (*Storage, error) {
-	db, err := sql.Open(config.DriverName, config.DataSourceName)
+func InitDatabase(config *config.Config) (*Storage, error) {
+	if config.Env == "prod" || config.Env == "debug" {
+		config.Database.DataSourceName = os.Getenv("DATABASE_PATH")
+	}
+	db, err := sql.Open(config.Database.DriverName, config.Database.DataSourceName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %v", err)
 	}
@@ -34,18 +36,21 @@ func InitDatabase(config config.DBConfig) (*Storage, error) {
 		"email" TEXT NOT NULL,
 		"password" TEXT NOT NULL,
 		"hashprotocol" TEXT,
-		"admin" BOOLEAN DEFAULT FALSE
+		"admin" INTEGER DEFAULT 1
 	);`)
 
-	return &Storage{DB: db}, err
+	if err != nil {
+		return nil, fmt.Errorf("failed to create table: %v", err)
+	}
+
+	return &Storage{DB: db}, nil
 }
 
 func (s *Storage) CloseDatabase() error {
 	return s.DB.Close()
 }
 
-func (s *Storage) SaveNewUser() error {
-	var user = &AboutUser{}
+func (s *Storage) SaveNewUser(user *UserData) error {
 	_, err := s.DB.Exec(`INSERT INTO users 
 		(username, email, password, hashprotocol, admin) VALUES (?, ?, ?, ?, ?)`,
 		user.Username, user.Email, user.Password, user.Protocol, user.Admin,
@@ -56,45 +61,21 @@ func (s *Storage) SaveNewUser() error {
 	return nil
 }
 
-func (s *Storage) GetAllUsers() ([]AboutUser, error) {
-	var users []AboutUser
+func (s *Storage) GetAllUsers() ([]UserData, error) {
+	var users []UserData
+	var user = UserData{}
 	rows, err := s.DB.Query(`SELECT username, email, password, hashprotocol, admin FROM users`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all users: %v", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var user = AboutUser{}
 		if err := rows.Scan(&user.Username, &user.Email, &user.Password, &user.Protocol, &user.Admin); err != nil {
 			return nil, fmt.Errorf("failed to scan user: %v", err)
 		}
 		users = append(users, user)
 	}
 	return users, nil
-}
-
-func (s *Storage) Admin() error {
-	adminEnv := os.Getenv("ADMIN_USER")
-	if adminEnv == "" {
-		return fmt.Errorf("no such env variable ADMIN_USER")
-	}
-
-	var admin AboutUser
-
-	err := json.Unmarshal([]byte(adminEnv), &admin)
-	if err != nil {
-		return fmt.Errorf("error unmarshalling ADMIN_USER: %v", err)
-	}
-
-	_, err = s.DB.Exec(`INSERT INTO users 
-		(username, email, password, hashprotocol, admin) VALUES (?, ?, ?, ?, ?)`,
-		admin.Username, admin.Email, admin.Password, admin.Protocol, admin.Admin,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to save admin: %v", err)
-	}
-
-	return nil
 }
 
 func (s *Storage) Query(query string) (*sql.Rows, error) {

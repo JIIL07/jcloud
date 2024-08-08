@@ -5,6 +5,7 @@ import (
 
 	"github.com/JIIL07/cloudFiles-manager/internal/lib/cookies"
 	jctx "github.com/JIIL07/cloudFiles-manager/internal/lib/ctx"
+	"github.com/JIIL07/cloudFiles-manager/internal/lib/parsers"
 	"github.com/JIIL07/cloudFiles-manager/internal/storage"
 )
 
@@ -41,7 +42,7 @@ func HandleSQLQuery(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	var results []map[string]interface{}
-	results, err = storage.ParseRows(rows)
+	results, err = parsers.ParseRows(rows)
 	if err != nil {
 		respondWithError(w, err)
 		return

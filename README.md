@@ -15,7 +15,9 @@
  \    \      ,'  '---'   '---'              
   "---....--'                               
 ```
+
 # File Storage System in Go using SQLite3
+
 
 This project is a file storage system that uses SQLite3 as a database to manage user files. Implemented in the Go programming language, this system provides a basic API for interacting with file data stored in the database.
 

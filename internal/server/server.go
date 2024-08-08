@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"net"
 	"net/http"
 
 	"github.com/JIIL07/cloudFiles-manager/internal/config"
@@ -15,12 +14,12 @@ type Server struct {
 }
 
 type Connection struct {
-	IP net.IP
+	IP string
 }
 
 type CurrentUser struct {
-	UserData       storage.AboutUser
-	Role           string
+	UserData       storage.UserData
+	Role           int
 	NetworkDetails Connection
 }
 

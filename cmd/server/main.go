@@ -16,11 +16,11 @@ import (
 	"github.com/JIIL07/cloudFiles-manager/internal/storage"
 )
 
-// main is the entry point of the program. It loads environment variables,
-// loads the configuration file, initializes the logger, initializes the
-// storage, sets up a new cookie storage, initializes the server, starts the
-// server in a separate goroutine, handles graceful shutdown, and gracefully
-// stops the server.
+// main is the entry point of the program. It loads environment variables, loads
+// the configuration file, initializes the logger, initializes the storage, sets
+// up a new cookie storage, initializes the server, starts the server in a
+// separate goroutine, handles graceful shutdown, and gracefully stops the
+// server.
 func main() {
 	//load env variables
 	jenv.LoadEnv()
@@ -32,7 +32,7 @@ func main() {
 	log := logger.NewLogger(cfg.Env)
 
 	//init storage
-	s, err := storage.InitDatabase(cfg.Database)
+	s, err := storage.InitDatabase(cfg)
 	if err != nil {
 		log.Error("Failed to initialize database", slg.Err(err))
 		os.Exit(1)

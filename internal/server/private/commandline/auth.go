@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/sessions"
 )
 
+var u storage.UserData
+
 func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -18,8 +20,6 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a := r.URL.Query().Get("admin")
-
-	var u storage.AboutUser
 
 	d := os.Getenv("ADMIN_USER")
 	err := json.Unmarshal([]byte(d), &u)
