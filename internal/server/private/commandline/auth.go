@@ -66,5 +66,5 @@ func CheckHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("Authorized"))
+	w.Write([]byte("Admin authorized"))
 }
