@@ -20,12 +20,19 @@ func GetFilesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if session.Values["username"] == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	u, err := s.GetByUsername(session.Values["username"].(string))
 	if err != nil {
 		http.Error(w, "Failed to get user", http.StatusInternalServerError)
 		return
 	}
-	files, err := s.GetAllFiles(u)
+
+	f := &storage.File{UserID: u.UserID}
+	files, err := s.GetAllFiles(f)
 	if err != nil {
 		http.Error(w, "Failed to get files", http.StatusInternalServerError)
 		return

@@ -9,7 +9,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -o server ./cmd/server/main.go
+RUN go build -o server cmd/server/main.go
 
 RUN mkdir -p /app/secrets
 COPY secrets/.env /app/secrets/.env

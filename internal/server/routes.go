@@ -15,24 +15,19 @@ func setupRouter(s *storage.Storage) *mux.Router {
 	router.HandleFunc("/", RootHandler).Methods(http.MethodGet).Name("root")
 	router.HandleFunc("/api/v1/healthcheck", HealthCheckHandler).Methods(http.MethodGet).Name("healthcheck")
 
-	api := router.PathPrefix("/api/v1").Subrouter()
+	api := router.PathPrefix("/api/v1").Name("api").Subrouter()
 	api.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		ctx := jctx.WithContext(r.Context(), "storage", s)
 		r = r.WithContext(ctx)
 		LoginHandler(w, r)
-	}).Methods(http.MethodPost)
-	api.HandleFunc("/login/check", func(w http.ResponseWriter, r *http.Request) {
-		ctx := jctx.WithContext(r.Context(), "storage", s)
-		r = r.WithContext(ctx)
-		LoginCheckHandler(w, r)
-	}).Methods(http.MethodGet)
+	}).Methods(http.MethodPost, http.MethodGet).Name("login")
 
-	f := api.PathPrefix("/files").Subrouter()
+	f := api.PathPrefix("/files").Name("files").Subrouter()
 	f.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {
 		ctx := jctx.WithContext(r.Context(), "storage", s)
 		r = r.WithContext(ctx)
 		GetFilesHandler(w, r)
-	}).Methods(http.MethodGet)
+	}).Methods(http.MethodGet).Name("get-files")
 	f.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
 
 	})

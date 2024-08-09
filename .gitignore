@@ -1,4 +1,3 @@
 storage/*.db
 secrets/
 .idea/
-.github/
