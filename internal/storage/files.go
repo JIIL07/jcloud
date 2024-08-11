@@ -14,7 +14,7 @@ func (s *Storage) GetAllFiles(f *File) ([]map[string]interface{}, error) {
 }
 
 func (s *Storage) GetFile(f *File) ([]map[string]interface{}, error) {
-	rows, err := s.DB.Query(`SELECT id, filename, extension, filesize, data FROM files WHERE user_id = ? AND id = ?`, f.UserID, f.Filename)
+	rows, err := s.DB.Query(`SELECT id, filename, extension, filesize, data FROM files WHERE user_id = ? AND filename = ?`, f.UserID, f.Filename)
 	if err != nil {
 		return nil, err
 	}
@@ -22,12 +22,14 @@ func (s *Storage) GetFile(f *File) ([]map[string]interface{}, error) {
 }
 
 func (s *Storage) AddFile(f *File) error {
-	_, err := s.DB.Query(`INSERT INTO files (user_id, filename, extension, filesize, data) VALUES (?, ?, ?, ?, ?)`, f.UserID, f.Filename, f.Extension, f.Filesize, f.Data)
+	_, err := s.DB.Exec(`INSERT INTO files 
+    	(user_id, filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?, ?)`,
+		f.UserID, f.Filename, f.Extension, f.Filesize, f.Status, f.Data)
 	return err
 }
 
 func (s *Storage) DeleteFile(f *File) error {
-	_, err := s.DB.Query(`DELETE FROM files WHERE user_id = ? AND id = ?`, f.UserID, f.Filename)
+	_, err := s.DB.Exec(`DELETE FROM files WHERE user_id = ? AND filename = ?`, f.UserID, f.Filename)
 	return err
 }
 

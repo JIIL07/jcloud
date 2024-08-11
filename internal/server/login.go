@@ -13,7 +13,6 @@ import (
 )
 
 var ActualUser = &CurrentUser{}
-var ActualSession = &sessions.Session{}
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var credentials CurrentUser

@@ -3,10 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/JIIL07/cloudFiles-manager/internal/client/cmd"
 	"os"
 	"strings"
-
-	"github.com/JIIL07/cloudFiles-manager/internal/cmd"
 )
 
 func main() {

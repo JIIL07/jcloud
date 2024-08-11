@@ -21,16 +21,34 @@ func setupRouter(s *storage.Storage) *mux.Router {
 		r = r.WithContext(ctx)
 		LoginHandler(w, r)
 	}).Methods(http.MethodPost, http.MethodGet).Name("login")
+	api.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
+		ctx := jctx.WithContext(r.Context(), "storage", s)
+		r = r.WithContext(ctx)
+		LogoutHandler(w, r)
+	}).Methods(http.MethodGet).Name("logout")
 
 	f := api.PathPrefix("/files").Name("files").Subrouter()
-	f.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {
+	f.HandleFunc("/get", func(w http.ResponseWriter, r *http.Request) {
 		ctx := jctx.WithContext(r.Context(), "storage", s)
 		r = r.WithContext(ctx)
 		GetFilesHandler(w, r)
 	}).Methods(http.MethodGet).Name("get-files")
 	f.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
+		ctx := jctx.WithContext(r.Context(), "storage", s)
+		r = r.WithContext(ctx)
+		AddFileHandler(w, r)
+	}).Methods(http.MethodPost).Name("add-file")
+	//f.HandleFunc("/download", func(w http.ResponseWriter, r *http.Request) {
+	//	ctx := jctx.WithContext(r.Context(), "storage", s)
+	//	r = r.WithContext(ctx)
+	//	DownloadFileHandler(w, r)
+	//}).Methods(http.MethodGet).Name("download-file")
 
-	})
+	f.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
+		ctx := jctx.WithContext(r.Context(), "storage", s)
+		r = r.WithContext(ctx)
+		DeleteFileHandler(w, r)
+	}).Methods(http.MethodDelete).Name("delete-file")
 
 	private := router.PathPrefix("/private").Subrouter()
 	private.HandleFunc("/admin", commandline.AuthHandler).Methods(http.MethodGet)

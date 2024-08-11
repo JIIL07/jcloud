@@ -2,10 +2,9 @@ package storage
 
 import (
 	"fmt"
+	"github.com/JIIL07/cloudFiles-manager/internal/config"
 	"github.com/jmoiron/sqlx"
 	"os"
-
-	"github.com/JIIL07/cloudFiles-manager/internal/config"
 )
 
 type Storage struct {
@@ -57,9 +56,9 @@ func InitDatabase(config *config.Config) (*Storage, error) {
 		`CREATE TABLE IF NOT EXISTS files (
 		"id" INTEGER PRIMARY KEY AUTOINCREMENT,
 		"user_id" INTEGER NOT NULL,
-		"filename" TEXT, 
-		"extension" TEXT, 
-		"filesize" INTEGER, 
+		"filename" TEXT NOT NULL UNIQUE, 
+		"extension" TEXT NOT NULL, 
+		"filesize" INTEGER NOT NULL, 
 		"status" TEXT, 
 		"data" BLOB,
 		FOREIGN KEY (user_id) REFERENCES users(id)
