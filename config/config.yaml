@@ -8,6 +8,6 @@ server:
 
 database:
   driverName: "sqlite3"
-  dataSourceName: "../../storage/storage.db"
+  dataSourceName: "file::memory:?cache=shared"
 
 url: "https://cloudfiles.up.railway.app"

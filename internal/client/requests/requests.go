@@ -36,7 +36,7 @@ func Login(u *UserData) error {
 		return fmt.Errorf("error marshalling data: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/login", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", URL+"/api/v1/login", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
 	}
@@ -50,7 +50,7 @@ func Login(u *UserData) error {
 	defer resp.Body.Close()
 
 	cookies = resp.Cookies()
-
+	fmt.Println(cookies)
 	return nil
 }
 
@@ -60,7 +60,7 @@ func UploadFile(f *File) error {
 		return fmt.Errorf("error marshalling data: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/files/upload", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", URL+"/api/v1/files/upload", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("error creating request: %w", err)
 	}
@@ -75,7 +75,9 @@ func UploadFile(f *File) error {
 		return fmt.Errorf("error executing request: %w", err)
 	}
 	defer resp.Body.Close()
-
+	response := make([]byte, resp.ContentLength)
+	resp.Body.Read(response)
+	fmt.Println(string(response))
 	return nil
 }
 

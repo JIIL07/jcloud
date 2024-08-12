@@ -18,6 +18,8 @@ ENV ENV_PATH=/app/secrets/.env
 RUN mkdir -p /app/config
 COPY config/config.yaml /app/config/config.yaml
 ENV CONFIG_PATH=/app/config/config.yaml
+COPY config/client.yaml /app/config/client.yaml
+ENV CLIENT_CONFIG_PATH=/app/config/client.yaml
 
 RUN mkdir -p /app/storage
 COPY storage/storage.db /app/storage/storage.db

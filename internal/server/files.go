@@ -69,11 +69,11 @@ func AddFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = s.AddFile(f)
 	if err != nil {
-		http.Error(w, "Failed to add file", http.StatusInternalServerError)
+		http.Error(w, "Failed to add file"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("File added"))
+	w.Write([]byte("File add	ed"))
 }
 
 func DeleteFileHandler(w http.ResponseWriter, r *http.Request) {

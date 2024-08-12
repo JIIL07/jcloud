@@ -3,6 +3,7 @@ package cloudfiles
 import (
 	"database/sql"
 	"fmt"
+	"github.com/JIIL07/cloudFiles-manager/internal/client/config"
 	"os"
 	"strings"
 )
@@ -24,7 +25,7 @@ func (ctx *FileContext) Add() error {
 
 	if !exists {
 		ctx.Info.Filesize = len(ctx.Info.Data)
-		ctx.Info.Status = Statuses[0]
+		ctx.Info.Status = config.Statuses[0]
 		_, err = ctx.DB.Exec(`INSERT INTO files (filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?)`,
 			ctx.Info.Filename, ctx.Info.Extension, ctx.Info.Filesize, ctx.Info.Status, ctx.Info.Data)
 		return err
@@ -173,7 +174,7 @@ func (ctx *FileContext) AddFile() error {
 	}
 
 	ctx.Info.Filesize = len(ctx.Info.Data)
-	ctx.Info.Status = Statuses[0]
+	ctx.Info.Status = config.Statuses[0]
 	_, err = ctx.DB.Exec("INSERT INTO files (filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?)",
 		ctx.Info.Filename, ctx.Info.Extension, ctx.Info.Filesize, ctx.Info.Status, ctx.Info.Data)
 	return err
