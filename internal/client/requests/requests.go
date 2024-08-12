@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/JIIL07/cloudFiles-manager/internal/client/lib/params"
+	"github.com/JIIL07/cloudFiles-manager/internal/client/requests/jreq"
 	"net/http"
 	"net/url"
 )
@@ -36,21 +38,23 @@ func Login(u *UserData) error {
 		return fmt.Errorf("error marshalling data: %w", err)
 	}
 
-	req, err := http.NewRequest("POST", URL+"/api/v1/login", bytes.NewBuffer(jsonData))
-	if err != nil {
-		return fmt.Errorf("error creating request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
+	p := params.NewParams()
+	p.Set("type", "POST")
+	p.Set("url", URL+"/api/v1/login")
+	p.Set("body", bytes.NewBuffer(jsonData))
+	p.Set("header", map[string]string{"Content-Type": "application/json"})
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := jreq.Post(&p)
 	if err != nil {
 		return fmt.Errorf("error executing request: %w", err)
 	}
 	defer resp.Body.Close()
 
+	response := make([]byte, resp.ContentLength)
+	resp.Body.Read(response)
+
 	cookies = resp.Cookies()
-	fmt.Println(cookies)
+
 	return nil
 }
 
@@ -100,5 +104,22 @@ func DeleteFile(f *File) error {
 	}
 	defer resp.Body.Close()
 
+	return nil
+}
+
+func GetFiles() error {
+	p := params.NewParams()
+	p.Set("type", "GET")
+	p.Set("url", URL+"/api/v1/files/get")
+
+	resp, err := jreq.Get(&p)
+	if err != nil {
+		return fmt.Errorf("error executing request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	response := make([]byte, resp.ContentLength)
+	resp.Body.Read(response)
+	fmt.Println(string(response))
 	return nil
 }

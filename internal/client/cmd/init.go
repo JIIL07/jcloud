@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	cloud "github.com/JIIL07/cloudFiles-manager/internal/client"
+	"github.com/JIIL07/cloudFiles-manager/internal/client/config"
 	"github.com/JIIL07/cloudFiles-manager/internal/client/storage"
 	"github.com/spf13/cobra"
 )
@@ -11,13 +11,17 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize the cloud",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		sqlite := &storage.SQLiteDB{}
-		db, err := sqlite.PrepareLocalDB()
+		c := config.MustLoad()
+		sqlite, err := storage.InitDatabase(c)
 		if err != nil {
 			return err
 		}
-		ctx = cloud.NewFileContext(db)
+		err = sqlite.CreateTable("files")
+		if err != nil {
+			return err
+		}
 		return nil
+
 	},
 }
 
