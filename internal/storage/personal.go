@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/bool"
+	"github.com/JIIL07/jcloud/internal/lib/bool"
 )
 
 func (s *Storage) Query(query string) (*sql.Rows, error) {

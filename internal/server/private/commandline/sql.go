@@ -3,10 +3,10 @@ package commandline
 import (
 	"net/http"
 
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/cookies"
-	jctx "github.com/JIIL07/cloudFiles-manager/internal/lib/ctx"
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/parsers"
-	"github.com/JIIL07/cloudFiles-manager/internal/storage"
+	"github.com/JIIL07/jcloud/internal/lib/cookies"
+	jctx "github.com/JIIL07/jcloud/internal/lib/ctx"
+	"github.com/JIIL07/jcloud/internal/lib/parsers"
+	"github.com/JIIL07/jcloud/internal/storage"
 )
 
 var s *storage.Storage

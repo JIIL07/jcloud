@@ -3,11 +3,11 @@ package server
 import (
 	"crypto"
 	"encoding/json"
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/cookies"
-	jctx "github.com/JIIL07/cloudFiles-manager/internal/lib/ctx"
-	jhash "github.com/JIIL07/cloudFiles-manager/internal/lib/hash"
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/ip"
-	"github.com/JIIL07/cloudFiles-manager/internal/storage"
+	"github.com/JIIL07/jcloud/internal/lib/cookies"
+	jctx "github.com/JIIL07/jcloud/internal/lib/ctx"
+	jhash "github.com/JIIL07/jcloud/internal/lib/hash"
+	"github.com/JIIL07/jcloud/internal/lib/ip"
+	"github.com/JIIL07/jcloud/internal/storage"
 	"github.com/gorilla/sessions"
 	"net/http"
 )

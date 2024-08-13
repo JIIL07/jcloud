@@ -2,7 +2,7 @@ package storage
 
 import (
 	"fmt"
-	"github.com/JIIL07/cloudFiles-manager/internal/client/config"
+	"github.com/JIIL07/jcloud/internal/client/config"
 	"github.com/jmoiron/sqlx"
 
 	_ "github.com/mattn/go-sqlite3"

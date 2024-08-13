@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/cookies"
-	"github.com/JIIL07/cloudFiles-manager/internal/storage"
+	"github.com/JIIL07/jcloud/internal/lib/cookies"
+	"github.com/JIIL07/jcloud/internal/storage"
 	"github.com/gorilla/sessions"
 )
 

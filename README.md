@@ -16,36 +16,42 @@
   "---....--'                               
 ```
 
-# File Storage System in Go using SQLite3
+# Jcloud
 
-
-This project is a file storage system that uses SQLite3 as a database to manage user files. Implemented in the Go programming language, this system provides a basic API for interacting with file data stored in the database.
+Jcloud is a client-server application for cloud file storage. This project provides a file storage system with a backend implemented in Go and a frontend using TypeScript. The backend uses SQLite3 to manage user files and offers a basic API for interacting with stored file data.
 
 ## Features
 
-- **Table Creation and Initialization**: The program automatically creates tables in the SQLite3 database for storing files.
-- **File Adding**: Users can add files to the database through the API.
-- **File Retrieval**: Users can retrieve and download their files on demand.
-- **File Deletion**: Functionality is provided for deleting files from the database.
+- **File Upload**: Easily upload files to the cloud.
+- **File List**: View and manage your uploaded files.
+- **Simple API**: RESTful endpoints for file operations.
+
+## Live Demo
+
+You can view the live demo of Jcloud at [Jcloud Live Demo](https://your-live-demo-url.com). Below is a preview of the web interface.
+
+![Jcloud Demo](https://your-image-url.com/demo-screenshot.png)
+
+## Web Interface
+
+The web interface is built using TypeScript and provides a user-friendly way to interact with the Jcloud system. Here’s a brief overview of the web application's layout:
+
+### Home Page
+
+- **File Upload**: Users can select and upload files to their cloud storage.
+- **File List**: Displays a list of uploaded files with options to view or delete them.
+
+## Technologies Used
+
+- **Frontend**: TypeScript, HTML, CSS
+- **Backend**: Go, SQLite3
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+To get started with Jcloud, clone the repository and set up the project as follows:
 
-### Prerequisites
+### Clone the Repository
 
-You will need the following installed on your system:
-
-- Go (version 1.18 or higher)
-- SQLite3
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/JIIL07/sql.git
-   cd sql
-2. **Build**
-    ```bash
-    go build -o file.exe #You can use any other name for .exe file
-    
+```bash
+git clone https://github.com/your-username/jcloud.git
+cd jcloud

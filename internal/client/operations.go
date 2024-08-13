@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/JIIL07/cloudFiles-manager/internal/client/config"
-	"github.com/JIIL07/cloudFiles-manager/internal/client/models"
-	"github.com/JIIL07/cloudFiles-manager/internal/client/util"
+	"github.com/JIIL07/jcloud/internal/client/config"
+	"github.com/JIIL07/jcloud/internal/client/models"
+	"github.com/JIIL07/jcloud/internal/client/util"
 )
 
 type FileContext struct {

@@ -2,9 +2,9 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/cookies"
-	jctx "github.com/JIIL07/cloudFiles-manager/internal/lib/ctx"
-	"github.com/JIIL07/cloudFiles-manager/internal/storage"
+	"github.com/JIIL07/jcloud/internal/lib/cookies"
+	jctx "github.com/JIIL07/jcloud/internal/lib/ctx"
+	"github.com/JIIL07/jcloud/internal/storage"
 	"net/http"
 )
 
@@ -73,7 +73,7 @@ func AddFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("File add	ed"))
+	w.Write([]byte("File added"))
 }
 
 func DeleteFileHandler(w http.ResponseWriter, r *http.Request) {

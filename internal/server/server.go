@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/JIIL07/cloudFiles-manager/internal/config"
-	"github.com/JIIL07/cloudFiles-manager/internal/storage"
+	"github.com/JIIL07/jcloud/internal/config"
+	"github.com/JIIL07/jcloud/internal/storage"
 	_ "github.com/mattn/go-sqlite3"
 )
 

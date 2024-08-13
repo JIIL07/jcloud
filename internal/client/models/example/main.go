@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/JIIL07/cloudFiles-manager/internal/client/models"
+	"github.com/JIIL07/jcloud/internal/client/models"
 )
 
 func main() {

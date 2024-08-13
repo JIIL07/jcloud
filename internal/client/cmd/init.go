@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/JIIL07/cloudFiles-manager/internal/client/config"
-	"github.com/JIIL07/cloudFiles-manager/internal/client/storage"
+	"github.com/JIIL07/jcloud/internal/client/config"
+	"github.com/JIIL07/jcloud/internal/client/storage"
 	"github.com/spf13/cobra"
 )
 

@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/parsers"
+	"github.com/JIIL07/jcloud/internal/lib/parsers"
 )
 
 func (s *Storage) GetAllFiles(f *File) ([]map[string]interface{}, error) {

@@ -2,7 +2,7 @@ package util
 
 import (
 	"fmt"
-	"github.com/JIIL07/cloudFiles-manager/internal/client/models"
+	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/fsnotify/fsnotify"
 	"log"
 	"os"
