@@ -1,43 +1,17 @@
-package cloudfiles
+package util
 
 import (
-	"database/sql"
 	"fmt"
+	"github.com/JIIL07/cloudFiles-manager/internal/client/models"
+	"github.com/fsnotify/fsnotify"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
-
-	"github.com/fsnotify/fsnotify"
 )
 
-func find(db *sql.DB, fln, ext string) (*sql.Rows, error) {
-	rows, err := db.Query(`SELECT * FROM files WHERE filename = ? AND extension = ?`, fln, ext)
-	if err != nil {
-		return nil, err
-	}
-	if !rows.Next() {
-		rows.Close()
-		return nil, fmt.Errorf("no rows found")
-	}
-	return rows, nil
-}
-
-func exists(db *sql.DB, fln, ext string) (bool, error) {
-	var exists bool
-	query := `SELECT EXISTS(SELECT 1 FROM files WHERE filename = ? AND extension = ?)`
-	err := db.QueryRow(query, fln, ext).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	if exists {
-		return false, fmt.Errorf("such file already exists")
-	}
-	return false, nil
-}
-
-func openExplorer(path string) error {
+func OpenExplorer(path string) error {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "windows":
@@ -55,7 +29,7 @@ func openExplorer(path string) error {
 	return nil
 }
 
-func createTempDir() (string, error) {
+func CreateTempDir() (string, error) {
 	tempDir, err := os.MkdirTemp("", "package_files_TEMPDIR")
 	if err != nil {
 		return "", fmt.Errorf("error creating temporary directory: %v", err)
@@ -63,7 +37,7 @@ func createTempDir() (string, error) {
 	return tempDir, nil
 }
 
-func waitFile(tempDir string) error {
+func WaitFile(tempDir string) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return fmt.Errorf("failed to create watcher: %v", err)
@@ -99,7 +73,7 @@ func waitFile(tempDir string) error {
 	return nil
 }
 
-func processFile(tempDir string) (*Info, error) {
+func ProcessFile(tempDir string) (*models.Info, error) {
 	files, err := os.ReadDir(tempDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read temp directory: %v", err)
@@ -114,16 +88,16 @@ func processFile(tempDir string) (*Info, error) {
 		return nil, fmt.Errorf("a file was expected, not a directory")
 	}
 
-	info := &Info{Fullname: fileEntry.Name()}
-	info.Split()
-	fmt.Println(info.Filename, info.Extension)
+	meta := models.NewFileMetadata(fileEntry.Name())
 
-	fileData, err := os.ReadFile(filepath.Join(tempDir, info.Fullname))
+	fileData, err := os.ReadFile(filepath.Join(tempDir, fileEntry.Name()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %v", err)
 	}
 
+	meta.Filesize = len(fileData)
+	info := &models.Info{Metadata: meta}
 	info.Data = fileData
-	info.Filesize = len(fileData)
+
 	return info, nil
 }

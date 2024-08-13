@@ -1,21 +1,14 @@
 package cloudfiles
 
 import (
-	"bufio"
 	"fmt"
 	"os"
-	"strings"
 )
 
 func Login() (string, string) {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter username: ")
-	username, _ := reader.ReadString('\n')
-	fmt.Print("Enter password: ")
-	password, _ := reader.ReadString('\n')
-
-	username = strings.TrimSpace(username)
-	password = strings.TrimSpace(password)
+	var username, password string
+	fmt.Print("Enter username and password (space separated): ")
+	fmt.Fscanln(os.Stdin, &username, &password)
 
 	return username, password
 }

@@ -3,27 +3,32 @@ package cloudfiles
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/JIIL07/cloudFiles-manager/internal/client/config"
-	"os"
-	"strings"
+	"github.com/JIIL07/cloudFiles-manager/internal/client/models"
+	"github.com/JIIL07/cloudFiles-manager/internal/client/util"
 )
 
 type FileContext struct {
 	DB   *sql.DB
-	Info *Info
+	Info *models.Info
 }
 
-func (ctx *FileContext) Add() error {
+func (ctx *FileContext) FileExists() (bool, error) {
+	return util.Exists(ctx.DB, ctx.Info.Metadata.Filename, ctx.Info.Metadata.Extension)
+}
+
+func (ctx *FileContext) AddFile() error {
 	if err := ctx.Info.PrepareInfo(); err != nil {
-		return err
+		return fmt.Errorf("failed to prepare info: %w", err)
 	}
 
-	exists, err := exists(ctx.DB, ctx.Info.Filename, ctx.Info.Extension)
+	fileExists, err := ctx.FileExists()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to check if file exists: %w", err)
 	}
 
-	if !exists {
+	if !fileExists {
 		ctx.Info.Filesize = len(ctx.Info.Data)
 		ctx.Info.Status = config.Statuses[0]
 		_, err = ctx.DB.Exec(`INSERT INTO files (filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?)`,
@@ -33,156 +38,57 @@ func (ctx *FileContext) Add() error {
 	return nil
 }
 
-func (ctx *FileContext) Delete() error {
+func (ctx *FileContext) DeleteFile() error {
 	if err := ctx.Info.GetNameExt(); err != nil {
 		return err
 	}
 
-	err := ctx.DB.QueryRow("SELECT * FROM files WHERE filename = ? AND extension = ?",
-		ctx.Info.Filename, ctx.Info.Extension).Scan(&ctx.Info.Id, &ctx.Info.Filename,
-		&ctx.Info.Extension, &ctx.Info.Filesize, &ctx.Info.Status, &ctx.Info.Data)
-
-	if err != nil {
-		return fmt.Errorf("query row error: %v", err)
-	}
-
-	tx, err := ctx.DB.Begin()
-	if err != nil {
-		return fmt.Errorf("begin transaction error: %v", err)
-	}
-
-	_, err = tx.Exec("INSERT INTO deletedfiles (id, filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?, ?)",
-		ctx.Info.Id, ctx.Info.Filename, ctx.Info.Extension, ctx.Info.Filesize, "Deleted", ctx.Info.Data)
-	if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("insert error: %v", err)
-	}
-
-	_, err = tx.Exec("DELETE FROM files WHERE filename = ? AND extension = ?",
-		ctx.Info.Filename, ctx.Info.Extension)
-	if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("delete error: %v", err)
-	}
-
-	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("commit transaction error: %v", err)
-	}
-	return nil
+	_, err := ctx.DB.Exec(`DELETE FROM files WHERE filename = ? AND extension = ?`, ctx.Info.Filename, ctx.Info.Extension)
+	return err
 }
-func (ctx *FileContext) List(tablename string) ([]map[string]interface{}, error) {
-	rows, err := ctx.DB.Query(fmt.Sprintf("SELECT * FROM %s", tablename))
+
+func (ctx *FileContext) ListFiles(tablename string) ([]map[string]interface{}, error) {
+	query := fmt.Sprintf("SELECT * FROM %s", tablename)
+	rows, err := ctx.DB.Query(query)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var id = 1
-	var items []map[string]interface{}
-	for rows.Next() {
-		err := rows.Scan(new(interface{}), &ctx.Info.Filename, &ctx.Info.Extension,
-			&ctx.Info.Filesize, &ctx.Info.Status, &ctx.Info.Data)
-		if err != nil {
-			return nil, err
-		}
-		items = append(items, map[string]interface{}{
-			"id":        id,
-			"filename":  ctx.Info.Filename,
-			"extension": ctx.Info.Extension,
-			"filesize":  ctx.Info.Filesize,
-			"status":    ctx.Info.Status,
-			"data":      ctx.Info.Data,
-		})
-		id++
-	}
-	return items, nil
+	return util.ScanRows(rows)
 }
 
-func (ctx *FileContext) DataIn() error {
+func (ctx *FileContext) DataInFile() error {
 	if err := ctx.Info.GetNameExt(); err != nil {
 		return err
 	}
 
-	rows, err := ctx.DB.Query(`SELECT data FROM files WHERE filename=? AND extension=?`,
-		ctx.Info.Filename, ctx.Info.Extension)
+	query := `SELECT data FROM files WHERE filename=? AND extension=?`
+	rows, err := ctx.DB.Query(query, ctx.Info.Filename, ctx.Info.Extension)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		err = rows.Scan(&ctx.Info.Data)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("Data:\n%v\n", strings.TrimSpace(string(ctx.Info.Data)))
-	}
-	return nil
+	return util.WriteData(rows, ctx.Info)
 }
 
-func (ctx *FileContext) Search() error {
+func (ctx *FileContext) SearchFile() error {
 	if err := ctx.Info.GetNameExt(); err != nil {
 		return err
 	}
 
-	rows, err := find(ctx.DB, ctx.Info.Filename, ctx.Info.Extension)
+	rows, err := util.Find(ctx.DB, ctx.Info.Filename, ctx.Info.Extension)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 
-	err = rows.Scan(new(interface{}), &ctx.Info.Filename, &ctx.Info.Extension,
-		new(interface{}), new(interface{}), new(interface{}))
+	item, err := util.ScanRow(rows)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Found: %v.%v\n", ctx.Info.Filename, ctx.Info.Extension)
+	fmt.Printf("Found: %v.%v\n", item["filename"], item["extension"])
 	return nil
-}
-
-func (ctx *FileContext) WriteData() error {
-	if err := ctx.Info.PrepareInfo(); err != nil {
-		return err
-	}
-
-	_, err := ctx.DB.Exec(`UPDATE files SET data = ? WHERE filename = ? AND extension = ?`,
-		ctx.Info.Data, ctx.Info.Filename, ctx.Info.Extension)
-	return err
-}
-
-func (ctx *FileContext) AddFile() error {
-	tempDir, err := createTempDir()
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tempDir)
-
-	err = openExplorer(tempDir)
-	if err != nil {
-		return err
-	}
-
-	err = waitFile(tempDir)
-	if err != nil {
-		return err
-	}
-
-	ctx.Info, err = processFile(tempDir)
-	if err != nil {
-		return err
-	}
-
-	ctx.Info.Filesize = len(ctx.Info.Data)
-	ctx.Info.Status = config.Statuses[0]
-	_, err = ctx.DB.Exec("INSERT INTO files (filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?)",
-		ctx.Info.Filename, ctx.Info.Extension, ctx.Info.Filesize, ctx.Info.Status, ctx.Info.Data)
-	return err
-}
-
-func NewFileContext(db *sql.DB) *FileContext {
-	return &FileContext{
-		DB:   db,
-		Info: &Info{},
-	}
 }
