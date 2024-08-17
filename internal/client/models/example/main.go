@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	info := &models.Info{}
+	info := &models.File{}
 	fullname, err := models.ReadNameFromStdin()
 	if err != nil {
 		log.Fatal(err)
@@ -21,7 +21,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Info: %+v\n", info)
+	fmt.Printf("File: %+v\n", info)
 }
 
 func Builder(id int) {
@@ -46,5 +46,5 @@ func Builder(id int) {
 
 	info := builder.Build()
 
-	fmt.Printf("Info: %+v\n", info)
+	fmt.Printf("File: %+v\n", info)
 }

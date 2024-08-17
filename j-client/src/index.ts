@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
     const uploadButton = document.getElementById("uploadButton") as HTMLButtonElement;
     const fileInput = document.getElementById("fileInput") as HTMLInputElement;
     const fileListItems = document.getElementById("fileListItems") as HTMLUListElement;
@@ -10,12 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Function to handle file upload
     const uploadFile = (file: File) => {
         const formData = new FormData();
         formData.append("file", file);
 
-        fetch("/api/upload", {
+        fetch("/api/v1/upload", {
             method: "POST",
             body: formData,
         })
@@ -33,9 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     };
 
-    // Function to list uploaded files
     const listFiles = () => {
-        fetch("/api/files")
+        fetch("/api/v1/files/get")
             .then(response => response.json())
             .then(data => {
                 fileListItems.innerHTML = "";
@@ -50,6 +48,5 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     };
 
-    // Initial file listing
     listFiles();
 });

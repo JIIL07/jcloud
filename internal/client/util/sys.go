@@ -73,7 +73,7 @@ func WaitFile(tempDir string) error {
 	return nil
 }
 
-func ProcessFile(tempDir string) (*models.Info, error) {
+func ProcessFile(tempDir string) (*models.File, error) {
 	files, err := os.ReadDir(tempDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read temp directory: %v", err)
@@ -96,7 +96,7 @@ func ProcessFile(tempDir string) (*models.Info, error) {
 	}
 
 	meta.Filesize = len(fileData)
-	info := &models.Info{Metadata: meta}
+	info := &models.File{Metadata: meta}
 	info.Data = fileData
 
 	return info, nil

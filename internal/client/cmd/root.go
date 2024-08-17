@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	cloud "github.com/JIIL07/jcloud/internal/client"
+	cloud "github.com/JIIL07/jcloud/internal/client/operations"
 	"github.com/spf13/cobra"
 )
 

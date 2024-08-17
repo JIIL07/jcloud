@@ -31,7 +31,7 @@ func NewFileMetadata(fullname string) FileMetadata {
 	return metadata
 }
 
-type Info struct {
+type File struct {
 	ID       int
 	Metadata FileMetadata
 	Status   string
@@ -65,8 +65,8 @@ func (b *InfoBuilder) WithData(data []byte) *InfoBuilder {
 	return b
 }
 
-func (b *InfoBuilder) Build() Info {
-	return Info{
+func (b *InfoBuilder) Build() File {
+	return File{
 		ID:       b.id,
 		Metadata: b.metadata,
 		Status:   b.status,
@@ -74,16 +74,21 @@ func (b *InfoBuilder) Build() Info {
 	}
 }
 
-func (i *Info) SetData() error {
+func (i *File) SetFile() error {
 	if i == nil {
 		return errors.New("info struct is nil")
 	}
+
+	m, err := ReadNameFromStdin()
+	if err != nil {
+		return fmt.Errorf("error reading name: %v", err)
+	}
+	i.Metadata = NewFileMetadata(m)
 
 	data, err := ReadDataFromStdin()
 	if err != nil {
 		return fmt.Errorf("error reading data: %v", err)
 	}
-
 	i.Data = data
 
 	return nil

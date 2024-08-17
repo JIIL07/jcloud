@@ -16,7 +16,7 @@ fn main() {
     let initial_state = AppState { file_content: String::new() };
 
     AppLauncher::with_window(main_window)
-        .log_to_console() // Use the updated logging method
+        .log_to_console()
         .launch(initial_state)
         .expect("Failed to launch application");
 }

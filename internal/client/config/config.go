@@ -4,12 +4,9 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 	"log"
 	"os"
-	"regexp"
 )
 
 var Statuses = []string{"Created", "Has data in", "Renamed", "Deleted"}
-
-var IsValidTableName = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_.]*$`).MatchString
 
 type Config struct {
 	Env      string `yaml:"env" env-required:"true"`

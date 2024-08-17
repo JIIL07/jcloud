@@ -2,18 +2,17 @@ package main
 
 import (
 	"context"
+	"github.com/JIIL07/jcloud/internal/config"
+	"github.com/JIIL07/jcloud/internal/lib/cookies"
+	"github.com/JIIL07/jcloud/internal/lib/env"
+	"github.com/JIIL07/jcloud/internal/lib/slg"
+	"github.com/JIIL07/jcloud/internal/logger"
+	"github.com/JIIL07/jcloud/internal/server"
+	"github.com/JIIL07/jcloud/internal/storage"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/JIIL07/cloudFiles-manager/internal/config"
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/cookies"
-	jenv "github.com/JIIL07/cloudFiles-manager/internal/lib/env"
-	"github.com/JIIL07/cloudFiles-manager/internal/lib/slg"
-	"github.com/JIIL07/cloudFiles-manager/internal/logger"
-	"github.com/JIIL07/cloudFiles-manager/internal/server"
-	"github.com/JIIL07/cloudFiles-manager/internal/storage"
 )
 
 // main is the entry point of the program. It loads environment variables, loads

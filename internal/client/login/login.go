@@ -1,4 +1,4 @@
-package cloudfiles
+package login
 
 import (
 	"fmt"
