@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/JIIL07/jcloud/internal/client/models"
 	cloud "github.com/JIIL07/jcloud/internal/client/operations"
 	"github.com/spf13/cobra"
 )
@@ -15,5 +16,8 @@ It supports commands like init to initialize the cloud, add to add files, and ex
 }
 
 func init() {
+	ctx = &cloud.FileContext{
+		Info: &models.File{},
+	}
 	RootCmd.PersistentFlags().BoolP("help", "h", false, "Help")
 }

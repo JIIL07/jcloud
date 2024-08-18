@@ -35,6 +35,17 @@ func (ctx *FileContext) AddFile() error {
 	return nil
 }
 
+func (ctx *FileContext) AddFileFromExplorer() error {
+	f, err := util.GetFileFromExplorer()
+	if err != nil {
+		return fmt.Errorf("failed to get file from explorer: %w", err)
+	}
+
+	ctx.Info = f
+	err = ctx.Storage.AddFile(ctx.Info)
+	return err
+}
+
 // DeleteFile removes a file from the database based on its metadata.
 func (ctx *FileContext) DeleteFile() error {
 	ctx.Info.Metadata.Split()
@@ -48,10 +59,10 @@ func (ctx *FileContext) DeleteFile() error {
 }
 
 // ListFiles retrieves a list of files from the specified table.
-func (ctx *FileContext) ListFiles() (*[]models.File, error) {
+func (ctx *FileContext) ListFiles() ([]models.File, error) {
 	files := &[]models.File{}
 	err := ctx.Storage.GetAllFiles(files)
-	return files, err
+	return *files, err
 }
 
 // DataInFile retrieves the file data from the database and sets it in the Info struct.

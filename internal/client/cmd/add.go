@@ -1,30 +1,30 @@
 package cmd
 
 import (
-	"github.com/JIIL07/jcloud/internal/client/requests"
 	"log"
 
 	"github.com/spf13/cobra"
 )
 
+var dropFlag bool
+
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a resource to the cloud",
 	Run: func(cmd *cobra.Command, args []string) {
-		f := &requests.File{
-			Filename:  args[0],
-			Extension: "extension",
-			Filesize:  1024,
-			Status:    "status",
-			Data:      []byte("data"),
+		if dropFlag {
+			err := ctx.AddFileFromExplorer()
+			if err != nil {
+				log.Println(err)
+			}
+		} else {
+			log.Println("no -d --drop usage")
 		}
-		err := requests.UploadFile(f)
-		if err != nil {
-			log.Println(err)
-		}
+
 	},
 }
 
 func init() {
+	addCmd.Flags().BoolVarP(&dropFlag, "drop", "d", false, "Drop a file from an opened explorer")
 	RootCmd.AddCommand(addCmd)
 }

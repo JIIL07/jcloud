@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var Statuses = []string{"Created", "Has data in", "Renamed", "Deleted"}
+var Statuses = []string{"upload"}
 
 type Config struct {
 	Env      string `yaml:"env" env-required:"true"`

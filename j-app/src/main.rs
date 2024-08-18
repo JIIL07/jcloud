@@ -23,14 +23,14 @@ fn main() {
 
 fn build_ui() -> impl Widget<AppState> {
     let text_box = TextBox::new()
-        .with_placeholder("Enter file content")
+        .with_placeholder("Enter filePath content")
         .padding(10.0)
         .lens(AppState::file_content);
 
     let button = Button::new("Save File")
         .on_click(|_ctx, data: &mut AppState, _env| {
-            let mut file = File::create("uploaded_file.txt").expect("Unable to create file");
-            file.write_all(data.file_content.as_bytes()).expect("Unable to write data");
+            let mut filePath = File::create("uploaded_file.txt").expect("Unable to create filePath");
+            filePath.write_all(data.file_content.as_bytes()).expect("Unable to write data");
         })
         .padding(10.0);
 

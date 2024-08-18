@@ -1,14 +1,22 @@
 package util
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/JIIL07/jcloud/internal/client/config"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/fsnotify/fsnotify"
-	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"runtime"
+	"sync"
+	"time"
+)
+
+const (
+	tempDirPrefix  = "jcloud-tmp"
+	tempDirTimeout = 30 * time.Second
 )
 
 func OpenExplorer(path string) error {
@@ -21,83 +29,137 @@ func OpenExplorer(path string) error {
 	case "linux":
 		cmd = exec.Command("xdg-open", path)
 	default:
-		return fmt.Errorf("unsupported platform")
+		return fmt.Errorf("unsupported platform: %s", runtime.GOOS)
 	}
+
 	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("failed to open explorer: %v", err)
+		return fmt.Errorf("failed to start command: %w", err)
 	}
+
 	return nil
 }
 
 func CreateTempDir() (string, error) {
-	tempDir, err := os.MkdirTemp("", "package_files_TEMPDIR")
+	dir, err := os.MkdirTemp("", tempDirPrefix)
 	if err != nil {
-		return "", fmt.Errorf("error creating temporary directory: %v", err)
+		return "", fmt.Errorf("failed to create temporary directory: %w", err)
 	}
-	return tempDir, nil
+	return dir, nil
 }
 
-func WaitFile(tempDir string) error {
+func InitializeWatcher(tempDir string) (*fsnotify.Watcher, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return fmt.Errorf("failed to create watcher: %v", err)
+		return nil, fmt.Errorf("failed to create file system watcher: %w", err)
 	}
-	defer watcher.Close()
 
-	done := make(chan bool)
+	if err := watcher.Add(tempDir); err != nil {
+		return nil, fmt.Errorf("failed to add directory to watcher: %w", err)
+	}
+
+	return watcher, nil
+}
+func HandleFileEvents(watcher *fsnotify.Watcher, ctx context.Context) (string, error) {
+	var detectedFile string
+	var watcherErr error
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	go func() {
+		defer wg.Done()
+
 		for {
 			select {
+			case <-ctx.Done():
+				return
 			case event, ok := <-watcher.Events:
 				if !ok {
 					return
 				}
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					log.Printf("Detected new file: %s", event.Name)
-					done <- true
+					detectedFile = event.Name
+					return
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
 					return
 				}
-				log.Printf("Error watching file: %v", err)
+				watcherErr = fmt.Errorf("error watching file: %w", err)
+				return
 			}
 		}
 	}()
 
-	if err := watcher.Add(tempDir); err != nil {
-		return fmt.Errorf("failed to add directory to watcher: %v", err)
-	}
+	wg.Wait()
 
-	<-done
-	return nil
+	return detectedFile, watcherErr
 }
 
-func ProcessFile(tempDir string) (*models.File, error) {
-	files, err := os.ReadDir(tempDir)
+func WaitForFile(tempDir string) (string, error) {
+	watcher, err := InitializeWatcher(tempDir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read temp directory: %v", err)
+		return "", err
+	}
+	defer watcher.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), tempDirTimeout)
+	defer cancel()
+
+	detectedFile, watcherErr := HandleFileEvents(watcher, ctx)
+
+	if watcherErr != nil {
+		return "", watcherErr
+	}
+
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return "", fmt.Errorf("timeout waiting for file in directory: %s", tempDir)
+	}
+
+	return detectedFile, nil
+}
+
+// GetFileFromExplorer opens the file explorer, waits for the user to create or modify a file,
+// reads the file, and returns the file's data wrapped in a models.File object.
+func GetFileFromExplorer() (*models.File, error) {
+	dir, err := CreateTempDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create temporary directory: %w", err)
+	}
+
+	if err := OpenExplorer(dir); err != nil {
+		return nil, fmt.Errorf("failed to open explorer: %w", err)
+	}
+
+	filePath, err := WaitForFile(dir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get filePath from explorer: %w", err)
+	}
+
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read temp directory %s: %w", dir, err)
 	}
 
 	if len(files) != 1 {
-		return nil, fmt.Errorf("expected exactly one file, got %d", len(files))
+		return nil, fmt.Errorf("expected exactly one file, but found %d files", len(files))
 	}
 
 	fileEntry := files[0]
 	if fileEntry.IsDir() {
-		return nil, fmt.Errorf("a file was expected, not a directory")
+		return nil, fmt.Errorf("expected a file, but found a directory: %s", fileEntry.Name())
 	}
+
+	fileData, err := os.ReadFile(filePath)
 
 	meta := models.NewFileMetadata(fileEntry.Name())
+	meta.Filesize = len(fileData)
 
-	fileData, err := os.ReadFile(filepath.Join(tempDir, fileEntry.Name()))
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %v", err)
+	f := &models.File{
+		Metadata: meta,
+		Status:   config.Statuses[0],
+		Data:     fileData,
 	}
 
-	meta.Filesize = len(fileData)
-	info := &models.File{Metadata: meta}
-	info.Data = fileData
-
-	return info, nil
+	return f, nil
 }

@@ -12,14 +12,15 @@ var initCmd = &cobra.Command{
 	Short: "Initialize the cloud",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c := config.MustLoad()
-		sqlite, err := storage.InitDatabase(c)
+		s, err := storage.InitDatabase(c)
 		if err != nil {
 			return err
 		}
-		err = sqlite.CreateTable("files")
+		err = s.CreateTable()
 		if err != nil {
 			return err
 		}
+		ctx.Storage = &s
 		return nil
 
 	},

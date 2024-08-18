@@ -18,13 +18,13 @@
 
 # Jcloud
 
-Jcloud is a client-server application for cloud file storage. This project provides a file storage system with a backend implemented in Go and a frontend using TypeScript. The backend uses SQLite3 to manage user files and offers a basic API for interacting with stored file data.
+Jcloud is a client-server application for cloud filePath storage. This project provides a filePath storage system with a backend implemented in Go and a frontend using TypeScript. The backend uses SQLite3 to manage user files and offers a basic API for interacting with stored filePath data.
 
 ## Features
 
 - **File Upload**: Easily upload files to the cloud.
 - **File List**: View and manage your uploaded files.
-- **Simple API**: RESTful endpoints for file operations.
+- **Simple API**: RESTful endpoints for filePath operations.
 
 ## Live Demo
 

@@ -10,16 +10,16 @@ import (
 )
 
 type FileMetadata struct {
-	Filename  string
-	Extension string
-	Filesize  int
+	Filename  string `db:"filename"`
+	Extension string `db:"extension"`
+	Filesize  int    `db:"filesize"`
 }
 
 func (metadata *FileMetadata) Split() {
 	dotIndex := strings.LastIndex(metadata.Filename, ".")
 	if dotIndex != -1 {
-		metadata.Filename = metadata.Filename[:dotIndex]
 		metadata.Extension = metadata.Filename[dotIndex+1:]
+		metadata.Filename = metadata.Filename[:dotIndex]
 	} else {
 		metadata.Extension = ""
 	}
@@ -32,10 +32,10 @@ func NewFileMetadata(fullname string) FileMetadata {
 }
 
 type File struct {
-	ID       int
+	ID       int `db:"id"`
 	Metadata FileMetadata
-	Status   string
-	Data     []byte
+	Status   string `db:"status"`
+	Data     []byte `db:"data"`
 }
 
 type InfoBuilder struct {

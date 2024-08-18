@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/JIIL07/cloudFiles-manager/internal/client/cmd"
+	"github.com/JIIL07/jcloud/internal/client/cmd"
 	"os"
 	"strings"
 )

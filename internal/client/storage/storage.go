@@ -5,6 +5,7 @@ import (
 	"github.com/JIIL07/jcloud/internal/client/config"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/jmoiron/sqlx"
+	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -40,9 +41,18 @@ func (s *SQLite) Close() error {
 }
 
 func (s *SQLite) GetAllFiles(f *[]models.File) error {
-	return s.DB.Select(&f, "SELECT * FROM local")
+	query := `
+        SELECT
+            id,
+            filename AS "metadata.filename",
+            extension AS "metadata.extension",
+            filesize AS "metadata.filesize",
+            status,
+            data
+        FROM local
+    `
+	return s.DB.Select(f, query)
 }
-
 func (s *SQLite) AddFile(f *models.File) error {
 	_, err := s.DB.Exec(`INSERT INTO local (filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?)`,
 		f.Metadata.Filename,
@@ -53,6 +63,7 @@ func (s *SQLite) AddFile(f *models.File) error {
 	if err != nil {
 		return fmt.Errorf("failed to insert file: %w", err)
 	}
+	log.Printf("db:%v\n", s.DB)
 	return nil
 }
 

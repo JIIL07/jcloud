@@ -19,16 +19,16 @@
 <main>
     <section class="intro">
         <h2>About Jcloud</h2>
-        <p>Jcloud is a sophisticated client-server application designed to provide reliable and scalable cloud file storage solutions. Our platform leverages the power of the Go programming language to deliver high-performance operations and ensures data integrity using SQLite3 and MySQL databases. Jcloud simplifies file management by providing a user-friendly interface and a robust API for seamless interaction with your files.</p>
-        <p>Our system is engineered to handle a diverse range of file operations, from simple uploads to complex file retrievals, all while maintaining a secure environment. Whether you're an individual looking to store personal documents or a business requiring extensive file management capabilities, Jcloud offers a versatile solution tailored to meet your needs.</p>
+        <p>Jcloud is a sophisticated client-server application designed to provide reliable and scalable cloud filePath storage solutions. Our platform leverages the power of the Go programming language to deliver high-performance operations and ensures data integrity using SQLite3 and MySQL databases. Jcloud simplifies filePath management by providing a user-friendly interface and a robust API for seamless interaction with your files.</p>
+        <p>Our system is engineered to handle a diverse range of filePath operations, from simple uploads to complex filePath retrievals, all while maintaining a secure environment. Whether you're an individual looking to store personal documents or a business requiring extensive filePath management capabilities, Jcloud offers a versatile solution tailored to meet your needs.</p>
     </section>
 
     <section class="features">
         <h2>Features</h2>
         <ul>
             <li><strong>File Upload:</strong> Easily upload files to the cloud with a few simple clicks. The upload process is optimized for speed and reliability.</li>
-            <li><strong>File List:</strong> View and manage your uploaded files with an intuitive interface. Options include viewing file details, renaming, and deleting files.</li>
-            <li><strong>Simple API:</strong> Access a RESTful API for performing file operations such as uploading, downloading, and deleting files. The API is designed to be straightforward and easy to integrate into your applications.</li>
+            <li><strong>File List:</strong> View and manage your uploaded files with an intuitive interface. Options include viewing filePath details, renaming, and deleting files.</li>
+            <li><strong>Simple API:</strong> Access a RESTful API for performing filePath operations such as uploading, downloading, and deleting files. The API is designed to be straightforward and easy to integrate into your applications.</li>
             <li><strong>Security:</strong> All data is transmitted over secure channels, and files are encrypted at rest to ensure that your data remains private and protected.</li>
             <li><strong>Scalability:</strong> Our system is designed to handle large volumes of files and high traffic loads, making it suitable for both personal and enterprise use.</li>
             <li><strong>Cross-Platform Compatibility:</strong> The web interface is built using modern technologies, ensuring compatibility across various devices and operating systems.</li>
@@ -37,17 +37,17 @@
 
     <section class="web-interface">
         <h2>Web Interface</h2>
-        <p>The web interface of Jcloud is crafted using TypeScript and React, offering a dynamic and responsive experience. Users interact with the system through a clean and intuitive design that provides a seamless workflow for file management.</p>
+        <p>The web interface of Jcloud is crafted using TypeScript and React, offering a dynamic and responsive experience. Users interact with the system through a clean and intuitive design that provides a seamless workflow for filePath management.</p>
         <h3>Home Page</h3>
         <ul>
             <li><strong>File Upload:</strong> The home page features a user-friendly form that allows users to select and upload files to their cloud storage. Drag-and-drop support is also available for added convenience.</li>
-            <li><strong>File List:</strong> After uploading files, users can view a comprehensive list of their files. Each entry displays relevant information such as file name, size, and upload date. Users can also sort and filter files to find specific items quickly.</li>
+            <li><strong>File List:</strong> After uploading files, users can view a comprehensive list of their files. Each entry displays relevant information such as filePath name, size, and upload date. Users can also sort and filter files to find specific items quickly.</li>
         </ul>
         <h3>Additional Features</h3>
         <ul>
-            <li><strong>Real-Time Notifications:</strong> Users receive real-time notifications for file upload statuses and other important system updates.</li>
-            <li><strong>Search Functionality:</strong> A powerful search feature allows users to locate files quickly by entering keywords or file attributes.</li>
-            <li><strong>File Preview:</strong> Users can preview file content directly in the browser for supported file types, enhancing their ability to manage files efficiently.</li>
+            <li><strong>Real-Time Notifications:</strong> Users receive real-time notifications for filePath upload statuses and other important system updates.</li>
+            <li><strong>Search Functionality:</strong> A powerful search feature allows users to locate files quickly by entering keywords or filePath attributes.</li>
+            <li><strong>File Preview:</strong> Users can preview filePath content directly in the browser for supported filePath types, enhancing their ability to manage files efficiently.</li>
         </ul>
     </section>
 
@@ -84,7 +84,7 @@ func AddFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = s.AddFile(f)
 	if err != nil {
-		http.Error(w, "Failed to add file"+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to add filePath"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -119,14 +119,14 @@ fn main() {
 
 fn build_ui() -> impl Widget<AppState> {
     let text_box = TextBox::new()
-        .with_placeholder("Enter file content")
+        .with_placeholder("Enter filePath content")
         .padding(10.0)
         .lens(AppState::file_content);
 
     let button = Button::new("Save File")
         .on_click(|_ctx, data: &mut AppState, _env| {
-            let mut file = File::create("uploaded_file.txt").expect("Unable to create file");
-            file.write_all(data.file_content.as_bytes()).expect("Unable to write data");
+            let mut filePath = File::create("uploaded_file.txt").expect("Unable to create filePath");
+            filePath.write_all(data.file_content.as_bytes()).expect("Unable to write data");
         })
         .padding(10.0);
 
