@@ -38,42 +38,6 @@ type File struct {
 	Data     []byte `db:"data"`
 }
 
-type InfoBuilder struct {
-	id       int
-	metadata FileMetadata
-	status   string
-	data     []byte
-}
-
-func (b *InfoBuilder) WithID(id int) *InfoBuilder {
-	b.id = id
-	return b
-}
-
-func (b *InfoBuilder) WithMetadata(metadata FileMetadata) *InfoBuilder {
-	b.metadata = metadata
-	return b
-}
-
-func (b *InfoBuilder) WithStatus(status string) *InfoBuilder {
-	b.status = status
-	return b
-}
-
-func (b *InfoBuilder) WithData(data []byte) *InfoBuilder {
-	b.data = data
-	return b
-}
-
-func (b *InfoBuilder) Build() File {
-	return File{
-		ID:       b.id,
-		Metadata: b.metadata,
-		Status:   b.status,
-		Data:     b.data,
-	}
-}
-
 func (i *File) SetFile() error {
 	if i == nil {
 		return errors.New("info struct is nil")

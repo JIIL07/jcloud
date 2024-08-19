@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = ".;protobuf";
+
+message FileMetadata {
+  string filename = 1;
+  string extension = 2;
+  int32 filesize = 3;
+}
+
+message File {
+  int32 id = 1;
+  FileMetadata metadata = 2;
+  string status = 3;
+  bytes data = 4;
+}

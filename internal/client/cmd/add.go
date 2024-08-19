@@ -13,7 +13,7 @@ var addCmd = &cobra.Command{
 	Short: "Add a resource to the cloud",
 	Run: func(cmd *cobra.Command, args []string) {
 		if dropFlag {
-			err := ctx.AddFileFromExplorer()
+			err := fctx.AddFileFromExplorer()
 			if err != nil {
 				log.Println(err)
 			}

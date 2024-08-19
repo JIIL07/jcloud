@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/JIIL07/jcloud/internal/client/models/v2/builder"
 	"log"
 
 	"github.com/JIIL07/jcloud/internal/client/models"
@@ -9,14 +10,7 @@ import (
 
 func main() {
 	info := &models.File{}
-	fullname, err := models.ReadNameFromStdin()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	metadata := models.NewFileMetadata(fullname)
-	info.Metadata = metadata
-	err = info.SetData()
+	err := info.SetFile()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -25,8 +19,8 @@ func main() {
 }
 
 func Builder(id int) {
-	builder := &models.InfoBuilder{}
-	builder.WithID(id)
+	b := &builder.InfoBuilder{}
+	b.WithID(id)
 
 	fullname, err := models.ReadNameFromStdin()
 	if err != nil {
@@ -34,17 +28,17 @@ func Builder(id int) {
 	}
 
 	metadata := models.NewFileMetadata(fullname)
-	builder.WithMetadata(metadata)
+	b.WithMetadata(metadata)
 
 	data, err := models.ReadDataFromStdin()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	builder.WithData(data)
-	builder.WithStatus("active")
+	b.WithData(data)
+	b.WithStatus("active")
 
-	info := builder.Build()
+	info := b.Build()
 
 	fmt.Printf("File: %+v\n", info)
 }

@@ -11,6 +11,12 @@ var exitCmd = &cobra.Command{
 	Use:   "exit",
 	Short: "Exit the cloud CLI",
 	Run: func(cmd *cobra.Command, args []string) {
+		fctx.Storage.Close()
+		filePath := "./local.db"
+		err := os.Remove(filePath)
+		if err != nil {
+			os.Exit(1)
+		}
 		os.Exit(0)
 	},
 }

@@ -5,8 +5,6 @@ import (
 	"github.com/JIIL07/jcloud/internal/client/config"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/jmoiron/sqlx"
-	"log"
-
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -20,12 +18,7 @@ func InitDatabase(c *config.Config) (SQLite, error) {
 		return SQLite{DB: nil}, err
 	}
 
-	return SQLite{DB: db}, nil
-}
-
-func (s *SQLite) CreateTable() error {
-
-	_, err := s.DB.Exec(`CREATE TABLE IF NOT EXISTS local 
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS local 
 	("id" INTEGER PRIMARY KEY AUTOINCREMENT, 
 		"filename"  TEXT NOT NULL, 
 		"extension" TEXT NOT NULL, 
@@ -33,7 +26,7 @@ func (s *SQLite) CreateTable() error {
 		"status" 	TEXT NOT NULL DEFAULT 'upload', 
 		"data"		BLOB)`)
 
-	return err
+	return SQLite{DB: db}, nil
 }
 
 func (s *SQLite) Close() error {
@@ -63,7 +56,6 @@ func (s *SQLite) AddFile(f *models.File) error {
 	if err != nil {
 		return fmt.Errorf("failed to insert file: %w", err)
 	}
-	log.Printf("db:%v\n", s.DB)
 	return nil
 }
 
