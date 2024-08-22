@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+type Berth struct {
+	CurrentAnchor Anchor
+}
+
 type Anchor struct {
 	ID        string
 	Message   string
@@ -29,7 +33,7 @@ func NewAnchor(files []models.File, message string) (Anchor, error) {
 		hashSum := hex.EncodeToString(hash.Sum(nil))
 
 		fmt.Printf("File ID: %d\nFilename: %s\nExtension: %s\nFilesize: %d\nStatus: %s\nHash: %s\n",
-			file.ID, file.Metadata.Filename, file.Metadata.Extension, file.Metadata.Filesize, file.Status, hashSum)
+			file.ID, file.Metadata.Name, file.Metadata.Extension, file.Metadata.Size, file.Status, hashSum)
 
 		err := logAnchor(anchorID, file, message, timestamp)
 		if err != nil {
@@ -58,7 +62,7 @@ func logAnchor(anchorID string, file models.File, message string, timestamp time
 	hashSum := hex.EncodeToString(hash.Sum(nil))
 
 	log := fmt.Sprintf("Anchor ID: %s\nFile ID: %d\nFilename: %s\nExtension: %s\nFilesize: %d\nStatus: %s\nHash: %s\nMessage: %s\nTimestamp: %s\n\n",
-		anchorID, file.ID, file.Metadata.Filename, file.Metadata.Extension, file.Metadata.Filesize, file.Status, hashSum, message, timestamp.Format(time.RFC3339))
+		anchorID, file.ID, file.Metadata.Name, file.Metadata.Extension, file.Metadata.Size, file.Status, hashSum, message, timestamp.Format(time.RFC3339))
 
 	f, err := os.OpenFile("anchor.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {

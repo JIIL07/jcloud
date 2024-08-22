@@ -10,14 +10,10 @@ import (
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:     "login",
+	Short:   "login to jcloud",
+	Long:    "login to jcloud locally and store user credentials in .jcloud file, send email credentials to jcloud server to store in database",
+	Example: "jcloud login [username] [email] [password]",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 3 {
 			return errors.New("not enough arguments")
@@ -45,5 +41,21 @@ to quickly create a Cobra application.`,
 }
 
 func init() {
+	//loginCmd.SetHelpFunc(customLoginHelpFunc)
+
 	RootCmd.AddCommand(loginCmd)
+}
+
+func customLoginHelpFunc(cmd *cobra.Command, args []string) {
+	helpMessage := fmt.Sprintf(`%s
+
+Usage:
+  jcloud add [args]
+
+Example:
+  jcloud login [username] [email] [password] (separated by spaces)
+
+Use "jcloud [command] --help" for more information about a command.
+`, loginCmd.Long)
+	fmt.Print(helpMessage)
 }

@@ -1,42 +1,36 @@
 package cmd
 
 import (
-	"github.com/JIIL07/jcloud/internal/client/models"
-	"github.com/JIIL07/jcloud/internal/client/requests"
-	"log"
-
+	slg "github.com/JIIL07/jcloud/internal/client/lib/logger"
 	"github.com/spf13/cobra"
 )
 
-// deteleCmd represents the detele command
-var deteleCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+var allFilesD bool
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+var deleteCmd = &cobra.Command{
+	Use:   "delete [flags] | [filename]",
+	Short: "Delete file",
+	Long:  "Delete file from local storage do not collide with server storage",
 	Run: func(cmd *cobra.Command, args []string) {
-		f := &models.File{}
-		err := requests.DeleteFile(f)
-		if err != nil {
-			log.Println(err)
+		switch {
+		case allFilesD:
+			err := fctx.DeleteAllFiles()
+			if err != nil {
+				fctx.Logger.Error("error deleting all files", slg.Err(err))
+				cobra.CheckErr(err)
+			}
+		case len(args) > 0:
+			fctx.File.Metadata.Name = args[0]
+			err := fctx.DeleteFile()
+			if err != nil {
+				fctx.Logger.Error("error deleting file", slg.Err(err))
+				cobra.CheckErr(err)
+			}
 		}
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(deteleCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// deteleCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// deteleCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	deleteCmd.Flags().BoolVarP(&allFilesD, "all", "a", false, "Delete all files from local storage")
+	RootCmd.AddCommand(deleteCmd)
 }

@@ -78,7 +78,7 @@ func UploadFile(f *models.File) error {
 func DeleteFile(f *models.File) error {
 	baseURL := URL + "/api/v1/files/delete"
 	p := url.Values{}
-	p.Add("filename", f.Metadata.Filename)
+	p.Add("filename", f.Metadata.Name)
 	fullURL := fmt.Sprintf("%s?%s", baseURL, p.Encode())
 
 	req, err := http.NewRequest("DELETE", fullURL, nil)

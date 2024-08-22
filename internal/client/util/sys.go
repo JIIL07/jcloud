@@ -153,7 +153,7 @@ func GetFileFromExplorer() (*models.File, error) {
 	fileData, err := os.ReadFile(filePath)
 
 	meta := models.NewFileMetadata(fileEntry.Name())
-	meta.Filesize = len(fileData)
+	meta.Size = len(fileData)
 
 	f := &models.File{
 		Metadata: meta,

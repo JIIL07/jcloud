@@ -48,9 +48,9 @@ func (s *SQLite) GetAllFiles(f *[]models.File) error {
 }
 func (s *SQLite) AddFile(f *models.File) error {
 	_, err := s.DB.Exec(`INSERT INTO local (filename, extension, filesize, status, data) VALUES (?, ?, ?, ?, ?)`,
-		f.Metadata.Filename,
+		f.Metadata.Name,
 		f.Metadata.Extension,
-		f.Metadata.Filesize,
+		f.Metadata.Size,
 		f.Status,
 		f.Data)
 	if err != nil {
@@ -63,8 +63,26 @@ func (s *SQLite) Exists(f *models.File) (bool, error) {
 	var exists bool
 	err := s.DB.Get(&exists,
 		`SELECT EXISTS(SELECT 1 FROM local WHERE filename = ? AND extension = ?)`,
-		f.Metadata.Filename,
+		f.Metadata.Name,
 		f.Metadata.Extension)
 
 	return exists, err
+}
+
+func (s *SQLite) DeleteFile(f *models.File) error {
+	_, err := s.DB.Exec(`DELETE FROM local WHERE filename = ? AND extension = ?`,
+		f.Metadata.Name,
+		f.Metadata.Extension)
+	if err != nil {
+		return fmt.Errorf("failed to delete file: %w", err)
+	}
+	return nil
+}
+
+func (s *SQLite) DeleteAllFiles() error {
+	_, err := s.DB.Exec(`DELETE FROM local`)
+	if err != nil {
+		return fmt.Errorf("failed to delete all files: %w", err)
+	}
+	return nil
 }

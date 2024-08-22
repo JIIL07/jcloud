@@ -11,9 +11,9 @@ func main() {
 		{
 			ID: 1,
 			Metadata: models.FileMetadata{
-				Filename:  "example1.txt",
+				Name:      "example1.txt",
 				Extension: ".txt",
-				Filesize:  1234,
+				Size:      1234,
 			},
 			Status: "active",
 			Data:   []byte("Hello, World!"),
@@ -21,9 +21,9 @@ func main() {
 		{
 			ID: 2,
 			Metadata: models.FileMetadata{
-				Filename:  "example2.jpg",
+				Name:      "example2.jpg",
 				Extension: ".jpg",
-				Filesize:  5678,
+				Size:      5678,
 			},
 			Status: "active",
 			Data:   []byte("Image Data"),
