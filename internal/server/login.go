@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/JIIL07/jcloud/internal/lib/cookies"
 	jctx "github.com/JIIL07/jcloud/internal/lib/ctx"
-	jhash "github.com/JIIL07/jcloud/internal/lib/hash"
 	"github.com/JIIL07/jcloud/internal/lib/ip"
 	"github.com/JIIL07/jcloud/internal/storage"
 	"github.com/gorilla/sessions"
@@ -48,7 +47,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			credentials.UserData.Password = jhash.Hash(credentials.UserData.Password)
 			credentials.UserData.Protocol = crypto.SHA256.String()
 			credentials.UserData.Admin = storage.Admin(&credentials.UserData).Int()
 

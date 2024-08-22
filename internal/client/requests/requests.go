@@ -5,20 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/lib/params"
+	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/requests/jreq"
 	"net/http"
 	"net/url"
 )
-
-type File struct {
-	Id        int    `json:"id"`
-	UserID    int    `json:"user_id"`
-	Filename  string `json:"filename"`
-	Extension string `json:"extension"`
-	Filesize  int    `json:"filesize"`
-	Status    string `json:"status"`
-	Data      []byte `json:"data"`
-}
 
 type UserData struct {
 	UserID   int    `db:"id" json:"id"`
@@ -42,7 +33,6 @@ func Login(u *UserData) error {
 	p.Set("type", "POST")
 	p.Set("url", URL+"/api/v1/login")
 	p.Set("body", bytes.NewBuffer(jsonData))
-	p.Set("header", map[string]string{"Content-Type": "application/json"})
 
 	resp, err := jreq.Post(&p)
 	if err != nil {
@@ -58,7 +48,7 @@ func Login(u *UserData) error {
 	return nil
 }
 
-func UploadFile(f *File) error {
+func UploadFile(f *models.File) error {
 	jsonData, err := json.Marshal(f)
 	if err != nil {
 		return fmt.Errorf("error marshalling data: %w", err)
@@ -85,11 +75,11 @@ func UploadFile(f *File) error {
 	return nil
 }
 
-func DeleteFile(f *File) error {
+func DeleteFile(f *models.File) error {
 	baseURL := URL + "/api/v1/files/delete"
-	params := url.Values{}
-	params.Add("filename", f.Filename)
-	fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+	p := url.Values{}
+	p.Add("filename", f.Metadata.Filename)
+	fullURL := fmt.Sprintf("%s?%s", baseURL, p.Encode())
 
 	req, err := http.NewRequest("DELETE", fullURL, nil)
 	if err != nil {

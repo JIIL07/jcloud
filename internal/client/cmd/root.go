@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	fctx *cloud.FileContext
+	fctx *cloud.Context
 	ctx  context.Context
 )
 
@@ -24,7 +24,7 @@ var RootCmd = &cobra.Command{
 It supports commands like init to initialize the cloud, add to add files, and exit to exit the CLI.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		var ok bool
-		fctx, ok = jctx.FromContext[*cloud.FileContext](ctx, "filecontext")
+		fctx, ok = jctx.FromContext[*cloud.Context](ctx, "filecontext")
 		if !ok {
 			return fmt.Errorf("failed to get file context")
 		}

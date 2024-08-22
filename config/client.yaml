@@ -1,4 +1,4 @@
-env: "local" #changable to debug or prod or local
+env: "debug" #changable to debug or prod or local
 
 database:
   driverName: "sqlite3"

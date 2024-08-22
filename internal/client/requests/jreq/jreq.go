@@ -33,7 +33,7 @@ func Post(p *params.Params) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header = p.Get("header").(http.Header)
+	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

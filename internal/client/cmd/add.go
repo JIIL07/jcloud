@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"errors"
+	"github.com/JIIL07/jcloud/internal/client/lib/logger"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -18,7 +20,7 @@ var addCmd = &cobra.Command{
 				log.Println(err)
 			}
 		} else {
-			log.Println("no -d --drop usage")
+			fctx.Logger.Error("Please use -d flag to drop a file from an opened explorer", slg.Err(errors.New("method not implemented")))
 		}
 
 	},

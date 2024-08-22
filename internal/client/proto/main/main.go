@@ -4,81 +4,85 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	protobuf "github.com/JIIL07/jcloud/internal/client/proto"
 	"io"
 	"log"
 	"os"
+	"strings"
 
+	protobuf "github.com/JIIL07/jcloud/internal/client/proto"
 	"google.golang.org/protobuf/proto"
 )
 
 func main() {
 	// Открываем файл
-	f, err := os.Open("server.exe")
+	f, err := os.Open("go.mod")
 	if err != nil {
 		log.Fatal("Error opening file:", err)
 	}
 	defer f.Close()
 
-	// Создаем буфер
 	var buffer bytes.Buffer
-
-	// Читаем файл в буфер
 	n, err := io.Copy(&buffer, f)
 	if err != nil {
 		log.Fatal("Error copying file to buffer:", err)
 	}
-
-	// Проверяем количество прочитанных байт
 	fmt.Printf("Copied %d bytes into buffer\n", n)
 
-	// Если буфер пуст, выдаем предупреждение
 	if buffer.Len() == 0 {
 		log.Fatal("Buffer is empty after reading file")
 	}
 
-	var b bytes.Buffer
-	gzipWriter := gzip.NewWriter(&b)
-	gzipWriter.Write(buffer.Bytes())
+	var compressedBuffer bytes.Buffer
+	gzipWriter := gzip.NewWriter(&compressedBuffer)
+	_, err = gzipWriter.Write(buffer.Bytes())
+	if err != nil {
+		log.Fatal("Error compressing data:", err)
+	}
 	gzipWriter.Close()
 
-	// Создаем структуру protobuf.File
 	file := &protobuf.File{
 		Id: 1,
 		Metadata: &protobuf.FileMetadata{
-			Filename:  f.Name(),
-			Extension: "exe",
-			Filesize:  int32(buffer.Len()),
+			Filename:  strings.Split(f.Name(), ".")[0],
+			Extension: strings.Split(f.Name(), ".")[1],
+			Filesize:  int32(compressedBuffer.Len()),
 		},
-		Status: "active",
-		Data:   b.Bytes(),
+		Status: "upload",
+		Data:   compressedBuffer.Bytes(),
 	}
 
-	// Сериализуем структуру в бинарный формат
 	data, err := proto.Marshal(file)
 	if err != nil {
 		log.Fatal("Marshaling error:", err)
 	}
 
-	// Записываем бинарные данные в файл
 	err = os.WriteFile("file.bin", data, 0644)
 	if err != nil {
 		log.Fatal("Error writing file:", err)
 	}
 
-	// Читаем бинарные данные из файла
 	in, err := os.ReadFile("file.bin")
 	if err != nil {
 		log.Fatal("Error reading file:", err)
 	}
 
-	// Десериализуем данные обратно в структуру
 	newFile := &protobuf.File{}
 	err = proto.Unmarshal(in, newFile)
 	if err != nil {
 		log.Fatal("Unmarshaling error:", err)
 	}
 
-	// Выводим десериализованные данные
+	var decompressedBuffer bytes.Buffer
+	gzipReader, err := gzip.NewReader(bytes.NewReader(newFile.Data))
+	if err != nil {
+		log.Fatal("Error creating gzip reader:", err)
+	}
+	_, err = io.Copy(&decompressedBuffer, gzipReader)
+	if err != nil {
+		log.Fatal("Error decompressing data:", err)
+	}
+	gzipReader.Close()
+
 	fmt.Printf("Deserialized File: %+v\n", newFile)
+	fmt.Printf("File Content: %s\n", decompressedBuffer.String())
 }
