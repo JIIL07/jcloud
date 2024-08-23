@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-// whoiamCmd represents the whoiam command
 var whoiamCmd = &cobra.Command{
 	Use:     "whoiam",
 	Aliases: []string{"wia"},

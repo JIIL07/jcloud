@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// exitCmd represents the exit command
 var exitCmd = &cobra.Command{
 	Use:   "exit",
 	Short: "exit Jcloud CLI",

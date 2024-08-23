@@ -8,7 +8,6 @@ import (
 	"os"
 )
 
-// loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:     "login",
 	Short:   "login to jcloud",

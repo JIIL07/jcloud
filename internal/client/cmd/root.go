@@ -48,7 +48,3 @@ func init() {
 	RootCmd.PersistentFlags().BoolP("help", "h", false, "Help")
 	RootCmd.Flags().BoolVarP(&versionFlag, "version", "v", false, "Version")
 }
-
-func Execute() error {
-	return RootCmd.Execute()
-}
