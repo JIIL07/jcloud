@@ -59,16 +59,16 @@ func (i *File) SetFile() error {
 	return nil
 }
 
-func (i *File) Serialize() ([]byte, error) {
+func (i *File) Serialize() []byte {
 	var buffer bytes.Buffer
 	encoder := gob.NewEncoder(&buffer)
 
 	err := encoder.Encode(i)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
-	return buffer.Bytes(), nil
+	return buffer.Bytes()
 }
 
 func (i *File) Deserialize(data []byte) error {

@@ -9,8 +9,8 @@ import (
 
 func main() {
 	files := []models.File{
-		{ID: 1, Metadata: models.FileMetadata{Name: "example1.txt", Extension: "txt", Size: 1024}, Status: "new", Data: []byte("Hello, World!")},
-		{ID: 1, Metadata: models.FileMetadata{Name: "example2.txt", Extension: "txt", Size: 2048}, Status: "modified", Data: []byte("Hello, Golang!")},
+		{ID: 1, Metadata: models.FileMetadata{Name: "example", Extension: "txt", Size: 1024}, Status: "new", Data: []byte("Hello, World!")},
+		{ID: 1, Metadata: models.FileMetadata{Name: "example", Extension: "txt", Size: 1024}, Status: "modified", Data: []byte("Hello, Golang!")},
 	}
 
 	previousSnapshots := make(map[int]*delta.Snapshot)
@@ -21,5 +21,5 @@ func main() {
 		return
 	}
 
-	fmt.Printf("Created Anchor: %+v\n", a)
+	fmt.Printf("%+v\n", a.Log)
 }
