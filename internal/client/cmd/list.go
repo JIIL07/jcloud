@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Print list of files",
@@ -16,7 +15,8 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		items, err := fctx.ListFiles()
 		if err != nil {
-			fctx.Logger.Error("error listing files", slg.Err(err))
+			logger.Error("error listing files", slg.Err(err))
+			cobra.CheckErr(err)
 		}
 		for _, item := range items {
 			cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("- %v\n", item))

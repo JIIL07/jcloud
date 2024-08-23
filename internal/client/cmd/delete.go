@@ -16,14 +16,14 @@ var deleteCmd = &cobra.Command{
 		case allFilesD:
 			err := fctx.DeleteAllFiles()
 			if err != nil {
-				fctx.Logger.Error("error deleting all files", slg.Err(err))
+				logger.Error("error deleting all files", slg.Err(err))
 				cobra.CheckErr(err)
 			}
 		case len(args) > 0:
 			fctx.File.Metadata.Name = args[0]
 			err := fctx.DeleteFile()
 			if err != nil {
-				fctx.Logger.Error("error deleting file", slg.Err(err))
+				logger.Error("error deleting file", slg.Err(err))
 				cobra.CheckErr(err)
 			}
 		}
