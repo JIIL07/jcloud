@@ -17,3 +17,7 @@ jobs:
         uses: JetBrains/qodana-action@latest
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+        with:
+          linter: jetbrains/qodana-go:2024.1
+          results-dir: ./qodana/results
+          cache-dir: ./qodana/caches
