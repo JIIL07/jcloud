@@ -3,6 +3,7 @@ package models
 import (
 	"bufio"
 	"bytes"
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"os"
@@ -54,6 +55,30 @@ func (i *File) SetFile() error {
 		return fmt.Errorf("error reading data: %v", err)
 	}
 	i.Data = data
+
+	return nil
+}
+
+func (i *File) Serialize() ([]byte, error) {
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+
+	err := encoder.Encode(i)
+	if err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (i *File) Deserialize(data []byte) error {
+	buffer := bytes.NewBuffer(data)
+	decoder := gob.NewDecoder(buffer)
+
+	err := decoder.Decode(i)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
