@@ -27,19 +27,23 @@ func main() {
 	}
 
 	homeDir := home.GetHome()
+
 	jcloudDir := home.CreateJcloudDir(homeDir)
 	jlogDir := home.CreateJlogDir(jcloudDir)
+	anchorDir := home.CreateAnchorDir(jcloudDir)
 
 	jcloudFile := home.CreateJcloudFile(jcloudDir)
 	logFile := home.CreateLogFile(jlogDir)
+	anchorLog := home.CreateAnchorLogFile(anchorDir)
 
 	fctx := &cloud.Context{
 		File:    &models.File{},
 		Storage: &s,
 		Local: &details.Details{
-			Home:   homeDir,
-			Jcloud: jcloudFile.Name(),
-			Jlog:   logFile.Name(),
+			Home:      homeDir,
+			Jcloud:    jcloudFile.Name(),
+			Jlog:      logFile.Name(),
+			AnchorLog: anchorLog.Name(),
 		},
 		Logger: slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug})),
 	}

@@ -31,6 +31,15 @@ func CreateJlogDir(jcloudDir string) string {
 	return jlogDir
 }
 
+func CreateAnchorDir(jcloudDir string) string {
+	anchorDir := filepath.Join(jcloudDir, ".anchor")
+	err := os.MkdirAll(anchorDir, os.ModePerm)
+	if err != nil {
+		return ""
+	}
+	return anchorDir
+}
+
 func CreateJcloudFile(jcloudDir string) *os.File {
 	file, err := os.OpenFile(filepath.Join(jcloudDir, ".jcloud"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -41,6 +50,14 @@ func CreateJcloudFile(jcloudDir string) *os.File {
 
 func CreateLogFile(jlogDir string) *os.File {
 	file, err := os.OpenFile(filepath.Join(jlogDir, "jcloud.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		return nil
+	}
+	return file
+}
+
+func CreateAnchorLogFile(anchorDir string) *os.File {
+	file, err := os.OpenFile(filepath.Join(anchorDir, "anchor.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return nil
 	}

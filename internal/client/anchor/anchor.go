@@ -1,12 +1,11 @@
 package anchor
 
 import (
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/JIIL07/jcloud/internal/client/delta"
 	"github.com/JIIL07/jcloud/internal/client/models"
-	"os"
 	"time"
 )
 
@@ -18,14 +17,17 @@ type Anchor struct {
 	ID        string
 	Message   string
 	Timestamp time.Time
+	Deltas    map[int]*delta.Delta
 }
 
-func NewAnchor(files []models.File, message string) (Anchor, error) {
+func NewAnchor(files []models.File, message string, previousSnapshots map[int]*delta.Snapshot) (Anchor, error) {
 	anchorID, err := GenerateAnchorID()
 	if err != nil {
 		return Anchor{}, err
 	}
 	timestamp := time.Now()
+
+	deltas := make(map[int]*delta.Delta)
 
 	for _, file := range files {
 		hash := sha256.New()
@@ -35,44 +37,27 @@ func NewAnchor(files []models.File, message string) (Anchor, error) {
 		fmt.Printf("File ID: %d\nFilename: %s\nExtension: %s\nFilesize: %d\nStatus: %s\nHash: %s\n",
 			file.ID, file.Metadata.Name, file.Metadata.Extension, file.Metadata.Size, file.Status, hashSum)
 
-		err := logAnchor(anchorID, file, message, timestamp)
+		newSnapshot := delta.NewSnapshot(file.Data)
+
+		if previous, ok := previousSnapshots[file.ID]; ok {
+			d := newSnapshot.CreateDelta(previous)
+			if d != nil {
+				deltas[file.ID] = d
+			}
+		}
+
+		err := LogAnchor(anchorID, file, message, timestamp)
 		if err != nil {
 			return Anchor{}, err
 		}
+
+		previousSnapshots[file.ID] = newSnapshot
 	}
 
 	return Anchor{
 		ID:        anchorID,
 		Message:   message,
 		Timestamp: timestamp,
+		Deltas:    deltas,
 	}, nil
-}
-
-func GenerateAnchorID() (string, error) {
-	bytes := make([]byte, 16)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
-}
-func logAnchor(anchorID string, file models.File, message string, timestamp time.Time) error {
-	hash := sha256.New()
-	hash.Write(file.Data)
-	hashSum := hex.EncodeToString(hash.Sum(nil))
-
-	log := fmt.Sprintf("Anchor ID: %s\nFile ID: %d\nFilename: %s\nExtension: %s\nFilesize: %d\nStatus: %s\nHash: %s\nMessage: %s\nTimestamp: %s\n\n",
-		anchorID, file.ID, file.Metadata.Name, file.Metadata.Extension, file.Metadata.Size, file.Status, hashSum, message, timestamp.Format(time.RFC3339))
-
-	f, err := os.OpenFile("anchor.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	if _, err := f.WriteString(log); err != nil {
-		return err
-	}
-
-	return nil
 }

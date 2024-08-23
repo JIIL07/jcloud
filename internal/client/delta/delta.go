@@ -2,7 +2,7 @@ package delta
 
 import (
 	"bytes"
-	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
 )
 
@@ -18,7 +18,7 @@ type Delta struct {
 }
 
 func NewSnapshot(content []byte) *Snapshot {
-	hash := fmt.Sprintf("%x", sha1.Sum(content))
+	hash := fmt.Sprintf("%x", sha256.Sum256(content))
 	return &Snapshot{Content: content, Hash: hash}
 }
 
