@@ -3,18 +3,14 @@ package operations
 import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/config"
-	"github.com/JIIL07/jcloud/internal/client/details"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/storage"
 	"github.com/JIIL07/jcloud/internal/client/util"
-	"log/slog"
 )
 
 type Context struct {
 	File    *models.File
 	Storage *storage.SQLite
-	Local   *details.Details
-	Logger  *slog.Logger
 }
 
 // AddFile inserts the file metadata and data into the database if it does not already exist.

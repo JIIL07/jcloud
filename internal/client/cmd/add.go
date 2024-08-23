@@ -23,7 +23,7 @@ var addCmd = &cobra.Command{
 		case dropFlag:
 			err := fctx.AddFileFromExplorer()
 			if err != nil {
-				fctx.Logger.Error("error adding file via drop-down", slg.Err(err))
+				logger.Error("error adding file via drop-down", slg.Err(err))
 				cobra.CheckErr(err)
 			}
 		case filepath != "":

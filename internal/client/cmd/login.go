@@ -18,7 +18,7 @@ var loginCmd = &cobra.Command{
 			return errors.New("not enough arguments")
 		}
 
-		err := os.WriteFile(fctx.Local.Jcloud, []byte(args[0]+" "+args[1]+" "+jhash.Hash(args[2])), os.ModePerm)
+		err := os.WriteFile(paths.Jcloud.Name(), []byte(args[0]+" "+args[1]+" "+jhash.Hash(args[2])), os.ModePerm)
 		if err != nil {
 			return err
 		}
@@ -33,7 +33,7 @@ var loginCmd = &cobra.Command{
 		//	return err
 		//}
 
-		fctx.Logger.Info(fmt.Sprintf("new user %v logged in with email %v", args[0], args[1]))
+		logger.Info(fmt.Sprintf("new user %v logged in with email %v", args[0], args[1]))
 
 		return nil
 	},

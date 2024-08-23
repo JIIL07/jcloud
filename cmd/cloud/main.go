@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/cmd"
 	"github.com/JIIL07/jcloud/internal/client/config"
-	"github.com/JIIL07/jcloud/internal/client/details"
 	"github.com/JIIL07/jcloud/internal/client/lib/ctx"
 	"github.com/JIIL07/jcloud/internal/client/lib/home"
 	"github.com/JIIL07/jcloud/internal/client/models"
@@ -26,27 +25,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	homeDir := home.GetHome()
-	jcloudDir := home.CreateJcloudDir(homeDir)
-	jlogDir := home.CreateJlogDir(jcloudDir)
-
-	jcloudFile := home.CreateJcloudFile(jcloudDir)
-	logFile := home.CreateLogFile(jlogDir)
-
 	fctx := &cloud.Context{
 		File:    &models.File{},
 		Storage: &s,
-		Local: &details.Details{
-			Home:   homeDir,
-			Jcloud: jcloudFile.Name(),
-			Jlog:   logFile.Name(),
-		},
-		Logger: slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: slog.LevelDebug})),
 	}
 
-	ctx := context.Background()
-	ctx = jctx.WithContext(ctx, "filecontext", fctx)
+	paths := home.SetPaths()
+	logger := slog.New(slog.NewTextHandler(paths.Jlog, &slog.HandlerOptions{Level: slog.LevelDebug}))
+
+	ctx := jctx.WithContext(context.Background(), "context", fctx)
+	ctx = jctx.WithContext(ctx, "logger", logger)
+	ctx = jctx.WithContext(ctx, "paths", paths)
 	cmd.SetContext(ctx)
+
 	switch {
 	case c.Env == "local":
 		if err := cmd.RootCmd.Execute(); err != nil {

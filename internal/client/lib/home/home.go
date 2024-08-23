@@ -5,6 +5,13 @@ import (
 	"path/filepath"
 )
 
+type Paths struct {
+	Home    string
+	Jcloud  *os.File
+	Jlog    *os.File
+	Profile string
+}
+
 func GetHome() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -45,4 +52,19 @@ func CreateLogFile(jlogDir string) *os.File {
 		return nil
 	}
 	return file
+}
+
+func SetPaths() *Paths {
+	homeDir := GetHome()
+	jcloudDir := CreateJcloudDir(homeDir)
+	jlogDir := CreateJlogDir(jcloudDir)
+
+	jcloudFile := CreateJcloudFile(jcloudDir)
+	logFile := CreateLogFile(jlogDir)
+
+	return &Paths{
+		Home:   homeDir,
+		Jcloud: jcloudFile,
+		Jlog:   logFile,
+	}
 }
