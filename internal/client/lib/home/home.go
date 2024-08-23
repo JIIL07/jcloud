@@ -9,6 +9,7 @@ type Paths struct {
 	Home    string
 	Jcloud  *os.File
 	Jlog    *os.File
+	Anchor  *os.File
 	Profile string
 }
 
@@ -38,6 +39,15 @@ func CreateJlogDir(jcloudDir string) string {
 	return jlogDir
 }
 
+func CreateAnchorDir(jcloudDir string) string {
+	anchorDir := filepath.Join(jcloudDir, ".anchor")
+	err := os.MkdirAll(anchorDir, os.ModePerm)
+	if err != nil {
+		return ""
+	}
+	return anchorDir
+}
+
 func CreateJcloudFile(jcloudDir string) *os.File {
 	file, err := os.OpenFile(filepath.Join(jcloudDir, ".jcloud"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -54,10 +64,20 @@ func CreateLogFile(jlogDir string) *os.File {
 	return file
 }
 
+func CreateAnchorFile(anchorDir string) *os.File {
+	file, err := os.OpenFile(filepath.Join(anchorDir, "anchor.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		return nil
+	}
+	return file
+}
+
 func SetPaths() *Paths {
 	homeDir := GetHome()
 	jcloudDir := CreateJcloudDir(homeDir)
 	jlogDir := CreateJlogDir(jcloudDir)
+	anchorDir := CreateAnchorDir(jcloudDir)
+	anchorLog := CreateAnchorFile(anchorDir)
 
 	jcloudFile := CreateJcloudFile(jcloudDir)
 	logFile := CreateLogFile(jlogDir)
@@ -66,5 +86,12 @@ func SetPaths() *Paths {
 		Home:   homeDir,
 		Jcloud: jcloudFile,
 		Jlog:   logFile,
+		Anchor: anchorLog,
 	}
+}
+
+func (p *Paths) Close() {
+	p.Jcloud.Close()
+	p.Jlog.Close()
+	p.Anchor.Close()
 }

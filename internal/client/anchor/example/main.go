@@ -3,39 +3,23 @@ package main
 import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/anchor"
+	"github.com/JIIL07/jcloud/internal/client/delta"
 	"github.com/JIIL07/jcloud/internal/client/models"
 )
 
 func main() {
 	files := []models.File{
-		{
-			ID: 1,
-			Metadata: models.FileMetadata{
-				Name:      "example1.txt",
-				Extension: ".txt",
-				Size:      1234,
-			},
-			Status: "active",
-			Data:   []byte("Hello, World!"),
-		},
-		{
-			ID: 2,
-			Metadata: models.FileMetadata{
-				Name:      "example2.jpg",
-				Extension: ".jpg",
-				Size:      5678,
-			},
-			Status: "active",
-			Data:   []byte("Image Data"),
-		},
+		{ID: 1, Metadata: models.FileMetadata{Name: "example", Extension: "txt", Size: 1024}, Status: "new", Data: []byte("Hello, World!")},
+		{ID: 1, Metadata: models.FileMetadata{Name: "example", Extension: "txt", Size: 1024}, Status: "modified", Data: []byte("Hello, Golang!")},
 	}
 
-	anchorMessage := "Initial Anchor"
-	a, err := anchor.NewAnchor(files, anchorMessage)
+	previousSnapshots := make(map[int]*delta.Snapshot)
+
+	a, err := anchor.NewAnchor(files, "Initial commit", previousSnapshots)
 	if err != nil {
-		fmt.Printf("Error during Anchor: %v\n", err)
+		fmt.Println("Error creating anchor:", err)
 		return
 	}
 
-	fmt.Printf("Anchor successful: %v\n", a)
+	fmt.Printf("%+v\n", a.Log)
 }

@@ -1,12 +1,11 @@
 package anchor
 
 import (
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/JIIL07/jcloud/internal/client/delta"
 	"github.com/JIIL07/jcloud/internal/client/models"
-	"os"
 	"time"
 )
 
@@ -18,61 +17,65 @@ type Anchor struct {
 	ID        string
 	Message   string
 	Timestamp time.Time
+	Deltas    map[int]*delta.Delta
+	Log       string
 }
 
-func NewAnchor(files []models.File, message string) (Anchor, error) {
+func NewAnchor(files []models.File, message string, previousSnapshots map[int]*delta.Snapshot) (Anchor, error) {
+	// Generate a unique anchor ID
 	anchorID, err := GenerateAnchorID()
 	if err != nil {
 		return Anchor{}, err
 	}
 	timestamp := time.Now()
 
+	// Initialize deltas map and file summaries slice
+	deltas := make(map[int]*delta.Delta)
+	fileSummaries := make([]string, 0, len(files)) // Preallocate to avoid resizing
+
 	for _, file := range files {
+		// Calculate the hash for the file data
 		hash := sha256.New()
-		hash.Write(file.Data)
+		hash.Write(file.Serialize())
 		hashSum := hex.EncodeToString(hash.Sum(nil))
 
-		fmt.Printf("File ID: %d\nFilename: %s\nExtension: %s\nFilesize: %d\nStatus: %s\nHash: %s\n",
-			file.ID, file.Metadata.Name, file.Metadata.Extension, file.Metadata.Size, file.Status, hashSum)
+		// Create a new snapshot from the file data
+		newSnapshot := delta.NewSnapshot(file.Serialize())
 
-		err := logAnchor(anchorID, file, message, timestamp)
-		if err != nil {
-			return Anchor{}, err
+		var deltaInfo string
+
+		// Check for previous snapshots and create a delta if applicable
+		if previous, ok := previousSnapshots[file.ID]; ok {
+
+			if d := newSnapshot.CreateDelta(previous); d != nil {
+				deltas[file.ID] = d
+				// Log the delta details
+				deltaInfo = fmt.Sprintf("Delta created: Original Hash: %s, New Hash: %s",
+					d.OriginalHash, d.NewHash)
+			} else {
+				deltaInfo = "No changes detected, no delta created."
+			}
+		} else {
+			deltaInfo = "No previous snapshot, no delta created."
 		}
+
+		// Collect summary information for the file
+		fileSummary := fmt.Sprintf("File ID: %d, Filename: %s, Hash: %s, Delta Info: %s",
+			file.ID, file.Metadata.Name, hashSum, deltaInfo)
+		fileSummaries = append(fileSummaries, fileSummary)
+
+		// Update the previous snapshot map with the new snapshot
+		previousSnapshots[file.ID] = newSnapshot
 	}
 
+	log := LogSummary(anchorID, message, timestamp, fileSummaries)
+
+	// Return the created anchor
 	return Anchor{
 		ID:        anchorID,
 		Message:   message,
 		Timestamp: timestamp,
+		Deltas:    deltas,
+		Log:       log,
 	}, nil
-}
-
-func GenerateAnchorID() (string, error) {
-	bytes := make([]byte, 16)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
-}
-func logAnchor(anchorID string, file models.File, message string, timestamp time.Time) error {
-	hash := sha256.New()
-	hash.Write(file.Data)
-	hashSum := hex.EncodeToString(hash.Sum(nil))
-
-	log := fmt.Sprintf("Anchor ID: %s\nFile ID: %d\nFilename: %s\nExtension: %s\nFilesize: %d\nStatus: %s\nHash: %s\nMessage: %s\nTimestamp: %s\n\n",
-		anchorID, file.ID, file.Metadata.Name, file.Metadata.Extension, file.Metadata.Size, file.Status, hashSum, message, timestamp.Format(time.RFC3339))
-
-	f, err := os.OpenFile("anchor.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	if _, err := f.WriteString(log); err != nil {
-		return err
-	}
-
-	return nil
 }

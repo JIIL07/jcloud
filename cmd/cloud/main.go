@@ -31,6 +31,8 @@ func main() {
 	}
 
 	paths := home.SetPaths()
+	defer paths.Close()
+
 	logger := slog.New(slog.NewTextHandler(paths.Jlog, &slog.HandlerOptions{Level: slog.LevelDebug}))
 
 	ctx := jctx.WithContext(context.Background(), "context", fctx)
