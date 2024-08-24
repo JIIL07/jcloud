@@ -1,25 +1,49 @@
-package j
+package jc
 
 import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/config"
+	"github.com/JIIL07/jcloud/internal/client/lib/home"
+	jlog "github.com/JIIL07/jcloud/internal/client/lib/logger"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/storage"
 	"github.com/JIIL07/jcloud/internal/client/util"
+	"log/slog"
 )
 
-type Context struct {
-	File    *models.File
-	Storage *storage.SQLite
+type Client struct {
+	cfg    *config.Config
+	common service
+}
+
+type service struct {
+	client  *Client
+	file    *models.File
+	storage *storage.SQLite
+	paths   *home.Paths
+	logger  *slog.Logger
+}
+
+var c *Client
+
+func Init() *Client {
+	c = &Client{}
+	c.cfg = config.MustLoad()
+	c.common.client = c
+	c.common.file = &models.File{}
+	c.common.storage = storage.MustInit(c.cfg)
+	c.common.paths = home.SetPaths()
+	c.common.logger = jlog.NewLogger(c.common.paths.Jlog)
+
+	return c
 }
 
 // AddFile inserts the file metadata and data into the database if it does not already exist.
-func (fctx *Context) AddFile() error {
-	if err := fctx.File.SetFile(); err != nil {
+func (s *service) AddFile() error {
+	if err := s.file.SetFile(); err != nil {
 		return fmt.Errorf("failed to prepare info: %w", err)
 	}
-
-	fileExists, err := fctx.Storage.Exists(fctx.File)
+	fileExists, err := s.client.ctx.Storage.Exists(s.client.ctx.File)
 	if err != nil {
 		return fmt.Errorf("failed to check if file exists: %w", err)
 	}

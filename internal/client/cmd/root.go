@@ -3,9 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
+	cloud "github.com/JIIL07/jcloud/internal/client/jc"
 	jctx "github.com/JIIL07/jcloud/internal/client/lib/ctx"
 	"github.com/JIIL07/jcloud/internal/client/lib/home"
-	cloud "github.com/JIIL07/jcloud/internal/client/operations"
 	"github.com/spf13/cobra"
 	"log/slog"
 	"os"
