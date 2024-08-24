@@ -1,0 +1,32 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="cloudFiles-openapi.yaml" type="SwaggerCodegen" editBeforeRun="true" show_console_on_std_err="false" show_console_on_std_out="false">
+    <option name="allowRunningInParallel" value="false" />
+    <option name="customTemplatesPath" value="" />
+    <option name="generateToPath" value="C:\Users\roman\gen" />
+    <option name="generationParameters">
+      <list>
+        <CliArgumentViewModel>
+          <option name="name" value="packageName" />
+          <option name="value" value="jcloud" />
+        </CliArgumentViewModel>
+        <CliArgumentViewModel>
+          <option name="name" value="hideGenerationTimestamp" />
+          <option name="value" value="true" />
+        </CliArgumentViewModel>
+        <CliArgumentViewModel>
+          <option name="name" value="generateInterfaces" />
+          <option name="value" value="true" />
+        </CliArgumentViewModel>
+      </list>
+    </option>
+    <option name="generatorType" value="OPENAPI_GENERATOR_V6" />
+    <option name="jdkPath" value="C:\Program Files\JetBrains\GoLand 2024.2\jbr\bin\java.exe" />
+    <option name="language" value="go" />
+    <option name="projectPathOnTarget" />
+    <option name="selectedOptions">
+      <list />
+    </option>
+    <option name="specificationPath" value="C:\Users\roman\AppData\Roaming\JetBrains\GoLand2024.2\openApiExport\cloudFiles-openapi.yaml" />
+    <method v="2" />
+  </configuration>
+</component>
