@@ -44,7 +44,7 @@ func NewAnchor(files []models.File, message string, previousSnapshots map[int]*d
 
 			if d := newSnapshot.CreateDelta(previous); d != nil {
 				deltas[file.ID] = d
-				deltaInfo = fmt.Sprintf("Delta created: Original Hash: %s, New Hash: %s",
+				deltaInfo = fmt.Sprintf("Delta created:\n\tOriginal Hash: %s\n\tNew Hash: %s",
 					d.OriginalHash, d.NewHash)
 			} else {
 				deltaInfo = "No changes detected, no delta created."
@@ -53,8 +53,8 @@ func NewAnchor(files []models.File, message string, previousSnapshots map[int]*d
 			deltaInfo = "No previous snapshot, no delta created."
 		}
 
-		fileSummary := fmt.Sprintf("File ID: %d, Filename: %s, Hash: %s, Delta Info: %s",
-			file.ID, file.Metadata.Name, hashSum, deltaInfo)
+		fileSummary := fmt.Sprintf("File ID: %d, File: %s.%s\nHash: %s\nDelta Info: %s\n",
+			file.ID, file.Metadata.Name, file.Metadata.Extension, hashSum, deltaInfo)
 		fileSummaries = append(fileSummaries, fileSummary)
 
 		previousSnapshots[file.ID] = newSnapshot

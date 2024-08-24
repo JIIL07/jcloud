@@ -6,16 +6,17 @@ import (
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 )
 
 type SQLite struct {
 	DB *sqlx.DB
 }
 
-func InitDatabase(c *config.Config) (SQLite, error) {
+func MustInit(c *config.Config) *SQLite {
 	db, err := sqlx.Open(c.Database.DriverName, c.Database.DataSourceName)
 	if err != nil {
-		return SQLite{DB: nil}, err
+		log.Fatalf("failed to open database: %v", err)
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS local 
@@ -24,9 +25,13 @@ func InitDatabase(c *config.Config) (SQLite, error) {
 		"extension" TEXT NOT NULL, 
 		"filesize"  INTEGER NOT NULL, 
 		"status" 	TEXT NOT NULL DEFAULT 'upload', 
-		"data"		BLOB)`)
+		"data"		BLOB)
+	`)
+	if err != nil {
+		log.Fatalf("failed to create table: %v", err)
+	}
 
-	return SQLite{DB: db}, nil
+	return &SQLite{DB: db}
 }
 
 func (s *SQLite) Close() error {

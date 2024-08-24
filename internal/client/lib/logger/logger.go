@@ -1,4 +1,4 @@
-package slg
+package jlog
 
 import (
 	"log/slog"

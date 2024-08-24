@@ -150,9 +150,11 @@ func GetFileFromExplorer() (*models.File, error) {
 		return nil, fmt.Errorf("expected a file, but found a directory: %s", fileEntry.Name())
 	}
 
-	fileData, err := os.ReadFile(filePath)
+	time.Sleep(time.Nanosecond * 1)
 
 	meta := models.NewFileMetadata(fileEntry.Name())
+
+	fileData, err := os.ReadFile(filePath)
 	meta.Size = len(fileData)
 
 	f := &models.File{
