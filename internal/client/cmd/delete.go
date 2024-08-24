@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/JIIL07/jcloud/internal/client/jc"
 	slg "github.com/JIIL07/jcloud/internal/client/lib/logger"
 	"github.com/spf13/cobra"
 )
@@ -14,14 +15,14 @@ var deleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		switch {
 		case allFilesD:
-			err := fctx.DeleteAllFiles()
+			err := jc.DeleteAllFiles(fs.FileService)
 			if err != nil {
 				logger.Error("error deleting all files", slg.Err(err))
 				cobra.CheckErr(err)
 			}
 		case len(args) > 0:
-			fctx.File.Metadata.Name = args[0]
-			err := fctx.DeleteFile()
+			fs.FileService.F.Metadata.Name = args[0]
+			err := jc.DeleteFile(fs.FileService)
 			if err != nil {
 				logger.Error("error deleting file", slg.Err(err))
 				cobra.CheckErr(err)

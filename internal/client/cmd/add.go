@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/client/lib/logger"
+	"github.com/JIIL07/jcloud/internal/client/jc"
+	slg "github.com/JIIL07/jcloud/internal/client/lib/logger"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -21,7 +22,7 @@ var addCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		switch {
 		case dropFlag:
-			err := fctx.AddFileFromExplorer()
+			err := jc.AddFileFromExplorer(fs.FileService)
 			if err != nil {
 				logger.Error("error adding file via drop-down", slg.Err(err))
 				cobra.CheckErr(err)

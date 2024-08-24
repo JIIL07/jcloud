@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
-	cloud "github.com/JIIL07/jcloud/internal/client/jc"
+	"github.com/JIIL07/jcloud/internal/client/app"
 	jctx "github.com/JIIL07/jcloud/internal/client/lib/ctx"
 	"github.com/JIIL07/jcloud/internal/client/lib/home"
 	"github.com/spf13/cobra"
@@ -12,14 +12,10 @@ import (
 )
 
 var (
-	ctx context.Context
-
-	fctx *cloud.Context
-
-	paths *home.Paths
-
-	logger *slog.Logger
-
+	ctx         context.Context
+	fs          *app.ClientContext
+	paths       *home.Paths
+	logger      *slog.Logger
 	versionFlag bool
 )
 
@@ -37,9 +33,7 @@ It supports commands like init to initialize the cloud, add to add files, and ex
 	Version: "0.0.1",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		var ok bool
-		fctx, ok = jctx.FromContext[*cloud.Context](ctx, "context")
-		paths, ok = jctx.FromContext[*home.Paths](ctx, "paths")
-		logger, ok = jctx.FromContext[*slog.Logger](ctx, "logger")
+		fs, ok = jctx.FromContext[*app.ClientContext](ctx, "app-context")
 		if !ok {
 			return fmt.Errorf("failed to get file context")
 		}

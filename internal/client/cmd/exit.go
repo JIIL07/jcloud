@@ -11,7 +11,7 @@ var exitCmd = &cobra.Command{
 	Short: "exit Jcloud CLI",
 	Long:  "exit Jcloud CLI, remove local storage and write logs",
 	Run: func(cmd *cobra.Command, args []string) {
-		fctx.Storage.Close()
+		fs.StorageService.S.Close()
 		filePath := "./local.db"
 		err := os.Remove(filePath)
 		if err != nil {

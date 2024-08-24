@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/client/lib/logger"
+	"github.com/JIIL07/jcloud/internal/client/jc"
+	slg "github.com/JIIL07/jcloud/internal/client/lib/logger"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -13,7 +14,7 @@ var listCmd = &cobra.Command{
 	Short: "Print list of files",
 	Long:  "Print list of files from local storage",
 	Run: func(cmd *cobra.Command, args []string) {
-		items, err := fctx.ListFiles()
+		items, err := jc.ListFiles(fs.FileService)
 		if err != nil {
 			logger.Error("error listing files", slg.Err(err))
 			cobra.CheckErr(err)

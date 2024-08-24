@@ -4,15 +4,11 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/JIIL07/jcloud/internal/client/app"
 	"github.com/JIIL07/jcloud/internal/client/cmd"
 	"github.com/JIIL07/jcloud/internal/client/config"
-	cloud "github.com/JIIL07/jcloud/internal/client/jc"
 	"github.com/JIIL07/jcloud/internal/client/lib/ctx"
-	"github.com/JIIL07/jcloud/internal/client/lib/home"
-	"github.com/JIIL07/jcloud/internal/client/models"
-	"github.com/JIIL07/jcloud/internal/client/storage"
 	"log"
-	"log/slog"
 	"os"
 	"strings"
 )
@@ -20,24 +16,12 @@ import (
 func main() {
 	c := config.MustLoad()
 
-	s, err := storage.InitDatabase(c)
+	appc, err := app.NewAppContext(c)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fctx := &cloud.Context{
-		File:    &models.File{},
-		Storage: &s,
-	}
-
-	paths := home.SetPaths()
-	defer paths.Close()
-
-	logger := slog.New(slog.NewTextHandler(paths.Jlog, &slog.HandlerOptions{Level: slog.LevelDebug}))
-
-	ctx := jctx.WithContext(context.Background(), "context", fctx)
-	ctx = jctx.WithContext(ctx, "logger", logger)
-	ctx = jctx.WithContext(ctx, "paths", paths)
+	ctx := jctx.WithContext(context.Background(), "app-context", appc)
 	cmd.SetContext(ctx)
 
 	switch {
