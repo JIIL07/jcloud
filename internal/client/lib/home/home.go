@@ -6,11 +6,11 @@ import (
 )
 
 type Paths struct {
-	Home    string
-	Jcloud  *os.File
-	Jlog    *os.File
-	Anchor  *os.File
-	Profile string
+	Home       string
+	JcloudFile *os.File
+	JlogFile   *os.File
+	AnchorFile *os.File
+	Profile    string
 }
 
 func GetHome() string {
@@ -83,15 +83,15 @@ func SetPaths() *Paths {
 	logFile := CreateLogFile(jlogDir)
 
 	return &Paths{
-		Home:   homeDir,
-		Jcloud: jcloudFile,
-		Jlog:   logFile,
-		Anchor: anchorLog,
+		Home:       homeDir,
+		JcloudFile: jcloudFile,
+		JlogFile:   logFile,
+		AnchorFile: anchorLog,
 	}
 }
 
 func (p *Paths) Close() {
-	p.Jcloud.Close()
-	p.Jlog.Close()
-	p.Anchor.Close()
+	p.JcloudFile.Close()
+	p.JlogFile.Close()
+	p.AnchorFile.Close()
 }

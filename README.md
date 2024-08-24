@@ -16,9 +16,9 @@
   "---....--'                               
 ```
 
-# Jcloud
+# JcloudFile
 
-Jcloud is a client-server application for cloud filePath storage. This project provides a filePath storage system with a backend implemented in Go and a frontend using TypeScript. The backend uses SQLite3 to manage user files and offers a basic API for interacting with stored filePath data.
+JcloudFile is a client-server application for cloud filePath storage. This project provides a filePath storage system with a backend implemented in Go and a frontend using TypeScript. The backend uses SQLite3 to manage user files and offers a basic API for interacting with stored filePath data.
 
 ## Features
 
@@ -28,13 +28,13 @@ Jcloud is a client-server application for cloud filePath storage. This project p
 
 ## Live Demo
 
-You can view the live demo of Jcloud at [Jcloud Live Demo](https://your-live-demo-url.com). Below is a preview of the web interface.
+You can view the live demo of JcloudFile at [JcloudFile Live Demo](https://your-live-demo-url.com). Below is a preview of the web interface.
 
-![Jcloud Demo](https://your-image-url.com/demo-screenshot.png)
+![JcloudFile Demo](https://your-image-url.com/demo-screenshot.png)
 
 ## Web Interface
 
-The web interface is built using TypeScript and provides a user-friendly way to interact with the Jcloud system. Here’s a brief overview of the web application's layout:
+The web interface is built using TypeScript and provides a user-friendly way to interact with the JcloudFile system. Here’s a brief overview of the web application's layout:
 
 ### Home Page
 
@@ -48,7 +48,7 @@ The web interface is built using TypeScript and provides a user-friendly way to 
 
 ## Getting Started
 
-To get started with Jcloud, clone the repository and set up the project as follows:
+To get started with JcloudFile, clone the repository and set up the project as follows:
 
 ### Clone the Repository
 

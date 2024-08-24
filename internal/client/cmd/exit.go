@@ -8,8 +8,8 @@ import (
 
 var exitCmd = &cobra.Command{
 	Use:   "exit",
-	Short: "exit Jcloud CLI",
-	Long:  "exit Jcloud CLI, remove local storage and write logs",
+	Short: "exit JcloudFile CLI",
+	Long:  "exit JcloudFile CLI, remove local storage and write logs",
 	Run: func(cmd *cobra.Command, args []string) {
 		fctx.Storage.Close()
 		filePath := "./local.db"

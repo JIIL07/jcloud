@@ -2,15 +2,24 @@ package j
 
 import (
 	"fmt"
+	"github.com/JIIL07/jcloud/internal/client/anchor"
 	"github.com/JIIL07/jcloud/internal/client/config"
+	"github.com/JIIL07/jcloud/internal/client/delta"
+	"github.com/JIIL07/jcloud/internal/client/lib/home"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/storage"
 	"github.com/JIIL07/jcloud/internal/client/util"
+	"log/slog"
 )
 
 type Context struct {
-	File    *models.File
-	Storage *storage.SQLite
+	File     *models.File
+	Storage  *storage.SQLite
+	Paths    *home.Paths
+	Logger   *slog.Logger
+	Anchor   *anchor.Anchor
+	Delta    *delta.Delta
+	Snapshot *delta.Snapshot
 }
 
 // AddFile inserts the file metadata and data into the database if it does not already exist.

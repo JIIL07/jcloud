@@ -19,7 +19,7 @@ func GenerateAnchorID() (string, error) {
 
 func LogSummary(anchorID string, message string, timestamp time.Time, fileSummaries []string) string {
 	logEntry := fmt.Sprintf(
-		"Anchor ID: %s\nMessage: %s\nTimestamp: %s\nFiles:\n%s",
+		"AnchorFile ID: %s\nMessage: %s\nTimestamp: %s\nFiles:\n%s",
 		anchorID, message, timestamp.Format(time.RFC3339), strings.Join(fileSummaries, "\n"),
 	)
 	return logEntry
