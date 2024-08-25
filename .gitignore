@@ -1,4 +1,4 @@
-storage/*.db
+*.db
 secrets/
 .idea/
 *.exe

@@ -48,15 +48,15 @@ func Login(u *UserData) error {
 	return nil
 }
 
-func UploadFile(f *models.File) error {
+func UploadFile(f *[]models.File) (*http.Response, error) {
 	jsonData, err := json.Marshal(f)
 	if err != nil {
-		return fmt.Errorf("error marshalling data: %w", err)
+		return nil, fmt.Errorf("error marshalling data: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", URL+"/api/v1/files/upload", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return fmt.Errorf("error creating request: %w", err)
+		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	for _, cookie := range cookies {
@@ -66,13 +66,10 @@ func UploadFile(f *models.File) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("error executing request: %w", err)
+		return nil, fmt.Errorf("error executing request: %w", err)
 	}
-	defer resp.Body.Close()
-	response := make([]byte, resp.ContentLength)
-	resp.Body.Read(response)
-	fmt.Println(string(response))
-	return nil
+
+	return resp, nil
 }
 
 func DeleteFile(f *models.File) error {

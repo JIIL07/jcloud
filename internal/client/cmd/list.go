@@ -14,9 +14,9 @@ var listCmd = &cobra.Command{
 	Short: "Print list of files",
 	Long:  "Print list of files from local storage",
 	Run: func(cmd *cobra.Command, args []string) {
-		items, err := jc.ListFiles(fs.FileService)
+		items, err := jc.ListFiles(appCtx.FileService)
 		if err != nil {
-			logger.Error("error listing files", slg.Err(err))
+			appCtx.LoggerService.L.Error("error listing files", slg.Err(err))
 			cobra.CheckErr(err)
 		}
 		for _, item := range items {

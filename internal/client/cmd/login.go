@@ -4,12 +4,13 @@ import (
 	"errors"
 	"fmt"
 	jhash "github.com/JIIL07/jcloud/internal/client/lib/hash"
+	"github.com/JIIL07/jcloud/internal/client/requests"
 	"github.com/spf13/cobra"
 	"os"
 )
 
 var loginCmd = &cobra.Command{
-	Use:     "login",
+	Use:     "login [args]",
 	Short:   "login to jcloud",
 	Long:    "login to jcloud locally and store user credentials in .jcloud file, send email credentials to jcloud server to store in database",
 	Example: "jcloud login [username] [email] [password]",
@@ -18,22 +19,22 @@ var loginCmd = &cobra.Command{
 			return errors.New("not enough arguments")
 		}
 
-		err := os.WriteFile(paths.JcloudFile.Name(), []byte(args[0]+" "+args[1]+" "+jhash.Hash(args[2])), os.ModePerm)
+		err := os.WriteFile(appCtx.PathsService.P.JcloudFile.Name(), []byte(args[0]+" "+args[1]+" "+jhash.Hash(args[2])), os.ModePerm)
 		if err != nil {
 			return err
 		}
 
-		//u := &requests.UserData{
-		//	Username: args[0],
-		//	Email:    args[1],
-		//	Password: jhash.Hash(args[2]),
-		//}
-		//err = requests.Login(u)
-		//if err != nil {
-		//	return err
-		//}
+		u := &requests.UserData{
+			Username: args[0],
+			Email:    args[1],
+			Password: jhash.Hash(args[2]),
+		}
+		err = requests.Login(u)
+		if err != nil {
+			return err
+		}
 
-		logger.Info(fmt.Sprintf("new user %v logged in with email %v", args[0], args[1]))
+		appCtx.LoggerService.L.Info(fmt.Sprintf("new user %v logged in with email %v", args[0], args[1]))
 
 		return nil
 	},

@@ -61,17 +61,22 @@ func AddFileHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to get user", http.StatusInternalServerError)
 		return
 	}
-	f := &storage.File{UserID: u.UserID}
-	err = json.NewDecoder(r.Body).Decode(f)
+	var files []storage.File
+	err = json.NewDecoder(r.Body).Decode(&files)
 	if err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
-	err = s.AddFile(f)
-	if err != nil {
-		http.Error(w, "Failed to add file"+err.Error(), http.StatusInternalServerError)
-		return
+
+	for _, file := range files {
+		file.UserID = u.UserID
+		err = s.AddFile(&file)
+		if err != nil {
+			http.Error(w, "Failed to add file"+err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("File added"))
 }
@@ -97,7 +102,7 @@ func DeleteFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	f := &storage.File{UserID: u.UserID}
-	f.Filename = r.URL.Query().Get("filename")
+	f.Metadata.Name = r.URL.Query().Get("filename")
 	err = s.DeleteFile(f)
 	if err != nil {
 		http.Error(w, "Failed to delete file", http.StatusInternalServerError)

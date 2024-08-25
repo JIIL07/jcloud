@@ -57,7 +57,7 @@ func CreateJcloudFile(jcloudDir string) *os.File {
 }
 
 func CreateLogFile(jlogDir string) *os.File {
-	file, err := os.OpenFile(filepath.Join(jlogDir, "jcloud.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(filepath.Join(jlogDir, "jlog.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return nil
 	}

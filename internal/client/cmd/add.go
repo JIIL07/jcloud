@@ -22,9 +22,9 @@ var addCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		switch {
 		case dropFlag:
-			err := jc.AddFileFromExplorer(fs.FileService)
+			err := jc.AddFileFromExplorer(appCtx.FileService)
 			if err != nil {
-				logger.Error("error adding file via drop-down", slg.Err(err))
+				appCtx.LoggerService.L.Error("error adding file via drop-down", slg.Err(err))
 				cobra.CheckErr(err)
 			}
 		case filepath != "":

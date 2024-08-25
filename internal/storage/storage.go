@@ -19,14 +19,19 @@ type UserData struct {
 	Protocol string `db:"hashprotocol" json:"hashprotocol"`
 	Admin    int    `db:"admin" json:"admin"`
 }
+
 type File struct {
-	Id        int    `db:"id" json:"id"`
-	UserID    int    `db:"user_id" json:"user_id"`
-	Filename  string `db:"filename" json:"filename"`
-	Extension string `db:"extension" json:"extension"`
-	Filesize  int    `db:"filesize" json:"filesize"`
-	Status    string `db:"status" json:"status"`
-	Data      []byte `db:"data" json:"data"`
+	ID       int          `json:"id" db:"id"`
+	UserID   int          `db:"user_id" json:"user_id"`
+	Metadata FileMetadata `json:"metadata" db:"-"`
+	Status   string       `json:"status" db:"status"`
+	Data     []byte       `json:"data" db:"data"`
+}
+
+type FileMetadata struct {
+	Name      string `json:"name" db:"filename"`
+	Extension string `json:"extension" db:"extension"`
+	Size      int    `json:"size" db:"filesize"`
 }
 
 func InitDatabase(config *config.Config) (*Storage, error) {

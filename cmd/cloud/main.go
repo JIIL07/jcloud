@@ -26,9 +26,7 @@ func main() {
 
 	switch {
 	case c.Env == "local":
-		if err := cmd.RootCmd.Execute(); err != nil {
-			log.Fatal(err)
-		}
+		cmd.Execute()
 	case c.Env == "debug":
 		reader := bufio.NewReader(os.Stdin)
 		for {
@@ -41,7 +39,7 @@ func main() {
 			args := strings.Split(input, " ")
 			cmd.RootCmd.SetArgs(args[1:])
 
-			cmd.RootCmd.Execute()
+			cmd.Execute()
 		}
 	}
 }

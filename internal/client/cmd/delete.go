@@ -14,17 +14,17 @@ var deleteCmd = &cobra.Command{
 	Long:  "Delete file from local storage do not collide with server storage",
 	Run: func(cmd *cobra.Command, args []string) {
 		switch {
-		case allFilesD:
-			err := jc.DeleteAllFiles(fs.FileService)
+		case len(args) > 0:
+			appCtx.FileService.F.Metadata.Name = args[0]
+			err := jc.DeleteFile(appCtx.FileService)
 			if err != nil {
-				logger.Error("error deleting all files", slg.Err(err))
+				appCtx.LoggerService.L.Error("error deleting file", slg.Err(err))
 				cobra.CheckErr(err)
 			}
-		case len(args) > 0:
-			fs.FileService.F.Metadata.Name = args[0]
-			err := jc.DeleteFile(fs.FileService)
+		case allFilesD:
+			err := jc.DeleteAllFiles(appCtx.FileService)
 			if err != nil {
-				logger.Error("error deleting file", slg.Err(err))
+				appCtx.LoggerService.L.Error("error deleting all files", slg.Err(err))
 				cobra.CheckErr(err)
 			}
 		}

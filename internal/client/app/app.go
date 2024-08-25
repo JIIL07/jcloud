@@ -65,12 +65,11 @@ type SnapshotService struct {
 }
 
 func NewAppContext(cfg *config.Config) (*ClientContext, error) {
-	// Инициализация базы данных
 	s := storage.MustInit(cfg)
 
 	p := home.SetPaths()
 
-	logger := jlog.NewLogger(p.Jlog)
+	logger := jlog.NewLogger(p.JlogFile)
 
 	context := &ClientContext{
 		cfg:    cfg,
