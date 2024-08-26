@@ -25,7 +25,7 @@ to quickly create a Cobra application.`,
 			cobra.CheckErr(err)
 		}
 
-		resp, err := requests.UploadFile(&files)
+		resp, err := requests.UploadFile(appCtx, &files)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
