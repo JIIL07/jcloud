@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gorilla/mux v1.8.1
-	github.com/gorilla/sessions v1.3.0
+	github.com/gorilla/sessions v1.4.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
