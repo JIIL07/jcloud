@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/JIIL07/jcloud/internal/client/jc"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/requests"
 	"github.com/spf13/cobra"
@@ -35,6 +36,14 @@ to quickly create a Cobra application.`,
 		}
 		appCtx.LoggerService.L.Info(fmt.Sprintf("response: %s, status code: %d", string(c), resp.StatusCode))
 		cobra.CheckErr(resp.Body.Close())
+
+		err = jc.DeleteAllFiles(appCtx.FileService)
+		if err != nil {
+			appCtx.LoggerService.L.Error("error deleting all files", slg.Err(err))
+			cobra.CheckErr(err)
+		}
+
+		appCtx.LoggerService.L.Info("berth success")
 	},
 }
 

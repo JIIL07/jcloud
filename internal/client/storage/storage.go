@@ -2,19 +2,20 @@ package storage
 
 import (
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/client/config"
+	"github.com/JIIL07/jcloud/internal/client/lib/home"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
+	"path/filepath"
 )
 
 type SQLite struct {
 	DB *sqlx.DB
 }
 
-func MustInit(c *config.Config) *SQLite {
-	db, err := sqlx.Open(c.Database.DriverName, c.Database.DataSourceName)
+func MustInit() *SQLite {
+	db, err := sqlx.Open("sqlite3", filepath.Join(home.GetHome(), ".jcloud/local_storage.db"))
 	if err != nil {
 		log.Fatalf("failed to open database: %v", err)
 	}

@@ -61,12 +61,13 @@ func InitDatabase(config *config.Config) (*Storage, error) {
 		`CREATE TABLE IF NOT EXISTS files (
 		"id" INTEGER PRIMARY KEY AUTOINCREMENT,
 		"user_id" INTEGER NOT NULL,
-		"filename" TEXT NOT NULL UNIQUE, 
+		"filename" TEXT NOT NULL, 
 		"extension" TEXT NOT NULL, 
 		"filesize" INTEGER NOT NULL, 
 		"status" TEXT, 
 		"data" BLOB,
-		FOREIGN KEY (user_id) REFERENCES users(id)
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		UNIQUE(user_id, filename)
 	);`)
 
 	if err != nil {

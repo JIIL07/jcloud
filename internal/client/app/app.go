@@ -65,7 +65,7 @@ type SnapshotService struct {
 }
 
 func NewAppContext(cfg *config.Config) (*ClientContext, error) {
-	s := storage.MustInit(cfg)
+	s := storage.MustInit()
 
 	p := home.SetPaths()
 

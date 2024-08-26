@@ -22,7 +22,8 @@ type UserData struct {
 	Admin    int    `db:"admin" json:"admin"`
 }
 
-var URL = "http://localhost:8080"
+// var URL = "http://localhost:8080"
+var URL = "https://jcloud.up.railway.app"
 
 func Login(u *UserData) (*http.Response, error) {
 	jsonData, err := json.Marshal(u)
