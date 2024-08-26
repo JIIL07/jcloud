@@ -22,8 +22,8 @@ type UserData struct {
 
 type File struct {
 	ID       int          `json:"id" db:"id"`
-	UserID   int          `db:"user_id" json:"user_id"`
-	Metadata FileMetadata `json:"metadata" db:"-"`
+	UserID   int          `json:"user_id" db:"user_id"`
+	Metadata FileMetadata `json:"metadata"`
 	Status   string       `json:"status" db:"status"`
 	Data     []byte       `json:"data" db:"data"`
 }

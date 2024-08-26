@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/JIIL07/jcloud/internal/client/app"
+	"github.com/JIIL07/jcloud/internal/client/lib/cookies"
 	"github.com/JIIL07/jcloud/internal/client/lib/params"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/requests/jreq"
@@ -21,12 +23,11 @@ type UserData struct {
 }
 
 var URL = "http://localhost:8080"
-var cookies []*http.Cookie
 
-func Login(u *UserData) error {
+func Login(u *UserData) (*http.Response, error) {
 	jsonData, err := json.Marshal(u)
 	if err != nil {
-		return fmt.Errorf("error marshalling data: %w", err)
+		return nil, fmt.Errorf("error marshalling data: %w", err)
 	}
 
 	p := params.NewParams()
@@ -36,19 +37,13 @@ func Login(u *UserData) error {
 
 	resp, err := jreq.Post(&p)
 	if err != nil {
-		return fmt.Errorf("error executing request: %w", err)
+		return nil, fmt.Errorf("error executing request: %w", err)
 	}
-	defer resp.Body.Close()
 
-	response := make([]byte, resp.ContentLength)
-	resp.Body.Read(response)
-
-	cookies = resp.Cookies()
-
-	return nil
+	return resp, nil
 }
 
-func UploadFile(f *[]models.File) (*http.Response, error) {
+func UploadFile(a *app.ClientContext, f *[]models.File) (*http.Response, error) {
 	jsonData, err := json.Marshal(f)
 	if err != nil {
 		return nil, fmt.Errorf("error marshalling data: %w", err)
@@ -59,8 +54,17 @@ func UploadFile(f *[]models.File) (*http.Response, error) {
 		return nil, fmt.Errorf("error creating request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	for _, cookie := range cookies {
-		req.AddCookie(cookie)
+
+	cookieString, err := cookies.ReadFromFile(a.PathsService.P.Jcookie.Name())
+	if err != nil {
+		return nil, fmt.Errorf("error reading cookies: %w", err)
+	}
+	c, err := cookies.Deserialize(cookieString)
+	if err != nil {
+		return nil, fmt.Errorf("error deserializing cookies: %w", err)
+	}
+	for i := range c {
+		req.AddCookie(c[i])
 	}
 
 	client := &http.Client{}

@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/JIIL07/jcloud/internal/client/lib/cookies"
 	jhash "github.com/JIIL07/jcloud/internal/client/lib/hash"
 	"github.com/JIIL07/jcloud/internal/client/requests"
 	"github.com/spf13/cobra"
@@ -29,7 +30,17 @@ var loginCmd = &cobra.Command{
 			Email:    args[1],
 			Password: jhash.Hash(args[2]),
 		}
-		err = requests.Login(u)
+		resp, err := requests.Login(u)
+		if err != nil {
+			return err
+		}
+
+		rawCookies, err := cookies.Serialize(resp.Cookies())
+		if err != nil {
+			return err
+		}
+
+		err = cookies.WriteToFile(appCtx.PathsService.P.Jcookie.Name(), rawCookies)
 		if err != nil {
 			return err
 		}

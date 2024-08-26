@@ -9,6 +9,7 @@ type Paths struct {
 	Home       string
 	JcloudFile *os.File
 	JlogFile   *os.File
+	Jcookie    *os.File
 	AnchorFile *os.File
 	Profile    string
 }
@@ -64,6 +65,14 @@ func CreateLogFile(jlogDir string) *os.File {
 	return file
 }
 
+func CreateJcookieFile(jcloudDir string) *os.File {
+	file, err := os.OpenFile(filepath.Join(jcloudDir, ".jcookie"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		return nil
+	}
+	return file
+}
+
 func CreateAnchorFile(anchorDir string) *os.File {
 	file, err := os.OpenFile(filepath.Join(anchorDir, "anchor.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -81,11 +90,13 @@ func SetPaths() *Paths {
 
 	jcloudFile := CreateJcloudFile(jcloudDir)
 	logFile := CreateLogFile(jlogDir)
+	jcookieFile := CreateJcookieFile(jcloudDir)
 
 	return &Paths{
 		Home:       homeDir,
 		JcloudFile: jcloudFile,
 		JlogFile:   logFile,
+		Jcookie:    jcookieFile,
 		AnchorFile: anchorLog,
 	}
 }
