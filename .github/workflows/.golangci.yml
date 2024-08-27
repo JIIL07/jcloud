@@ -1,0 +1,16 @@
+run:
+  timeout: 5m
+
+linters:
+  enable-all: false
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gofmt
+    - gosec
+
+issues:
+  exclude-use-default: false
+  exclude:
+    - "SA1019"
