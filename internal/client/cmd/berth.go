@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/jc"
+	slg "github.com/JIIL07/jcloud/internal/client/lib/logger"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/requests"
 	"github.com/spf13/cobra"
