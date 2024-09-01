@@ -1,10 +1,86 @@
 run:
   timeout: 5m
+  concurrency: 4
+
+linters-settings:
+  govet:
+    shadow: true
+    unusedparams: true
+  staticcheck:
+    checks: ["all", "-ST1000", "-ST1003"]
+  errcheck:
+    exclude-functions:
+      - fmt.Errorf
+      - _ = .*
+  gofmt:
+    simplify: true
+  gosec:
+    severity: high
+  depguard:
+    rules:
+      prevent_unmaintained_packages:
+        list-mode: strict
+        files:
+          - $all
+          - "!$test"
+        allow:
+          - $gostd
+          - github.com/JIIL07/jcloud/
+          - github.com/spf13/cobra
+          - github.com/ilyakaznacheev
+          - github.com/jmoiron
+          - github.com/mattn
+          - github.com/fsnotify
+          - github.com/gorilla
+          - github.com/joho
+
+        deny:
+          - pkg: io/ioutil
+            desc: "replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil"
+
+
+
+  dupl:
+    threshold: 100
+  gocyclo:
+    min-complexity: 15
+  ineffassign:
+    require-explanation: true
+  misspell:
+    locale: US
 
 linters:
   enable-all: false
   enable:
     - govet
-    - errcheck
     - staticcheck
+    - errcheck
+    - gofmt
     - gosec
+    - dupl
+    - gocyclo
+    - ineffassign
+    - misspell
+    - nakedret
+    - unparam
+    - depguard
+    - bodyclose
+
+issues:
+  max-issues-per-linter: 100
+  max-same-issues: 5
+output:
+  formats: colored-line-number
+  sort-results: true
+
+exclude:
+  - ".*_test.go"
+
+skip-dirs:
+  - .git
+
+
+skip-files:
+  - ".*_generated.go"
+
+fix: true

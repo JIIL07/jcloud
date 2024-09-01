@@ -1,5 +1,5 @@
 // nolint:errcheck
-package main
+package example
 
 import (
 	"bytes"
@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-	// Открываем файл
 	f, err := os.Open("go.mod")
 	if err != nil {
 		log.Fatal("Error opening file:", err)
@@ -46,7 +45,7 @@ func main() {
 		Metadata: &protobuf.FileMetadata{
 			Filename:  strings.Split(f.Name(), ".")[0],
 			Extension: strings.Split(f.Name(), ".")[1],
-			Filesize:  int32(compressedBuffer.Len()),
+			Filesize:  int64(compressedBuffer.Len()),
 		},
 		Status: "upload",
 		Data:   compressedBuffer.Bytes(),
@@ -78,9 +77,16 @@ func main() {
 	if err != nil {
 		log.Fatal("Error creating gzip reader:", err)
 	}
-	_, err = io.Copy(&decompressedBuffer, gzipReader)
+
+	maxDecompressedSize := 10 * 1024 * 1024 * 1024 * 1024
+	limitedReader := io.LimitReader(gzipReader, int64(maxDecompressedSize))
+
+	n, err = io.Copy(&decompressedBuffer, limitedReader)
 	if err != nil {
-		log.Fatal("Error decompressing data:", err)
+		return
+	}
+	if n == int64(maxDecompressedSize) {
+		return
 	}
 	gzipReader.Close()
 

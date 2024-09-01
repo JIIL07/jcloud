@@ -7,7 +7,7 @@ option go_package = ".;protobuf";
 message FileMetadata {
   string filename = 1;
   string extension = 2;
-  int32 filesize = 3;
+  int64 filesize = 3;
 }
 
 message File {

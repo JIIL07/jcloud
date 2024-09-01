@@ -28,7 +28,7 @@ var URL = "https://jcloud.up.railway.app"
 func Login(u *UserData) (*http.Response, error) {
 	jsonData, err := json.Marshal(u)
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling data: %w", err)
+		return nil, fmt.Errorf("error marshaling data: %w", err)
 	}
 
 	p := params.NewParams()
@@ -47,7 +47,7 @@ func Login(u *UserData) (*http.Response, error) {
 func UploadFile(a *app.ClientContext, f *[]models.File) (*http.Response, error) {
 	jsonData, err := json.Marshal(f)
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling data: %w", err)
+		return nil, fmt.Errorf("error marshaling data: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", URL+"/api/v1/files/upload", bytes.NewBuffer(jsonData))

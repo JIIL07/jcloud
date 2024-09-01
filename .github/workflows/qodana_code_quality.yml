@@ -3,7 +3,7 @@ name: Qodana
 on:
   push:
     branches:
-      - main
+      - example
 
 jobs:
   qodana:
