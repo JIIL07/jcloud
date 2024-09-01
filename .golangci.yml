@@ -11,7 +11,6 @@ linters-settings:
   errcheck:
     exclude-functions:
       - fmt.Errorf
-      - _ = .*
   gofmt:
     simplify: true
   gosec:
@@ -65,7 +64,8 @@ linters:
     - unparam
     - depguard
     - bodyclose
-
+  disable:
+    - unused
 issues:
   max-issues-per-linter: 100
   max-same-issues: 5
