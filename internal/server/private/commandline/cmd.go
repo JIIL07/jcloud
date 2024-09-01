@@ -27,7 +27,7 @@ func HandleCmdExec(w http.ResponseWriter, r *http.Request) {
 
 	if store.IsNew {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Unauthorized"))
+		w.Write([]byte("Unauthorized")) // nolint:errcheck
 		return
 	}
 

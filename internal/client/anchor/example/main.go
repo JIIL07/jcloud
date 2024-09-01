@@ -1,3 +1,4 @@
+// nolint:errcheck
 package main
 
 import (
@@ -12,7 +13,7 @@ import (
 )
 
 func main() {
-	files := []models.File{}
+	var files []models.File
 
 	for i := 1; i <= 50; i++ {
 		file := models.File{
@@ -36,7 +37,7 @@ func main() {
 		return
 	}
 
-	err = os.WriteFile(filepath.Join(home.GetHome(), ".jcloud", ".anchor", "anchor.log"), []byte(a.Log), 0644)
+	err = os.WriteFile(filepath.Join(home.GetHome(), ".jcloud", ".anchor", "anchor.log"), []byte(a.Log), 0600)
 	if err != nil {
 		fmt.Println("Error writing anchor log:", err)
 		return

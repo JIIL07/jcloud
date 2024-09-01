@@ -101,7 +101,7 @@ func WaitForFile(tempDir string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer watcher.Close()
+	defer watcher.Close() // nolint:errcheck
 
 	ctx, cancel := context.WithTimeout(context.Background(), tempDirTimeout)
 	defer cancel()
@@ -155,6 +155,10 @@ func GetFileFromExplorer() (*models.File, error) {
 	meta := models.NewFileMetadata(fileEntry.Name())
 
 	fileData, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file: %w", err)
+	}
+
 	meta.Size = len(fileData)
 
 	f := &models.File{

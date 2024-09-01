@@ -20,7 +20,7 @@ var loginCmd = &cobra.Command{
 			return errors.New("not enough arguments")
 		}
 
-		err := os.WriteFile(appCtx.PathsService.P.JcloudFile.Name(), []byte(args[0]+" "+args[1]+" "+jhash.Hash(args[2])), os.ModePerm)
+		err := os.WriteFile(appCtx.PathsService.P.JcloudFile.Name(), []byte(args[0]+" "+args[1]+" "+jhash.Hash(args[2])), 0600)
 		if err != nil {
 			return err
 		}
@@ -52,21 +52,5 @@ var loginCmd = &cobra.Command{
 }
 
 func init() {
-	//loginCmd.SetHelpFunc(customLoginHelpFunc)
-
 	RootCmd.AddCommand(loginCmd)
-}
-
-func customLoginHelpFunc(cmd *cobra.Command, args []string) {
-	helpMessage := fmt.Sprintf(`%s
-
-Usage:
-  jcloud add [args]
-
-Example:
-  jcloud login [username] [email] [password] (separated by spaces)
-
-Use "jcloud [command] --help" for more information about a command.
-`, loginCmd.Long)
-	fmt.Print(helpMessage)
 }

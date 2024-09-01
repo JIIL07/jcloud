@@ -24,7 +24,7 @@ func Deserialize(data string) ([]*http.Cookie, error) {
 }
 
 func WriteToFile(filename, data string) error {
-	return os.WriteFile(filename, []byte(data), 0644)
+	return os.WriteFile(filename, []byte(data), 0600)
 }
 
 func ReadFromFile(filename string) (string, error) {

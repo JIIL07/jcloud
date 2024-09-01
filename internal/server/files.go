@@ -38,7 +38,11 @@ func GetFilesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(files)
+	err = json.NewEncoder(w).Encode(files)
+	if err != nil {
+		http.Error(w, "Failed to encode files", http.StatusInternalServerError)
+		return
+	}
 }
 
 func AddFileHandler(w http.ResponseWriter, r *http.Request) {
@@ -78,7 +82,7 @@ func AddFileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("File added"))
+	w.Write([]byte("File added")) // nolint:errcheck
 }
 
 func DeleteFileHandler(w http.ResponseWriter, r *http.Request) {
@@ -109,5 +113,5 @@ func DeleteFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("File deleted"))
+	w.Write([]byte("File deleted")) // nolint:errcheck
 }

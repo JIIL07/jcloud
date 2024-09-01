@@ -15,7 +15,7 @@ var u storage.UserData
 func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Only method GET is allowed"))
+		w.Write([]byte("Only method GET is allowed")) // nolint:errcheck
 		return
 	}
 
@@ -45,12 +45,12 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.Write([]byte("Session established"))
+		w.Write([]byte("Session established")) // nolint:errcheck
 		return
 	}
 
 	w.WriteHeader(http.StatusUnauthorized)
-	w.Write([]byte("Unauthorized"))
+	w.Write([]byte("Unauthorized")) // nolint:errcheck
 }
 
 func CheckHandler(w http.ResponseWriter, r *http.Request) {
@@ -62,9 +62,9 @@ func CheckHandler(w http.ResponseWriter, r *http.Request) {
 
 	if s.IsNew {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Unauthorized"))
+		w.Write([]byte("Unauthorized")) // nolint:errcheck
 		return
 	}
 
-	w.Write([]byte("Admin authorized"))
+	w.Write([]byte("Admin authorized")) // nolint:errcheck
 }

@@ -75,7 +75,7 @@ func DataInFile(fs *app.FileService) error {
 	if err != nil {
 		return fmt.Errorf("failed to query file data: %w", err)
 	}
-	defer rows.Close()
+	defer rows.Close() // nolint:errcheck
 
 	return util.WriteData(rows, fs.F)
 }

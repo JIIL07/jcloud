@@ -24,7 +24,7 @@ func GetHome() string {
 
 func CreateJcloudDir(home string) string {
 	jcloudDir := filepath.Join(home, ".jcloud")
-	err := os.MkdirAll(jcloudDir, os.ModePerm)
+	err := os.MkdirAll(jcloudDir, 0750)
 	if err != nil {
 		return ""
 	}
@@ -33,7 +33,7 @@ func CreateJcloudDir(home string) string {
 
 func CreateJlogDir(jcloudDir string) string {
 	jlogDir := filepath.Join(jcloudDir, ".jlog")
-	err := os.MkdirAll(jlogDir, os.ModePerm)
+	err := os.MkdirAll(jlogDir, 0750)
 	if err != nil {
 		return ""
 	}
@@ -42,7 +42,7 @@ func CreateJlogDir(jcloudDir string) string {
 
 func CreateAnchorDir(jcloudDir string) string {
 	anchorDir := filepath.Join(jcloudDir, ".anchor")
-	err := os.MkdirAll(anchorDir, os.ModePerm)
+	err := os.MkdirAll(anchorDir, 0750)
 	if err != nil {
 		return ""
 	}
@@ -50,7 +50,7 @@ func CreateAnchorDir(jcloudDir string) string {
 }
 
 func CreateJcloudFile(jcloudDir string) *os.File {
-	file, err := os.OpenFile(filepath.Join(jcloudDir, ".jcloud"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(filepath.Join(jcloudDir, ".jcloud"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		return nil
 	}
@@ -58,7 +58,7 @@ func CreateJcloudFile(jcloudDir string) *os.File {
 }
 
 func CreateLogFile(jlogDir string) *os.File {
-	file, err := os.OpenFile(filepath.Join(jlogDir, "jlog.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(filepath.Join(jlogDir, "jlog.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		return nil
 	}
@@ -66,7 +66,7 @@ func CreateLogFile(jlogDir string) *os.File {
 }
 
 func CreateJcookieFile(jcloudDir string) *os.File {
-	file, err := os.OpenFile(filepath.Join(jcloudDir, ".jcookie"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(filepath.Join(jcloudDir, ".jcookie"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		return nil
 	}
@@ -74,7 +74,7 @@ func CreateJcookieFile(jcloudDir string) *os.File {
 }
 
 func CreateAnchorFile(anchorDir string) *os.File {
-	file, err := os.OpenFile(filepath.Join(anchorDir, "anchor.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(filepath.Join(anchorDir, "anchor.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		return nil
 	}
@@ -102,7 +102,20 @@ func SetPaths() *Paths {
 }
 
 func (p *Paths) Close() {
-	p.JcloudFile.Close()
-	p.JlogFile.Close()
-	p.AnchorFile.Close()
+	err := p.JcloudFile.Close()
+	if err != nil {
+		return
+	}
+	err = p.Jcookie.Close()
+	if err != nil {
+		return
+	}
+	err = p.AnchorFile.Close()
+	if err != nil {
+		return
+	}
+	err = p.JlogFile.Close()
+	if err != nil {
+		return
+	}
 }

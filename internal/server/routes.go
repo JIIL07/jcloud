@@ -68,10 +68,13 @@ func setupRouter(s *storage.Storage) *mux.Router {
 }
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(`Welcome to CloudFiles API`))
+	w.Write([]byte(`Welcome to CloudFiles API`)) // nolint:errcheck
 }
 
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "OK"})
+	err := json.NewEncoder(w).Encode(map[string]string{"status": "OK"})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }

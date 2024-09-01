@@ -27,7 +27,7 @@ func HandleSQLQuery(w http.ResponseWriter, r *http.Request) {
 
 	if store.IsNew {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Unauthorized"))
+		w.Write([]byte("Unauthorized")) // nolint:errcheck
 		return
 	}
 
@@ -39,7 +39,7 @@ func HandleSQLQuery(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, err)
 		return
 	}
-	defer rows.Close()
+	defer rows.Close() // nolint:errcheck
 
 	var results []map[string]interface{}
 	results, err = parsers.ParseRows(rows)

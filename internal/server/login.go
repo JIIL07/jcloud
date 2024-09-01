@@ -65,7 +65,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			w.Write([]byte("Authorization successful"))
+			w.Write([]byte("Authorization successful")) // nolint:errcheck
 		}
 	case http.MethodGet:
 		{
@@ -100,7 +100,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			w.Write([]byte("Authorized"))
+			w.Write([]byte("Authorized")) // nolint:errcheck
 		}
 	}
 }
@@ -117,5 +117,5 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to save session", http.StatusInternalServerError)
 		return
 	}
-	w.Write([]byte("Session cleared"))
+	w.Write([]byte("Session cleared")) // nolint:errcheck
 }

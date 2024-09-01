@@ -1,3 +1,4 @@
+// nolint:errcheck
 package main
 
 import (
@@ -56,7 +57,7 @@ func main() {
 		log.Fatal("Marshaling error:", err)
 	}
 
-	err = os.WriteFile("file.bin", data, 0644)
+	err = os.WriteFile("file.bin", data, 0600)
 	if err != nil {
 		log.Fatal("Error writing file:", err)
 	}

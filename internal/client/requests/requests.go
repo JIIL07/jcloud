@@ -94,7 +94,7 @@ func DeleteFile(f *models.File) error {
 	if err != nil {
 		return fmt.Errorf("error executing request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() // nolint:errcheck
 
 	return nil
 }
@@ -108,10 +108,13 @@ func GetFiles() error {
 	if err != nil {
 		return fmt.Errorf("error executing request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() // nolint:errcheck
 
 	response := make([]byte, resp.ContentLength)
-	resp.Body.Read(response)
+	_, err = resp.Body.Read(response)
+	if err != nil {
+		return fmt.Errorf("error reading response: %w", err)
+	}
 	fmt.Println(string(response))
 	return nil
 }
