@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/jc"
-	slg "github.com/JIIL07/jcloud/internal/client/lib/logger"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/requests"
+	"github.com/JIIL07/jcloud/pkg/log"
 	"github.com/spf13/cobra"
 	"io"
 )
@@ -40,7 +40,7 @@ to quickly create a Cobra application.`,
 
 		err = jc.DeleteAllFiles(appCtx.FileService)
 		if err != nil {
-			appCtx.LoggerService.L.Error("error deleting all files", slg.Err(err))
+			appCtx.LoggerService.L.Error("error deleting all files", jlog.Err(err))
 			cobra.CheckErr(err)
 		}
 

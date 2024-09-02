@@ -6,6 +6,8 @@ import (
 	"github.com/JIIL07/jcloud/internal/client/config"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/util"
+	"os"
+	"path/filepath"
 )
 
 // AddFile inserts the file metadata and data into the database if it does not already exist.
@@ -42,6 +44,77 @@ func AddFileFromExplorer(fs *app.FileService) error {
 	if err != nil {
 		return fmt.Errorf("failed to add file from explorer: %w", err)
 	}
+	return nil
+}
+
+func AddFileFromPath(fs *app.FileService, path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("failed to open file from path: %w", err)
+	}
+	defer f.Close()
+
+	stat, err := f.Stat()
+	if err != nil {
+		return fmt.Errorf("failed to get file stat: %w", err)
+	}
+
+	meta := models.NewFileMetadata(f.Name())
+	meta.Size = int(stat.Size())
+	file := &models.File{
+		Metadata: meta,
+		Status:   "upload",
+		Data:     util.ReadFull(f),
+	}
+
+	err = fs.Context.StorageService.S.AddFile(file)
+	if err != nil {
+		return fmt.Errorf("failed to add file from path: %w", err)
+	}
+	return nil
+}
+
+func AddFilesFromDir(fs *app.FileService, dirPath string) error {
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return fmt.Errorf("failed to access path %s: %w", path, err)
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		f, err := os.Open(path)
+		if err != nil {
+			return fmt.Errorf("failed to open file from path: %w", err)
+		}
+		defer f.Close()
+
+		stat, err := f.Stat()
+		if err != nil {
+			return fmt.Errorf("failed to get file stat: %w", err)
+		}
+
+		meta := models.NewFileMetadata(f.Name())
+		meta.Size = int(stat.Size())
+		file := &models.File{
+			Metadata: meta,
+			Status:   "upload",
+			Data:     util.ReadFull(f),
+		}
+
+		err = fs.Context.StorageService.S.AddFile(file)
+		if err != nil {
+			return fmt.Errorf("failed to add file from path: %w", err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to add files from directory %s: %w", dirPath, err)
+	}
+
 	return nil
 }
 

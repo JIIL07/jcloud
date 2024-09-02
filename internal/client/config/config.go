@@ -9,8 +9,8 @@ import (
 var Statuses = []string{"upload"}
 
 type Config struct {
-	Env      string `yaml:"env" env-required:"true"`
-	Database DBConfig
+	Env string `yaml:"env" env-required:"true"`
+	//Database DBConfig
 }
 
 type DBConfig struct {

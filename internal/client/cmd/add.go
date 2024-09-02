@@ -3,10 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/jc"
-	slg "github.com/JIIL07/jcloud/internal/client/lib/logger"
-	"os"
-
+	slg "github.com/JIIL07/jcloud/pkg/log"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var (
@@ -27,10 +26,23 @@ var addCmd = &cobra.Command{
 				appCtx.LoggerService.L.Error("error adding file via drop-down", slg.Err(err))
 				cobra.CheckErr(err)
 			}
-		case filepath != "":
-			// TODO: Add file from path
 		case allFiles:
-			// TODO: Add all files from current directory
+			currentDir, err := os.Getwd()
+			if err != nil {
+				appCtx.LoggerService.L.Error("error getting current directory", slg.Err(err))
+				cobra.CheckErr(err)
+			}
+			err = jc.AddFilesFromDir(appCtx.FileService, currentDir)
+			if err != nil {
+				appCtx.LoggerService.L.Error("error adding files from directory", slg.Err(err))
+				cobra.CheckErr(err)
+			}
+		case filepath != "":
+			err := jc.AddFileFromPath(appCtx.FileService, filepath)
+			if err != nil {
+				appCtx.LoggerService.L.Error("error adding file from path", slg.Err(err))
+				cobra.CheckErr(err)
+			}
 		default:
 			cobra.WriteStringAndCheck(os.Stdout, "specify a flag or use 'jcloud add --help' for more information\n")
 		}

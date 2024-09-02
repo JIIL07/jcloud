@@ -2,8 +2,4 @@
 secrets/
 .idea/
 *.exe
-j-app/target
-j-app/Cargo.lock
-j-client/dist
-j-client/node_modules
-j-client/package-lock.json
+api/openapi/jcloud.yaml

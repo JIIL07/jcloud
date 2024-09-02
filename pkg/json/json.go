@@ -1,4 +1,4 @@
-package commandline
+package json
 
 import (
 	"encoding/json"
@@ -15,14 +15,14 @@ type Response struct {
 	Error  string `json:"error,omitempty"`
 }
 
-func respondWithError(w http.ResponseWriter, err error) {
-	respondWithJSON(w, Response{Error: err.Error()})
+func RespondWithError(w http.ResponseWriter, err error) {
+	RespondWithJSON(w, Response{Error: err.Error()})
 }
 
-func respondWithJSON(w http.ResponseWriter, data interface{}) {
+func RespondWithJSON(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(w).Encode(data)
 	if err != nil {
-		respondWithError(w, err)
+		RespondWithError(w, err)
 	}
 }

@@ -1,12 +1,13 @@
 package commandline
 
 import (
+	jjson "github.com/JIIL07/jcloud/pkg/json"
 	"net/http"
 
-	"github.com/JIIL07/jcloud/internal/lib/cookies"
-	jctx "github.com/JIIL07/jcloud/internal/lib/ctx"
-	"github.com/JIIL07/jcloud/internal/lib/parsers"
 	"github.com/JIIL07/jcloud/internal/storage"
+	"github.com/JIIL07/jcloud/pkg/cookies"
+	"github.com/JIIL07/jcloud/pkg/ctx"
+	"github.com/JIIL07/jcloud/pkg/parsers"
 )
 
 var s *storage.Storage
@@ -21,7 +22,7 @@ func HandleSQLQuery(w http.ResponseWriter, r *http.Request) {
 
 	store, err := cookies.Store.Get(r, "admin")
 	if err != nil {
-		respondWithError(w, err)
+		jjson.RespondWithError(w, err)
 		return
 	}
 
@@ -31,12 +32,12 @@ func HandleSQLQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req Request
+	var req jjson.Request
 	req.Command = r.URL.Query().Get("command")
 
 	rows, err := s.Query(req.Command)
 	if err != nil {
-		respondWithError(w, err)
+		jjson.RespondWithError(w, err)
 		return
 	}
 	defer rows.Close() // nolint:errcheck
@@ -44,9 +45,9 @@ func HandleSQLQuery(w http.ResponseWriter, r *http.Request) {
 	var results []map[string]interface{}
 	results, err = parsers.ParseRows(rows)
 	if err != nil {
-		respondWithError(w, err)
+		jjson.RespondWithError(w, err)
 		return
 	}
 
-	respondWithJSON(w, results)
+	jjson.RespondWithJSON(w, results)
 }

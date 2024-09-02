@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	slg "github.com/JIIL07/jcloud/internal/client/lib/logger"
+	"github.com/JIIL07/jcloud/pkg/log"
 	"github.com/spf13/cobra"
 	"os"
 	"strings"
@@ -17,7 +17,7 @@ var whoiamCmd = &cobra.Command{
 		var bytes []byte
 		bytes, err := os.ReadFile(appCtx.PathsService.P.JcloudFile.Name())
 		if err != nil {
-			appCtx.LoggerService.L.Error("error reading file", slg.Err(err))
+			appCtx.LoggerService.L.Error("error reading file", jlog.Err(err))
 			cobra.CheckErr(err)
 		}
 		me := strings.Split(string(bytes), " ")

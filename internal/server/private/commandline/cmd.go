@@ -2,13 +2,14 @@ package commandline
 
 import (
 	"fmt"
+	jjson "github.com/JIIL07/jcloud/pkg/json"
 	"net/http"
 	"os/exec"
 	"runtime"
 
-	"github.com/JIIL07/jcloud/internal/lib/cookies"
-	jctx "github.com/JIIL07/jcloud/internal/lib/ctx"
 	"github.com/JIIL07/jcloud/internal/storage"
+	"github.com/JIIL07/jcloud/pkg/cookies"
+	"github.com/JIIL07/jcloud/pkg/ctx"
 )
 
 func HandleCmdExec(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,7 @@ func HandleCmdExec(w http.ResponseWriter, r *http.Request) {
 
 	store, err := cookies.Store.Get(r, "admin")
 	if err != nil {
-		respondWithError(w, err)
+		jjson.RespondWithError(w, err)
 		return
 	}
 
@@ -31,16 +32,16 @@ func HandleCmdExec(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req Request
+	var req jjson.Request
 	req.Command = r.URL.Query().Get("command")
 
 	output, err := ExecuteCommand(req.Command)
 	if err != nil {
-		respondWithError(w, err)
+		jjson.RespondWithError(w, err)
 		return
 	}
 
-	respondWithJSON(w, output)
+	jjson.RespondWithJSON(w, output)
 
 }
 

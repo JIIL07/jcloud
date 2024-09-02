@@ -19,7 +19,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=TypeScript&logoColor=FFF&style=flat-square)
 ![Rust](https://img.shields.io/badge/Rust-%23000000.svg?style=flat-square&logo=rust&logoColor=white)
 
-# JcloudFile ☁️
+# Jcloud ☁️
 
 JcloudFile is a client-server application for cloud filePath storage. This project provides a filePath storage system with a backend implemented in Go and a frontend using TypeScript. The backend uses SQLite3 to manage user files and offers a basic API for interacting with stored filePath data.
 ## 📇 Table of Content
@@ -46,7 +46,7 @@ JcloudFile is a client-server application for cloud filePath storage. This proje
 
 ### 🌟 Overview
 
-JcloudFile offers multiple ways to interact with its file storage system, providing flexibility to users based on their preferences and needs. You can choose from the following options:
+Jcloud offers multiple ways to interact with its file storage system, providing flexibility to users based on their preferences and needs. You can choose from the following options:
 
 1. **TypeScript Web App** 🌐:
     - **Interactive Interface**: The web application, built with TypeScript, offers a user-friendly graphical interface for managing files.
@@ -84,26 +84,46 @@ JcloudFile offers multiple ways to interact with its file storage system, provid
 package main
 
 import (
-	"context"
-	"github.com/JIIL07/jcloud/internal/client/app"
-	"github.com/JIIL07/jcloud/internal/client/cmd"
-	"github.com/JIIL07/jcloud/internal/client/config"
-	jctx "github.com/JIIL07/jcloud/internal/client/lib/ctx"
-	"log"
+   "bufio"
+   "context"
+   "fmt"
+   "github.com/JIIL07/jcloud/internal/client/app"
+   "github.com/JIIL07/jcloud/internal/client/cmd"
+   "github.com/JIIL07/jcloud/internal/client/config"
+   "github.com/JIIL07/jcloud/pkg/ctx"
+   "log"
+   "os"
+   "strings"
 )
 
 func main() {
-    c := config.MustLoad()
-    appc, err := app.NewAppContext(c)
-    if err != nil {
-        log.Fatal(err)
-    }
-    ctx := jctx.WithContext(context.Background(), "app-context", appc)
-    cmd.SetContext(ctx)
-    if err := cmd.RootCmd.Execute(); err != nil {
-        log.Fatal(err)
-    }
+   c := config.MustLoad()
+   appc, err := app.NewAppContext(c)
+   if err != nil {
+      log.Fatal(err)
+   }
+   ctx := jctx.WithContext(context.Background(), "app-context", appc)
+   cmd.SetContext(ctx)
+   switch {
+   case c.Env == "prod":
+      cmd.Execute()
+   case c.Env == "debug" || c.Env == "local":
+      reader := bufio.NewReader(os.Stdin)
+      for {
+         dir, _ := os.Getwd()
+         fmt.Printf("%v>", dir)
+
+         input, _ := reader.ReadString('\n')
+         input = strings.TrimSpace(input)
+
+         args := strings.Split(input, " ")
+         cmd.RootCmd.SetArgs(args[1:])
+
+         cmd.Execute()
+      }
+   }
 }
+
 ```
 
 #### Go Server 
@@ -112,49 +132,50 @@ func main() {
 package main
 
 import (
-	"context"
-	"github.com/JIIL07/jcloud/internal/config"
-	"github.com/JIIL07/jcloud/internal/lib/cookies"
-	"github.com/JIIL07/jcloud/internal/lib/env"
-	"github.com/JIIL07/jcloud/internal/lib/slg"
-	"github.com/JIIL07/jcloud/internal/logger"
-	"github.com/JIIL07/jcloud/internal/server"
-	"github.com/JIIL07/jcloud/internal/storage"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
+   "context"
+   "github.com/JIIL07/jcloud/internal/config"
+   "github.com/JIIL07/jcloud/internal/logger"
+   "github.com/JIIL07/jcloud/internal/server"
+   "github.com/JIIL07/jcloud/internal/storage"
+   "github.com/JIIL07/jcloud/pkg/cookies"
+   "github.com/JIIL07/jcloud/pkg/env"
+   "github.com/JIIL07/jcloud/pkg/log"
+   "os"
+   "os/signal"
+   "syscall"
+   "time"
 )
 
 func main() {
-	jenv.LoadEnv()
-	cfg := config.MustLoad()
-	log := logger.NewLogger(cfg.Env)
-	s, err := storage.InitDatabase(cfg)
-	if err != nil {
-		log.Error("Failed to initialize database", slg.Err(err))
-		os.Exit(1)
-	}
-	defer s.CloseDatabase()
-	cookies.SetNewCookieStore()
-	srv := server.New(cfg.Server, s)
-	go func() {
-		log.Info("Server starting on port :8080")
-		if err := srv.Start(); err != nil {
-			log.Error("Server failed to start", slg.Err(err))
-			os.Exit(1)
-		}
-	}()
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	<-c
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	if err := srv.Stop(ctx); err != nil {
-		log.Error("Server shutdown failed", slg.Err(err))
-		os.Exit(1)
-	}
-	log.Info("Server gracefully stopped")
+   jenv.LoadEnv()
+   cfg := config.MustLoad()
+   log := logger.NewLogger(cfg.Env)
+   s, err := storage.InitDatabase(cfg)
+   if err != nil {
+      log.Error("Failed to initialize database", jlog.Err(err))
+      os.Exit(1)
+   }
+   defer s.CloseDatabase()
+   cookies.SetNewCookieStore()
+   srv := server.New(cfg.Server, s)
+   go func() {
+      log.Info("Server starting on port :8080")
+      if err := srv.Start(); err != nil {
+         log.Error("Server failed to start", jlog.Err(err))
+         os.Exit(1)
+      }
+   }()
+   c := make(chan os.Signal, 1)
+   signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+   <-c
+   ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+   defer cancel()
+   if err := srv.Stop(ctx); err != nil {
+      log.Error("Server shutdown failed", jlog.Err(err))
+      os.Exit(1)
+   }
+   log.Info("Server gracefully stopped")
 }
+
 ```
 

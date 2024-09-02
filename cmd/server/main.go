@@ -4,12 +4,12 @@ package main
 import (
 	"context"
 	"github.com/JIIL07/jcloud/internal/config"
-	"github.com/JIIL07/jcloud/internal/lib/cookies"
-	"github.com/JIIL07/jcloud/internal/lib/env"
-	"github.com/JIIL07/jcloud/internal/lib/slg"
 	"github.com/JIIL07/jcloud/internal/logger"
 	"github.com/JIIL07/jcloud/internal/server"
 	"github.com/JIIL07/jcloud/internal/storage"
+	"github.com/JIIL07/jcloud/pkg/cookies"
+	"github.com/JIIL07/jcloud/pkg/env"
+	"github.com/JIIL07/jcloud/pkg/log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -17,7 +17,7 @@ import (
 )
 
 // main is the entry point of the program. It loads environment variables, loads
-// the configuration file, initializes the logger, initializes the storage, sets
+// the configuration file, initializes the log, initializes the storage, sets
 // up a new cookie storage, initializes the server, starts the server in a
 // separate goroutine, handles graceful shutdown, and gracefully stops the
 // server.
@@ -28,13 +28,13 @@ func main() {
 	//load config file
 	cfg := config.MustLoad()
 
-	//init logger
+	//init log
 	log := logger.NewLogger(cfg.Env)
 
 	//init storage
 	s, err := storage.InitDatabase(cfg)
 	if err != nil {
-		log.Error("Failed to initialize database", slg.Err(err))
+		log.Error("Failed to initialize database", jlog.Err(err))
 		os.Exit(1)
 	}
 	defer s.CloseDatabase()
@@ -49,7 +49,7 @@ func main() {
 	go func() {
 		log.Info("Server starting on port :8080")
 		if err := srv.Start(); err != nil {
-			log.Error("Server failed to start", slg.Err(err))
+			log.Error("Server failed to start", jlog.Err(err))
 			os.Exit(1)
 		}
 	}()
@@ -63,7 +63,7 @@ func main() {
 	defer cancel()
 
 	if err := srv.Stop(ctx); err != nil {
-		log.Error("Server shutdown failed", slg.Err(err))
+		log.Error("Server shutdown failed", jlog.Err(err))
 		os.Exit(1)
 	}
 

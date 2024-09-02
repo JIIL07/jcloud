@@ -2,10 +2,10 @@ package app
 
 import (
 	"github.com/JIIL07/jcloud/internal/client/config"
-	"github.com/JIIL07/jcloud/internal/client/lib/home"
-	jlog "github.com/JIIL07/jcloud/internal/client/lib/logger"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/storage"
+	"github.com/JIIL07/jcloud/internal/logger"
+	"github.com/JIIL07/jcloud/pkg/home"
 	"log/slog"
 )
 
@@ -65,11 +65,11 @@ type SnapshotService struct {
 }
 
 func NewAppContext(cfg *config.Config) (*ClientContext, error) {
-	s := storage.MustInit()
-
 	p := home.SetPaths()
 
-	logger := jlog.NewLogger(p.JlogFile)
+	s := storage.MustInit()
+
+	l := logger.NewClientLogger(p.JlogFile)
 
 	context := &ClientContext{
 		cfg:    cfg,
@@ -92,7 +92,7 @@ func NewAppContext(cfg *config.Config) (*ClientContext, error) {
 	}
 	context.LoggerService = &LoggerService{
 		service: &context.common,
-		L:       logger,
+		L:       l,
 	}
 	context.AnchorService = &AnchorService{
 		service: &context.common,

@@ -2,9 +2,9 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/JIIL07/jcloud/internal/lib/cookies"
-	jctx "github.com/JIIL07/jcloud/internal/lib/ctx"
 	"github.com/JIIL07/jcloud/internal/storage"
+	"github.com/JIIL07/jcloud/pkg/cookies"
+	jctx "github.com/JIIL07/jcloud/pkg/ctx"
 	"net/http"
 )
 

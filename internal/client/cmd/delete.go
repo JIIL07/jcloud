@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/JIIL07/jcloud/internal/client/jc"
-	slg "github.com/JIIL07/jcloud/internal/client/lib/logger"
+	"github.com/JIIL07/jcloud/pkg/log"
 	"github.com/spf13/cobra"
 )
 
@@ -18,13 +18,13 @@ var deleteCmd = &cobra.Command{
 			appCtx.FileService.F.Metadata.Name = args[0]
 			err := jc.DeleteFile(appCtx.FileService)
 			if err != nil {
-				appCtx.LoggerService.L.Error("error deleting file", slg.Err(err))
+				appCtx.LoggerService.L.Error("error deleting file", jlog.Err(err))
 				cobra.CheckErr(err)
 			}
 		case allFilesD:
 			err := jc.DeleteAllFiles(appCtx.FileService)
 			if err != nil {
-				appCtx.LoggerService.L.Error("error deleting all files", slg.Err(err))
+				appCtx.LoggerService.L.Error("error deleting all files", jlog.Err(err))
 				cobra.CheckErr(err)
 			}
 		}

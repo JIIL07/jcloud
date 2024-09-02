@@ -37,8 +37,6 @@ linters-settings:
           - pkg: io/ioutil
             desc: "replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil"
 
-
-
   dupl:
     threshold: 100
   gocyclo:
@@ -66,6 +64,7 @@ linters:
     - bodyclose
   disable:
     - unused
+
 issues:
   max-issues-per-linter: 100
   max-same-issues: 5
@@ -78,7 +77,6 @@ exclude:
 
 skip-dirs:
   - .git
-
 
 skip-files:
   - ".*_generated.go"

@@ -2,7 +2,7 @@ package jreq
 
 import (
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/client/lib/params"
+	"github.com/JIIL07/jcloud/pkg/params"
 	"io"
 	"net/http"
 )

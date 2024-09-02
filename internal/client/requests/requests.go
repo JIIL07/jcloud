@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/app"
-	"github.com/JIIL07/jcloud/internal/client/lib/cookies"
-	"github.com/JIIL07/jcloud/internal/client/lib/params"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/requests/jreq"
+	"github.com/JIIL07/jcloud/pkg/cookies"
+	"github.com/JIIL07/jcloud/pkg/params"
 	"net/http"
 	"net/url"
 )

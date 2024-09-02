@@ -1,16 +1,16 @@
 // nolint:errcheck
-package example
+package main
 
 import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
+	"github.com/JIIL07/jcloud/api/protobuf"
 	"io"
 	"log"
 	"os"
 	"strings"
 
-	protobuf "github.com/JIIL07/jcloud/internal/client/proto"
 	"google.golang.org/protobuf/proto"
 )
 

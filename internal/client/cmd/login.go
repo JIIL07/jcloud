@@ -3,9 +3,9 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/client/lib/cookies"
-	jhash "github.com/JIIL07/jcloud/internal/client/lib/hash"
 	"github.com/JIIL07/jcloud/internal/client/requests"
+	"github.com/JIIL07/jcloud/pkg/cookies"
+	jhash "github.com/JIIL07/jcloud/pkg/hash"
 	"github.com/spf13/cobra"
 	"os"
 )

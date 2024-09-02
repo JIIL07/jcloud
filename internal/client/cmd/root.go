@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/app"
-	jctx "github.com/JIIL07/jcloud/internal/client/lib/ctx"
+	jctx "github.com/JIIL07/jcloud/pkg/ctx"
 	"github.com/spf13/cobra"
 	"os"
 )

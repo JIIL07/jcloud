@@ -2,11 +2,12 @@ package commandline
 
 import (
 	"encoding/json"
+	jjson "github.com/JIIL07/jcloud/pkg/json"
 	"net/http"
 	"os"
 
-	"github.com/JIIL07/jcloud/internal/lib/cookies"
 	"github.com/JIIL07/jcloud/internal/storage"
+	"github.com/JIIL07/jcloud/pkg/cookies"
 	"github.com/gorilla/sessions"
 )
 
@@ -31,7 +32,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	if a == u.Username {
 		session, err := cookies.Store.Get(r, "admin")
 		if err != nil {
-			respondWithError(w, err)
+			jjson.RespondWithError(w, err)
 			return
 		}
 
@@ -41,7 +42,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 
 		err = sessions.Save(r, w)
 		if err != nil {
-			respondWithError(w, err)
+			jjson.RespondWithError(w, err)
 			return
 		}
 
@@ -56,7 +57,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 func CheckHandler(w http.ResponseWriter, r *http.Request) {
 	s, err := cookies.Store.Get(r, "admin")
 	if err != nil {
-		respondWithError(w, err)
+		jjson.RespondWithError(w, err)
 		return
 	}
 

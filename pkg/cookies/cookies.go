@@ -2,9 +2,22 @@ package cookies
 
 import (
 	"encoding/json"
+	"github.com/gorilla/sessions"
 	"net/http"
 	"os"
 )
+
+var Store *sessions.CookieStore
+
+func SetNewCookieStore() {
+	Store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_TOKEN")))
+	Store.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400, //24 hours
+		Secure:   false,
+		HttpOnly: true,
+	}
+}
 
 func Serialize(cookies []*http.Cookie) (string, error) {
 	data, err := json.Marshal(cookies)
