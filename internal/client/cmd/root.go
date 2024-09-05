@@ -13,6 +13,7 @@ var (
 	ctx         context.Context
 	appCtx      *app.ClientContext
 	versionFlag bool
+	allFiles    bool
 )
 
 func SetContext(newCtx context.Context) {
@@ -64,11 +65,10 @@ It supports commands like init to initialize the cloud, add to add files, and ex
 
 func init() {
 	RootCmd.PersistentFlags().BoolP("help", "h", false, "Help")
-	RootCmd.Flags().BoolVarP(&versionFlag, "version", "v", false, "Version")
+	RootCmd.PersistentFlags().BoolVarP(&allFiles, "all", "a", false, "All files from the specified directory (or current directory if not specified)")
+	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", false, "Version")
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by example.example(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		cobra.CheckErr(err)

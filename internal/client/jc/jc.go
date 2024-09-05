@@ -6,13 +6,12 @@ import (
 	"github.com/JIIL07/jcloud/internal/client/config"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/util"
+	jlog "github.com/JIIL07/jcloud/pkg/log"
 	"os"
 	"path/filepath"
 )
 
-// AddFile inserts the file metadata and data into the database if it does not already exist.
 func AddFile(fs *app.FileService) error {
-	// Подготовка информации о файле
 	if err := fs.F.SetFile(); err != nil {
 		return fmt.Errorf("failed to prepare file info: %w", err)
 	}
@@ -59,7 +58,7 @@ func AddFileFromPath(fs *app.FileService, path string) error {
 		return fmt.Errorf("failed to get file stat: %w", err)
 	}
 
-	meta := models.NewFileMetadata(f.Name())
+	meta := models.NewFileMetadata(stat.Name())
 	meta.Size = int(stat.Size())
 	file := &models.File{
 		Metadata: meta,
@@ -77,6 +76,7 @@ func AddFileFromPath(fs *app.FileService, path string) error {
 func AddFilesFromDir(fs *app.FileService, dirPath string) error {
 	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			fs.Context.LoggerService.L.Error("Error accessing path", jlog.Err(err), "path", path)
 			return fmt.Errorf("failed to access path %s: %w", path, err)
 		}
 
@@ -84,34 +84,39 @@ func AddFilesFromDir(fs *app.FileService, dirPath string) error {
 			return nil
 		}
 
-		f, err := os.Open(path)
+		file, err := os.Open(path)
 		if err != nil {
-			return fmt.Errorf("failed to open file from path: %w", err)
+			fs.Context.LoggerService.L.Error("Failed to open file", jlog.Err(err), "file", path)
+			return fmt.Errorf("failed to open file at path %s: %w", path, err)
 		}
-		defer f.Close()
+		defer file.Close()
 
-		stat, err := f.Stat()
+		stat, err := file.Stat()
 		if err != nil {
-			return fmt.Errorf("failed to get file stat: %w", err)
+			return fmt.Errorf("failed to stat file %s: %w", path, err)
 		}
 
-		meta := models.NewFileMetadata(f.Name())
+		meta := models.NewFileMetadata(stat.Name())
 		meta.Size = int(stat.Size())
-		file := &models.File{
+
+		newFile := &models.File{
 			Metadata: meta,
 			Status:   "upload",
-			Data:     util.ReadFull(f),
+			Data:     util.ReadFull(file),
 		}
 
-		err = fs.Context.StorageService.S.AddFile(file)
+		err = fs.Context.StorageService.S.AddFile(newFile)
 		if err != nil {
-			return fmt.Errorf("failed to add file from path: %w", err)
+			fs.Context.LoggerService.L.Error("Failed to add file to storage", jlog.Err(err), "file", path)
+			return fmt.Errorf("failed to add file %s to storage: %w", path, err)
 		}
 
+		fs.Context.LoggerService.L.Info("Successfully added file", "file", path)
 		return nil
 	})
 
 	if err != nil {
+		fs.Context.LoggerService.L.Error("Failed to walk through directory", jlog.Err(err), "directory", dirPath)
 		return fmt.Errorf("failed to add files from directory %s: %w", dirPath, err)
 	}
 
@@ -131,7 +136,7 @@ func DeleteAllFiles(fs *app.FileService) error {
 
 // ListFiles retrieves a list of files from the specified table.
 func ListFiles(fs *app.FileService) ([]models.File, error) {
-	files := []models.File{}
+	var files []models.File
 	err := fs.Context.StorageService.S.GetAllFiles(&files)
 	return files, err
 }

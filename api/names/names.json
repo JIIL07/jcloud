@@ -1,0 +1,19 @@
+{
+  "commit": "anchor",
+  "push": "berth",
+  "status": "compass",
+  "add": "load",
+  "delete": "shed",
+  "list": "fleet",
+  "login": "embark",
+  "pull": "haul",
+  "origin": "nexus",
+  "clone": "chart",
+  "branch": "mast",
+  "merge": "tide",
+  "rebase": "navigate",
+  "fetch": "retrieve",
+  "checkout": "dock",
+  "reset": "wreck",
+  "repo": "harbor"
+}

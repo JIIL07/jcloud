@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/jc"
 	"github.com/JIIL07/jcloud/pkg/log"
-	"os"
-
 	"github.com/spf13/cobra"
+	"os"
 )
+
+var dataFlag bool
 
 var listCmd = &cobra.Command{
 	Use:   "list",
@@ -20,13 +21,19 @@ var listCmd = &cobra.Command{
 			cobra.CheckErr(err)
 		}
 		for _, item := range items {
-			cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("- %v\n", item))
-			//TODO: implement good file output
+			cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("ID: %d\n", item.ID))
+			cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("File: %s.%s\n", item.Metadata.Name, item.Metadata.Extension))
+			cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("Size: %d bytes\n", item.Metadata.Size))
+			if dataFlag {
+				cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("File content: %s\n\n", string(item.Data)))
+			} else {
+				cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintln())
+			}
 		}
 	},
 }
 
 func init() {
+	listCmd.Flags().BoolVarP(&dataFlag, "data", "d", false, "Show file content")
 	RootCmd.AddCommand(listCmd)
-
 }
