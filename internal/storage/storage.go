@@ -80,39 +80,3 @@ func InitDatabase(config *config.Config) (*Storage, error) {
 func (s *Storage) CloseDatabase() error {
 	return s.DB.Close()
 }
-
-func (s *Storage) SaveNewUser(u *UserData) error {
-	_, err := s.DB.Exec(`INSERT INTO users 
-		(username, email, password, hashprotocol, admin) VALUES (?, ?, ?, ?, ?)`,
-		u.Username, u.Email, u.Password, u.Protocol, u.Admin,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to save new user: %v", err)
-	}
-	return nil
-}
-
-func (s *Storage) GetAllUsers() ([]UserData, error) {
-	var users []UserData
-	var u = &UserData{}
-	rows, err := s.DB.Query(`SELECT * FROM users`)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get all users: %v", err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		if err := rows.Scan(&u.Username, &u.Email, &u.Password, &u.Protocol, &u.Admin); err != nil {
-			return nil, fmt.Errorf("failed to scan user: %v", err)
-		}
-		users = append(users, *u)
-	}
-	return users, nil
-}
-
-func (s *Storage) DeleteUser(username string) error {
-	_, err := s.DB.Exec(`DELETE FROM users WHERE username = ?`, username)
-	if err != nil {
-		return err
-	}
-	return nil
-}
