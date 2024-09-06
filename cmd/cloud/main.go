@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/app"
 	"github.com/JIIL07/jcloud/internal/client/cmd"
-	"github.com/JIIL07/jcloud/internal/client/config"
+	"github.com/JIIL07/jcloud/internal/config"
 	"github.com/JIIL07/jcloud/pkg/ctx"
 	"log"
 	"os"
@@ -15,20 +15,19 @@ import (
 )
 
 func main() {
-	c := config.MustLoad()
+	c := config.MustLoadClient()
 
 	appc, err := app.NewAppContext(c)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	ctx := jctx.WithContext(context.Background(), "app-context", appc)
 	cmd.SetContext(ctx)
 
 	switch {
-	case c.Env == "prod":
+	case c.Client.Environment == "prod":
 		cmd.Execute()
-	case c.Env == "debug" || c.Env == "local":
+	case c.Client.Environment == "debug" || c.Client.Environment == "local":
 		reader := bufio.NewReader(os.Stdin)
 		for {
 			dir, _ := os.Getwd()

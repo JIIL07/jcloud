@@ -97,7 +97,7 @@ import (
 )
 
 func main() {
-   c := config.MustLoad()
+   c := config.MustLoadClient()
    appc, err := app.NewAppContext(c)
    if err != nil {
       log.Fatal(err)
