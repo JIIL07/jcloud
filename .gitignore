@@ -2,4 +2,4 @@
 secrets/
 .idea/
 *.exe
-api/openapi/jcloud.yaml
+api/openapi/

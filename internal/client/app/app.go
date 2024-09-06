@@ -1,16 +1,16 @@
 package app
 
 import (
-	"github.com/JIIL07/jcloud/internal/client/config"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/storage"
+	"github.com/JIIL07/jcloud/internal/config"
 	"github.com/JIIL07/jcloud/internal/logger"
 	"github.com/JIIL07/jcloud/pkg/home"
 	"log/slog"
 )
 
 type ClientContext struct {
-	cfg    *config.Config
+	cfg    *config.ClientConfig
 	common service
 
 	// Services
@@ -64,7 +64,7 @@ type SnapshotService struct {
 	*service
 }
 
-func NewAppContext(cfg *config.Config) (*ClientContext, error) {
+func NewAppContext(cfg *config.ClientConfig) (*ClientContext, error) {
 	p := home.SetPaths()
 
 	s := storage.MustInit()

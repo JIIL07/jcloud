@@ -1,1 +1,83 @@
-env: "prod" #changable to debug or prod or local
+# client.yaml
+
+# General client configuration
+client:
+  # Unique identifier for the client
+  id: "client-12345"
+
+  # Human-readable name for the client
+  name: "ClientApp"
+
+  # Environment in which the client is operating (e.g., development, production)
+  environment: "local"
+
+  # API connection settings
+  api:
+    base_url: "https://api.example.com"
+    
+    # API key or token for authentication
+    auth_token: "your-auth-token-here"
+    
+    # Timeout in seconds for API requests
+    timeout: 30
+    
+    # Maximum number of retries in case of failure
+    retries: 3
+    
+    # Optional SSL verification toggle
+    ssl_verify: true
+
+  # Log settings
+  logging:
+    # Log level: info, debug, error
+    level: "info"
+    
+    # Path to store logs
+    log_path: "/var/log/client_app.log"
+    
+    # Maximum size of log file in MB before rolling over
+    max_size: 100
+    
+    # Maximum number of log files to keep
+    max_files: 5
+
+# Connection settings to external services (e.g., databases, message brokers)
+services:
+  database:
+    host: "db.example.com"
+    port: 5432
+    username: "dbuser"
+    password: "dbpass"
+    database: "client_db"
+    sslmode: "require" # options: disable, require, verify-ca, verify-full
+
+  cache:
+    host: "cache.example.com"
+    port: 6379
+    use_ssl: false
+
+  message_broker:
+    host: "broker.example.com"
+    port: 5672
+    queue_name: "client_queue"
+    username: "brokeruser"
+    password: "brokerpass"
+    use_ssl: true
+
+# Optional feature toggles
+features:
+  enable_feature_x: true
+  enable_feature_y: false
+
+# Retry strategy in case of failures
+retry_strategy:
+  max_attempts: 5
+  delay_seconds: 2
+  backoff_multiplier: 1.5
+
+# Optional metrics and monitoring settings
+metrics:
+  enabled: true
+  provider: "prometheus"
+  endpoint: "http://metrics.example.com"
+  interval_seconds: 60

@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/JIIL07/jcloud/internal/storage"
 	"github.com/JIIL07/jcloud/pkg/cookies"
 	jctx "github.com/JIIL07/jcloud/pkg/ctx"
@@ -27,7 +28,7 @@ func GetFilesHandler(w http.ResponseWriter, r *http.Request) {
 
 	u, err := s.GetByUsername(session.Values["username"].(string))
 	if err != nil {
-		http.Error(w, "Failed to get user", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Failed to get user: %v", err), http.StatusInternalServerError)
 		return
 	}
 

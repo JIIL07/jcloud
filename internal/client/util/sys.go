@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/client/config"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/fsnotify/fsnotify"
 	"os"
@@ -163,7 +162,7 @@ func GetFileFromExplorer() (*models.File, error) {
 
 	f := &models.File{
 		Metadata: meta,
-		Status:   config.Statuses[0],
+		Status:   "upload",
 		Data:     fileData,
 	}
 

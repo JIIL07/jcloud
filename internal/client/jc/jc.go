@@ -3,7 +3,6 @@ package jc
 import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/app"
-	"github.com/JIIL07/jcloud/internal/client/config"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/util"
 	jlog "github.com/JIIL07/jcloud/pkg/log"
@@ -24,7 +23,7 @@ func AddFile(fs *app.FileService) error {
 	if !fileExists {
 		file := fs.F
 		file.Metadata.Size = len(file.Data)
-		file.Status = config.Statuses[0]
+		file.Status = "upload"
 		err = fs.Context.StorageService.S.AddFile(file)
 		if err != nil {
 			return fmt.Errorf("failed to add file: %w", err)
