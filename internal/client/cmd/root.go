@@ -4,16 +4,19 @@ import (
 	"context"
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/app"
-	jctx "github.com/JIIL07/jcloud/pkg/ctx"
+	h "github.com/JIIL07/jcloud/internal/client/hints"
+	"github.com/JIIL07/jcloud/internal/config"
+	"github.com/JIIL07/jcloud/pkg/ctx"
 	"github.com/spf13/cobra"
+	"io"
 	"os"
 )
 
 var (
 	ctx         context.Context
 	appCtx      *app.ClientContext
+	c           *config.ClientConfig
 	versionFlag bool
-	allFiles    bool
 )
 
 func SetContext(newCtx context.Context) {
@@ -35,18 +38,25 @@ It supports commands like init to initialize the cloud, add to add files, and ex
 			return fmt.Errorf("failed to get file context")
 		}
 
-		//if cmd.Name() != loginCmd.Name() && cmd != cmd.Root() {
-		//	content, err := io.ReadAll(appCtx.PathsService.P.JcloudFile)
-		//	if err != nil {
-		//		cobra.CheckErr(err)
-		//	}
-		//
-		//	if len(content) == 0 {
-		//		cobra.WriteStringAndCheck(os.Stdout, "use 'jcloud login [username] [email] [password]' first\n")
-		//		os.Exit(0)
-		//	}
-		//
-		//}
+		c = appCtx.Cfg
+
+		if versionFlag || cmd.Name() == "login" || cmd == cmd.Root() {
+			return nil
+		}
+
+		content, err := io.ReadAll(appCtx.PathsService.P.JcloudFile)
+		if err != nil {
+			return fmt.Errorf("failed to read login file: %v", err)
+		}
+
+		if len(content) == 0 {
+			hintMessage := h.DisplayHint("login", h.LoginRequired, c)
+			if hintMessage != "" {
+				cobra.WriteStringAndCheck(os.Stdout, hintMessage)
+			}
+			os.Exit(0)
+		}
+
 		return nil
 	},
 
@@ -65,7 +75,6 @@ It supports commands like init to initialize the cloud, add to add files, and ex
 
 func init() {
 	RootCmd.PersistentFlags().BoolP("help", "h", false, "Help")
-	RootCmd.PersistentFlags().BoolVarP(&allFiles, "all", "a", false, "All files from the specified directory (or current directory if not specified)")
 	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", false, "Version")
 }
 

@@ -10,7 +10,7 @@ import (
 )
 
 type ClientContext struct {
-	cfg    *config.ClientConfig
+	Cfg    *config.ClientConfig
 	common service
 
 	// Services
@@ -72,7 +72,7 @@ func NewAppContext(cfg *config.ClientConfig) (*ClientContext, error) {
 	l := logger.NewClientLogger(p.JlogFile)
 
 	context := &ClientContext{
-		cfg:    cfg,
+		Cfg:    cfg,
 		common: service{},
 	}
 
