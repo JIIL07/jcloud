@@ -8,17 +8,24 @@ import (
 
 type ClientConfig struct {
 	Client        Client        `yaml:"client"`
+	CmdHints      Hints         `yaml:"hints"`
 	Services      Services      `yaml:"services"`
 	RetryStrategy RetryStrategy `yaml:"retry_strategy"`
 	Metrics       Metrics       `yaml:"metrics"`
 }
 
 type Client struct {
-	ID          string    `yaml:"id"`
-	Name        string    `yaml:"name"`
-	Environment string    `yaml:"environment"`
-	API         APIConfig `yaml:"api"`
-	Logging     Logging   `yaml:"logging"`
+	Personal    PersonalConfig `yaml:"personal"`
+	Environment string         `yaml:"environment"`
+	API         APIConfig      `yaml:"api"`
+	Logging     LoggingConfig  `yaml:"logging"`
+}
+
+type PersonalConfig struct {
+	ID       string `yaml:"id"`
+	Name     string `yaml:"name"`
+	Email    string `yaml:"email"`
+	Password string `yaml:"password"`
 }
 
 type APIConfig struct {
@@ -29,17 +36,27 @@ type APIConfig struct {
 	SSLVerify bool   `yaml:"ssl_verify"`
 }
 
-type Logging struct {
+type LoggingConfig struct {
 	Level    string `yaml:"level"`
 	LogPath  string `yaml:"log_path"`
 	MaxSize  int    `yaml:"max_size"`
 	MaxFiles int    `yaml:"max_files"`
 }
 
+type Hints struct {
+	Config map[string]bool       `yaml:"config"`
+	Hint   map[string]HintDetail `yaml:"commands"`
+}
+
+type HintDetail struct {
+	Message string   `yaml:"message"`
+	Hints   []string `yaml:"hint"`
+}
+
 type Services struct {
-	Database      DatabaseConfig `yaml:"database"`
-	Cache         CacheConfig    `yaml:"cache"`
-	MessageBroker MessageBroker  `yaml:"message_broker"`
+	Database      DatabaseConfig      `yaml:"database"`
+	Cache         CacheConfig         `yaml:"cache"`
+	MessageBroker MessageBrokerConfig `yaml:"message_broker"`
 }
 
 type DatabaseConfig struct {
@@ -57,7 +74,7 @@ type CacheConfig struct {
 	UseSSL bool   `yaml:"use_ssl"`
 }
 
-type MessageBroker struct {
+type MessageBrokerConfig struct {
 	Host      string `yaml:"host"`
 	Port      int    `yaml:"port"`
 	QueueName string `yaml:"queue_name"`
@@ -94,6 +111,5 @@ func MustLoadClient() *ClientConfig {
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
 		log.Fatalf("cannot read config: %v", err)
 	}
-
 	return &cfg
 }

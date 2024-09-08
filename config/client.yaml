@@ -1,45 +1,128 @@
 # client.yaml
-
-# General client configuration
 client:
-  # Unique identifier for the client
-  id: "client-12345"
-
-  # Human-readable name for the client
-  name: "ClientApp"
+  personal:
+    id: ""
+    name: ""
+    email: ""
+    password: ""
 
   # Environment in which the client is operating (e.g., development, production)
   environment: "local"
 
   # API connection settings
   api:
-    base_url: "https://api.example.com"
-    
-    # API key or token for authentication
-    auth_token: "your-auth-token-here"
-    
-    # Timeout in seconds for API requests
+    base_url: "https://jcloud.up.railway.app"
+    auth_token: ""
     timeout: 30
-    
-    # Maximum number of retries in case of failure
-    retries: 3
-    
-    # Optional SSL verification toggle
+    retries: 5
     ssl_verify: true
 
-  # Log settings
   logging:
-    # Log level: info, debug, error
     level: "info"
-    
-    # Path to store logs
     log_path: "/var/log/client_app.log"
-    
-    # Maximum size of log file in MB before rolling over
     max_size: 100
-    
-    # Maximum number of log files to keep
-    max_files: 5
+    max_files: 3
+
+hints:
+  # Configuration hints
+  config:
+    add.emptyPath: true
+    add.loginRequired: true
+    add.noFilesMatched: true
+    add.allFlagMissing: true
+    add.noModifiedFiles: true
+    add.dryRunWithoutFiles: true
+    add.excludeNotMatched: true
+    add.unmodifiedWithUpdate: true
+
+    login.loginRequired: true
+    login.invalidCredentials: true
+
+    global.unknownCommand: true
+    global.flagNotRecognized: true
+    global.noArgsProvided: true
+    global.missingFileOrDirectory: true
+    global.missingRequiredFlag: true
+
+  # Command hints
+  commands:
+      add.emptyPath:
+        message: "Nothing specified, nothing added."
+        hint:
+          - "Maybe you wanted to say 'jcloud add .'?"
+          - "Disable this hint with 'jcloud config hints.add.emptyPath false'."
+      add.loginRequired:
+        message: "You must log in before using this command."
+        hint:
+          - "Use 'jcloud login [username] [email] [password]' to log in first."
+          - "Disable this hint with 'jcloud config hints.add.loginRequired false'."
+      add.noFilesMatched:
+        message: "No files were added."
+        hint:
+          - "Make sure the file paths are correct."
+          - "Use 'jcloud add --force' to include hidden files."
+          - "Disable this hint with 'jcloud config hints.add.noFilesMatched false'."
+      add.allFlagMissing:
+        message: "It looks like you want to add all files."
+        hint:
+          - "Try 'jcloud add --all' to add all files in the current directory."
+          - "Disable this hint with 'jcloud config hints.add.allFlagMissing false'."
+      add.noModifiedFiles:
+        message: "No modified files found to update."
+        hint:
+          - "Ensure your files have been modified since last addition."
+          - "Use 'jcloud add' without '--update' to add all files."
+          - "Disable this hint with 'jcloud config hints.add.noModifiedFiles false'."
+      add.dryRunWithoutFiles:
+        message: "Dry run requested, but no files specified."
+        hint:
+          - "Use 'jcloud add --dry-run .' to simulate adding all files."
+          - "Disable this hint with 'jcloud config hints.add.dryRunWithoutFiles false'."
+      add.excludeNotMatched:
+        message: "No files matched the exclusion pattern."
+        hint:
+          - "Ensure your exclusion pattern is correct, e.g., 'jcloud add --exclude \"*.log\"."
+          - "Disable this hint with 'jcloud config hints.add.excludeNotMatched false'."
+      add.unmodifiedWithUpdate:
+        message: "No modified files found to add with --update."
+        hint:
+          - "Make sure you have modified the files or use 'jcloud add' without '--update' to include all files."
+          - "Disable this hint with 'jcloud config hints.add.unmodifiedWithUpdate false'."
+
+      login.loginRequired:
+        message: "You must log in before using this command."
+        hint:
+          - "Use 'jcloud login [username] [email] [password]' to log in first."
+          - "If you don't have an account, create one with 'jcloud register'."
+      login.invalidCredentials:
+        message: "Invalid login credentials provided."
+        hint:
+          - "Ensure your username, email, and password are correct."
+          - "You can reset your password if forgotten."
+
+      global.unknownCommand:
+        message: "Unknown command."
+        hint:
+          - "Use 'jcloud --help' to see a list of available commands."
+      global.flagNotRecognized:
+        message: "Unrecognized flag or option."
+        hint:
+          - "Check available flags with 'jcloud [command] --help'."
+      global.noArgsProvided:
+        message: "No arguments provided."
+        hint:
+          - "Use 'jcloud [command] --help' to see how to use this command properly."
+      global.missingFileOrDirectory:
+        message: "No file or directory specified."
+        hint:
+          - "Try 'jcloud add [file]' to add specific files."
+          - "Use 'jcloud add --all' to add all files in the current directory."
+      global.missingRequiredFlag:
+        message: "Missing required flag."
+        hint:
+          - "Check available flags with 'jcloud [command] --help'."
+          - "Make sure to specify all required flags."
+
 
 # Connection settings to external services (e.g., databases, message brokers)
 services:
@@ -63,11 +146,6 @@ services:
     username: "brokeruser"
     password: "brokerpass"
     use_ssl: true
-
-# Optional feature toggles
-features:
-  enable_feature_x: true
-  enable_feature_y: false
 
 # Retry strategy in case of failures
 retry_strategy:

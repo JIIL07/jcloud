@@ -61,7 +61,10 @@ func AddFileHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			err = tx.Rollback()
+			if err != nil {
+				http.Error(w, "Failed to rollback transaction: "+err.Error(), http.StatusInternalServerError)
+			}
 			http.Error(w, "Failed to add files: "+err.Error(), http.StatusInternalServerError)
 		}
 	}()
