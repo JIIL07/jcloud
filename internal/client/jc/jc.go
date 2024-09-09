@@ -5,9 +5,11 @@ import (
 	"github.com/JIIL07/jcloud/internal/client/app"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/util"
+	jhash "github.com/JIIL07/jcloud/pkg/hash"
 	jlog "github.com/JIIL07/jcloud/pkg/log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func AddFile(fs *app.FileService) error {
@@ -59,10 +61,17 @@ func AddFileFromPath(fs *app.FileService, path string) error {
 
 	meta := models.NewFileMetadata(stat.Name())
 	meta.Size = int(stat.Size())
+
+	data := util.ReadFull(f)
+
+	meta.HashSum = jhash.Hash(string(data))
+
 	file := &models.File{
-		Metadata: meta,
-		Status:   "upload",
-		Data:     util.ReadFull(f),
+		Metadata:   meta,
+		Status:     "upload",
+		Data:       data,
+		CreatedAt:  time.Now(),
+		ModifiedAt: time.Now(),
 	}
 
 	err = fs.Context.StorageService.S.AddFile(file)
