@@ -31,6 +31,10 @@ func MustInit() *SQLite {
 	if err != nil {
 		log.Fatalf("failed to create table: %v", err)
 	}
+	_, err = db.Exec("PRAGMA journal_mode = WAL;")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return &SQLite{DB: db}
 }

@@ -4,17 +4,17 @@ import (
 	"fmt"
 	h "github.com/JIIL07/jcloud/internal/client/hints"
 	"github.com/JIIL07/jcloud/internal/client/jc"
-	"github.com/JIIL07/jcloud/pkg/log"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"sync"
 	"time"
 )
 
 var (
 	dropFlag     bool
-	targetDir    string
 	allFlag      bool
 	ignoreErrors bool
 	dryRun       bool
@@ -23,11 +23,15 @@ var (
 	verboseFlag  bool
 	interactive  bool
 	excludeFiles []string
-	hintsEnabled bool = true
+	targetDir    string
+	hintsEnabled = true
+
+	mutex      sync.Mutex
+	numWorkers = runtime.NumCPU() + 2
 )
 
 var addCmd = &cobra.Command{
-	Use:   "add [flags] [file or directory]...",
+	Use:   "add [flags] [path] [file]...",
 	Short: "Add files or directories to local storage",
 	Long:  `Add one or more files or directories to local storage (SQLite) before uploading to the server.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -35,7 +39,17 @@ var addCmd = &cobra.Command{
 
 		if len(args) == 0 && !allFlag && !dropFlag && !dryRun && !updateFlag {
 			if hintsEnabled {
-				hintMessage := h.DisplayHint("add", h.EmptyPath, c)
+				hintMessage := h.DisplayHint("add", h.EmptyPath, nil)
+				if hintMessage != "" {
+					cobra.WriteStringAndCheck(os.Stdout, hintMessage)
+				}
+			}
+			return
+		}
+
+		if len(args) == 0 && !allFlag {
+			if hintsEnabled {
+				hintMessage := h.DisplayHint("add", h.AllFlagMissing, nil)
 				if hintMessage != "" {
 					cobra.WriteStringAndCheck(os.Stdout, hintMessage)
 				}
@@ -47,139 +61,181 @@ var addCmd = &cobra.Command{
 			args = append(args, ".")
 		}
 
+		//TODO:
+		// Check for modified files when --update is used, if none exist, show hint
+		//if updateFlag && !hasModifiedFiles(args) {
+		//	if hintsEnabled {
+		//		hintMessage := h.DisplayHint("add", h.NoModifiedFiles, nil)
+		//		if hintMessage != "" {
+		//			cobra.WriteStringAndCheck(os.Stdout, hintMessage)
+		//		}
+		//	}
+		//	return
+		//}
+
 		if allFlag || (len(args) == 1 && args[0] == ".") {
-			handleAddAllFiles()
+			addAll(args)
 			return
 		}
 
-		// Handle the --drop flag
-		if dropFlag {
-			handleDropAdd()
-			return
+		if interactive {
+			withInteractive(args)
+		} else {
+			withWorkerPool(args)
 		}
 
-		// Handle specific file/directory arguments
-		var wg sync.WaitGroup
-		for _, arg := range args {
-			wg.Add(1)
-			go func(arg string) {
-				defer wg.Done()
-				handleAddArg(arg)
-			}(arg)
-		}
-		wg.Wait()
-
-		// Log command execution time
+		logVerbose("Command execution time", "duration", time.Since(startTime))
 		appCtx.LoggerService.L.Info("Command execution time", "duration", time.Since(startTime))
 	},
 }
 
-func handleAddAllFiles() {
-	var err error
-	targetDir, err = os.Getwd()
-	if err != nil {
-		appCtx.LoggerService.L.Error("error getting current directory", jlog.Err(err))
-		cobra.CheckErr(err)
-	}
-
-	err = filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			if ignoreErrors {
-				appCtx.LoggerService.L.Warn("error walking directory", jlog.Err(err), "path", path)
-				return nil
-			}
-			return err
-		}
-
-		// Exclude files based on pattern
-		for _, exclude := range excludeFiles {
-			if match, _ := filepath.Match(exclude, path); match {
-				appCtx.LoggerService.L.Info("excluding file", "file", path)
-				return nil
-			}
-		}
-
-		// Process directories and files
-		if info.IsDir() {
-			if verboseFlag {
-				appCtx.LoggerService.L.Info("adding directory", "dir", path)
-			}
-			err = jc.AddFilesFromDir(appCtx.FileService, path)
-		} else {
-			if dryRun {
-				appCtx.LoggerService.L.Info("would add file", "file", path)
-			} else {
-				if verboseFlag {
-					appCtx.LoggerService.L.Info("adding file", "file", path)
-				}
-				err = jc.AddFileFromPath(appCtx.FileService, path)
-			}
-		}
-		if err != nil && !ignoreErrors {
-			return fmt.Errorf("failed to add files from directory: %w", err)
-		}
-		return nil
-	})
-
-	if err != nil && !ignoreErrors {
-		cobra.CheckErr(err)
+func workerPool(files chan string, wg *sync.WaitGroup) {
+	for file := range files {
+		add(file)
+		wg.Done()
 	}
 }
 
-func handleDropAdd() {
-	err := jc.AddFileFromExplorer(appCtx.FileService)
-	if err != nil {
-		appCtx.LoggerService.L.Error("error adding file via drop-down", jlog.Err(err))
-		cobra.CheckErr(err)
+func withInteractive(args []string) {
+	for _, arg := range args {
+		add(arg)
 	}
 }
 
-func handleAddArg(arg string) {
+func withWorkerPool(args []string) {
+	files := make(chan string)
+	var wg sync.WaitGroup
+
+	for i := 0; i < numWorkers; i++ {
+		go workerPool(files, &wg)
+	}
+
+	for _, arg := range args {
+		wg.Add(1)
+		files <- arg
+	}
+
+	close(files)
+	wg.Wait()
+}
+
+func add(arg string) {
 	info, err := os.Stat(arg)
 	if os.IsNotExist(err) {
-		// Display hint if the file or directory doesn't exist
-		hintMessage := h.DisplayHint("add", h.NoFilesMatched, c)
+		hintMessage := h.DisplayHint("add", h.NoFilesMatched, nil)
 		if hintMessage != "" {
 			cobra.WriteStringAndCheck(os.Stdout, hintMessage)
 		}
-		appCtx.LoggerService.L.Warn("file or directory does not exist", jlog.Err(err), "path", arg)
+		logVerbose("File or directory does not exist", "path", arg)
 		if !ignoreErrors {
 			return
 		}
 	}
 
 	if err != nil {
-		appCtx.LoggerService.L.Error("error accessing file or directory", jlog.Err(err), "path", arg)
+		logVerbose("Error accessing file or directory", "path", arg, "error", err)
 		cobra.CheckErr(err)
 	}
 
-	// Check for --update flag and only add modified files
-	if updateFlag {
-		// TODO: Replace with actual logic to get the last modified time from storage
-		lastModTime := time.Now().Add(-1 * time.Hour)
-		if !info.ModTime().After(lastModTime) {
-			// Display hint for unmodified files
-			hintMessage := h.DisplayHint("add", h.NoModifiedFiles, c)
-			if hintMessage != "" {
-				cobra.WriteStringAndCheck(os.Stdout, hintMessage)
-			}
-			appCtx.LoggerService.L.Info("skipping unmodified file", "file", arg)
-			return
-		}
-	}
-
-	// Handle directories
 	if info.IsDir() {
-		handleAddAllFiles()
+		addAll([]string{arg})
 	} else {
+		if interactive {
+			var response string
+			fmt.Printf("Add file %s? (y/n): ", arg)
+			_, err := fmt.Scanln(&response)
+			if err != nil || (response != "y" && response != "Y") {
+				logVerbose("Skipping file", "file", arg)
+				return
+			}
+		}
+
 		if dryRun {
-			appCtx.LoggerService.L.Info("would add file", "file", arg)
+			cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("Would add file %s\n", arg))
 		} else {
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			logVerbose("Adding file", "file", arg)
 			err = jc.AddFileFromPath(appCtx.FileService, arg)
 			if err != nil && !ignoreErrors {
 				cobra.CheckErr(fmt.Errorf("failed to add file: %w", err))
 			}
 		}
+	}
+}
+
+func addAll(args []string) {
+	var err error
+	targetDir, err = getTargetDir(args)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	files := make(chan string)
+	var wg sync.WaitGroup
+
+	for i := 0; i < numWorkers; i++ {
+		go workerPool(files, &wg)
+	}
+
+	err = filepath.Walk(targetDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			if ignoreErrors {
+				logVerbose("Error walking directory", "path", path, "error", err)
+				return nil
+			}
+			return err
+		}
+
+		if excludeFile(path) {
+			return nil
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		logVerbose("Processing file", "file", path)
+		wg.Add(1)
+		files <- path
+		return nil
+	})
+
+	close(files)
+	wg.Wait()
+
+	if err != nil && !ignoreErrors {
+		cobra.CheckErr(err)
+	}
+}
+
+func excludeFile(path string) bool {
+	for _, exclude := range excludeFiles {
+		absExclude, err := filepath.Abs(exclude)
+		if err != nil {
+			logVerbose("Error resolving exclude path", "exclude", exclude, "error", err)
+			continue
+		}
+
+		if strings.HasPrefix(path, absExclude) {
+			logVerbose("Excluding path", "file", path)
+			return true
+		}
+	}
+	return false
+}
+
+func getTargetDir(args []string) (string, error) {
+	if args != nil {
+		return filepath.Abs(args[0])
+	}
+	return os.Getwd()
+}
+
+func logVerbose(message string, keysAndValues ...interface{}) {
+	if verboseFlag {
+		cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("[%s] %s - %v\n", time.Now().Format(time.RFC3339), message, keysAndValues))
 	}
 }
 
