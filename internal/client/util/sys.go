@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/models"
+	jhash "github.com/JIIL07/jcloud/pkg/hash"
 	"github.com/fsnotify/fsnotify"
 	"os"
 	"os/exec"
@@ -159,11 +160,14 @@ func GetFileFromExplorer() (*models.File, error) {
 	}
 
 	meta.Size = len(fileData)
+	meta.HashSum = jhash.Hash(string(fileData))
 
 	f := &models.File{
-		Metadata: meta,
-		Status:   "upload",
-		Data:     fileData,
+		Meta:       meta,
+		Status:     "upload",
+		Data:       fileData,
+		CreatedAt:  time.Now(),
+		ModifiedAt: time.Now(),
 	}
 
 	return f, nil

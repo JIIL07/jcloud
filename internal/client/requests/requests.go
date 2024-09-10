@@ -56,7 +56,7 @@ func UploadFile(a *app.ClientContext, f *[]models.File) (*http.Response, error) 
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	cookieString, err := cookies.ReadFromFile(a.PathsService.P.Jcookie.Name())
+	cookieString, err := cookies.ReadFromFile(a.Paths.P.Jcookie.Name())
 	if err != nil {
 		return nil, fmt.Errorf("error reading cookies: %w", err)
 	}
@@ -80,7 +80,7 @@ func UploadFile(a *app.ClientContext, f *[]models.File) (*http.Response, error) 
 func DeleteFile(f *models.File) error {
 	baseURL := URL + "/api/v1/files/delete"
 	p := url.Values{}
-	p.Add("filename", f.Metadata.Name)
+	p.Add("filename", f.Meta.Name)
 	fullURL := fmt.Sprintf("%s?%s", baseURL, p.Encode())
 
 	req, err := http.NewRequest("DELETE", fullURL, nil)

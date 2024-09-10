@@ -22,29 +22,29 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		files := make([]models.File, 0)
-		err := appCtx.StorageService.S.GetAllFiles(&files)
+		err := a.Storage.S.GetAllFiles(&files)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
 
-		resp, err := requests.UploadFile(appCtx, &files)
+		resp, err := requests.UploadFile(a, &files)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
-		c, err := io.ReadAll(resp.Body)
+		content, err := io.ReadAll(resp.Body)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
-		appCtx.LoggerService.L.Info(fmt.Sprintf("response: %s, status code: %d", string(c), resp.StatusCode))
+		a.Logger.L.Info(fmt.Sprintf("response: %s, status code: %d", string(content), resp.StatusCode))
 		cobra.CheckErr(resp.Body.Close())
 
-		err = jc.DeleteAllFiles(appCtx.FileService)
+		err = jc.DeleteAllFiles(a.File)
 		if err != nil {
-			appCtx.LoggerService.L.Error("error deleting all files", jlog.Err(err))
+			a.Logger.L.Error("error deleting all files", jlog.Err(err))
 			cobra.CheckErr(err)
 		}
 
-		appCtx.LoggerService.L.Info("berth success")
+		a.Logger.L.Info("berth success")
 	},
 }
 

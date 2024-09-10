@@ -37,7 +37,7 @@ func NewFileMetadata(fullname string) FileMetadata {
 
 type File struct {
 	ID         int          `db:"id"`
-	Metadata   FileMetadata `db:"m"`
+	Meta       FileMetadata `db:"m"`
 	Status     string       `db:"status"`
 	Data       []byte       `db:"data"`
 	CreatedAt  time.Time    `db:"created_at"`
@@ -53,7 +53,7 @@ func (i *File) SetFile() error {
 	if err != nil {
 		return fmt.Errorf("error reading name: %v", err)
 	}
-	i.Metadata = NewFileMetadata(m)
+	i.Meta = NewFileMetadata(m)
 
 	data, err := ReadDataFromStdin()
 	if err != nil {

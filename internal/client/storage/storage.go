@@ -55,7 +55,7 @@ func (s *SQLite) GetFile(f *models.File) error {
 		       status, data, created_at, last_modified_at, hash_sum AS "m.hash_sum", description AS "m.description"
 		FROM local
 		WHERE filename = ? AND extension = ?`,
-		f.Metadata.Name, f.Metadata.Extension)
+		f.Meta.Name, f.Meta.Extension)
 }
 
 func (s *SQLite) GetAllFiles(f *[]models.File) error {
@@ -69,15 +69,15 @@ func (s *SQLite) AddFile(f *models.File) error {
 	_, err := s.DB.Exec(`
 		INSERT INTO local (filename, extension, filesize, status, data, created_at, last_modified_at, hash_sum, description) 
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		f.Metadata.Name,
-		f.Metadata.Extension,
-		f.Metadata.Size,
+		f.Meta.Name,
+		f.Meta.Extension,
+		f.Meta.Size,
 		f.Status,
 		f.Data,
 		f.CreatedAt,
 		f.ModifiedAt,
-		f.Metadata.HashSum,
-		f.Metadata.Description)
+		f.Meta.HashSum,
+		f.Meta.Description)
 	if err != nil {
 		return fmt.Errorf("failed to insert file: %w", err)
 	}
@@ -88,14 +88,14 @@ func (s *SQLite) Exists(f *models.File) (bool, error) {
 	var exists bool
 	err := s.DB.Get(&exists, `
 		SELECT EXISTS(SELECT 1 FROM local WHERE filename = ? AND extension = ?)`,
-		f.Metadata.Name, f.Metadata.Extension)
+		f.Meta.Name, f.Meta.Extension)
 
 	return exists, err
 }
 
 func (s *SQLite) DeleteFile(f *models.File) error {
 	_, err := s.DB.Exec(`DELETE FROM local WHERE filename = ? AND extension = ?`,
-		f.Metadata.Name, f.Metadata.Extension)
+		f.Meta.Name, f.Meta.Extension)
 	if err != nil {
 		return fmt.Errorf("failed to delete file: %w", err)
 	}
@@ -118,8 +118,8 @@ func (s *SQLite) UpdateFile(f *models.File) error {
 		f.Status,
 		f.Data,
 		f.ModifiedAt,
-		f.Metadata.Name,
-		f.Metadata.Extension)
+		f.Meta.Name,
+		f.Meta.Extension)
 	if err != nil {
 		return fmt.Errorf("failed to update file: %w", err)
 	}
@@ -131,9 +131,9 @@ func (s *SQLite) UpdateFileDescription(f *models.File) error {
 		UPDATE local
 		SET description = ?
 		WHERE filename = ? AND extension = ?`,
-		f.Metadata.Description,
-		f.Metadata.Name,
-		f.Metadata.Extension)
+		f.Meta.Description,
+		f.Meta.Name,
+		f.Meta.Extension)
 	if err != nil {
 		return fmt.Errorf("failed to update file description: %w", err)
 	}

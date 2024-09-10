@@ -15,9 +15,9 @@ var whoiamCmd = &cobra.Command{
 	Long:    "Read .jcloud file from $HOME dir and return information about current user",
 	Run: func(cmd *cobra.Command, args []string) {
 		var bytes []byte
-		bytes, err := os.ReadFile(appCtx.PathsService.P.JcloudFile.Name())
+		bytes, err := os.ReadFile(a.Paths.P.JcloudFile.Name())
 		if err != nil {
-			appCtx.LoggerService.L.Error("error reading file", jlog.Err(err))
+			a.Logger.L.Error("error reading file", jlog.Err(err))
 			cobra.CheckErr(err)
 		}
 		me := strings.Split(string(bytes), " ")
