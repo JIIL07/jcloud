@@ -3,3 +3,5 @@ secrets/
 .idea/
 *.exe
 api/openapi/
+interactive_file_selector/target
+interactive_file_selector/*.lock
