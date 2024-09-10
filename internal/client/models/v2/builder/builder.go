@@ -31,9 +31,9 @@ func (b *InfoBuilder) WithData(data []byte) *InfoBuilder {
 
 func (b *InfoBuilder) Build() models.File {
 	return models.File{
-		ID:       b.id,
-		Metadata: b.metadata,
-		Status:   b.status,
-		Data:     b.data,
+		ID:     b.id,
+		Meta:   b.metadata,
+		Status: b.status,
+		Data:   b.data,
 	}
 }

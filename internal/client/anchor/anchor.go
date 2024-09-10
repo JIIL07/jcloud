@@ -54,7 +54,7 @@ func NewAnchor(files []models.File, message string, previousSnapshots map[int]*d
 		}
 
 		fileSummary := fmt.Sprintf("File ID: %d, File: %s.%s\nHash: %s\nDelta Info: %s\n",
-			file.ID, file.Metadata.Name, file.Metadata.Extension, hashSum, deltaInfo)
+			file.ID, file.Meta.Name, file.Meta.Extension, hashSum, deltaInfo)
 		fileSummaries = append(fileSummaries, fileSummary)
 
 		previousSnapshots[file.ID] = newSnapshot

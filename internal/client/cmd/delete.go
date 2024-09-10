@@ -1,37 +1,62 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/jc"
-	"github.com/JIIL07/jcloud/pkg/log"
 	"github.com/spf13/cobra"
+	"os"
 )
 
-var allFilesD bool
-
 var deleteCmd = &cobra.Command{
-	Use:   "delete [flags] | [filename]",
-	Short: "Delete file",
-	Long:  "Delete file from local storage do not collide with server storage",
+	Use:   "delete [flags] [filename]...",
+	Short: "Delete file or directory records from local database",
+	Long:  "Delete one or more file or directory records from the local SQLite database without affecting the server storage.",
 	Run: func(cmd *cobra.Command, args []string) {
-		switch {
-		case len(args) > 0:
-			appCtx.FileService.F.Metadata.Name = args[0]
-			err := jc.DeleteFile(appCtx.FileService)
+		if allFlag {
+			confirmAction("all files")
+			err := jc.DeleteAllFiles(a.File)
 			if err != nil {
-				appCtx.LoggerService.L.Error("error deleting file", jlog.Err(err))
-				cobra.CheckErr(err)
+				cobra.CheckErr(fmt.Errorf("failed to delete all files from database: %w", err))
 			}
-		case allFilesD:
-			err := jc.DeleteAllFiles(appCtx.FileService)
-			if err != nil {
-				appCtx.LoggerService.L.Error("error deleting all files", jlog.Err(err))
-				cobra.CheckErr(err)
-			}
+			return
+		}
+
+		if len(args) == 0 {
+			cobra.CheckErr(fmt.Errorf("no files specified"))
+		}
+
+		if interactive {
+			withInteractive(args, deleteFile)
+		} else {
+			withWorkerPool(args, deleteFile)
 		}
 	},
 }
 
+func deleteFile(arg string) {
+	if arg == "" {
+		cobra.CheckErr(fmt.Errorf("no file specified"))
+		return
+	}
+
+	if dryRun {
+		cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("Would delete record for file %s from database\n", arg))
+	} else {
+		logVerbose("Deleting file record", "file", arg)
+		a.File.F.Meta.Name = arg
+		err := jc.DeleteFile(a.File)
+		if err != nil && !ignoreErrors {
+			cobra.CheckErr(fmt.Errorf("failed to delete file record: %w", err))
+		}
+	}
+}
+
 func init() {
-	deleteCmd.Flags().BoolVarP(&allFilesD, "all", "a", false, "Delete all files from local storage")
+	deleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all files")
+	deleteCmd.Flags().BoolVarP(&ignoreErrors, "ignore-errors", "I", false, "Ignore errors and continue deleting files")
+	deleteCmd.Flags().BoolVarP(&dryRun, "dry-run", "n", false, "Show files that would be deleted, without deleting them")
+	deleteCmd.Flags().BoolVarP(&verboseFlag, "verbose", "V", false, "Show detailed logs during deletion")
+	deleteCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactively choose files to delete")
+
 	RootCmd.AddCommand(deleteCmd)
 }

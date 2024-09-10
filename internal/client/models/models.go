@@ -8,12 +8,15 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 type FileMetadata struct {
-	Name      string `db:"filename"`
-	Extension string `db:"extension"`
-	Size      int    `db:"filesize"`
+	Name        string `db:"filename"`
+	Extension   string `db:"extension"`
+	Size        int    `db:"filesize"`
+	HashSum     string `db:"hash_sum"`
+	Description string `db:"description,omitempty"`
 }
 
 func (metadata *FileMetadata) Split() {
@@ -33,10 +36,12 @@ func NewFileMetadata(fullname string) FileMetadata {
 }
 
 type File struct {
-	ID       int `db:"id"`
-	Metadata FileMetadata
-	Status   string `db:"status"`
-	Data     []byte `db:"data"`
+	ID         int          `db:"id"`
+	Meta       FileMetadata `db:"m"`
+	Status     string       `db:"status"`
+	Data       []byte       `db:"data"`
+	CreatedAt  time.Time    `db:"created_at"`
+	ModifiedAt time.Time    `db:"last_modified_at"`
 }
 
 func (i *File) SetFile() error {
@@ -48,7 +53,7 @@ func (i *File) SetFile() error {
 	if err != nil {
 		return fmt.Errorf("error reading name: %v", err)
 	}
-	i.Metadata = NewFileMetadata(m)
+	i.Meta = NewFileMetadata(m)
 
 	data, err := ReadDataFromStdin()
 	if err != nil {

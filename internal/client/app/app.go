@@ -14,10 +14,10 @@ type ClientContext struct {
 	common service
 
 	// Services
-	FileService     *FileService
-	StorageService  *StorageService
-	PathsService    *PathsService
-	LoggerService   *LoggerService
+	File            *FileService
+	Storage         *StorageService
+	Paths           *PathsService
+	Logger          *LoggerService
 	AnchorService   *AnchorService
 	DeltaService    *DeltaService
 	SnapshotService *SnapshotService
@@ -30,11 +30,6 @@ type service struct {
 type FileService struct {
 	*service
 	F *models.File
-}
-
-func NewFileService() *FileService {
-	fs := &FileService{}
-	return fs
 }
 
 type StorageService struct {
@@ -78,19 +73,19 @@ func NewAppContext(cfg *config.ClientConfig) (*ClientContext, error) {
 
 	context.common.Context = context
 
-	context.FileService = &FileService{
+	context.File = &FileService{
 		service: &context.common,
 		F:       &models.File{},
 	}
-	context.StorageService = &StorageService{
+	context.Storage = &StorageService{
 		service: &context.common,
 		S:       s,
 	}
-	context.PathsService = &PathsService{
+	context.Paths = &PathsService{
 		service: &context.common,
 		P:       p,
 	}
-	context.LoggerService = &LoggerService{
+	context.Logger = &LoggerService{
 		service: &context.common,
 		L:       l,
 	}

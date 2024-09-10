@@ -20,7 +20,7 @@ var loginCmd = &cobra.Command{
 			return errors.New("not enough arguments")
 		}
 
-		err := os.WriteFile(appCtx.PathsService.P.JcloudFile.Name(), []byte(args[0]+" "+args[1]+" "+jhash.Hash(args[2])), 0600)
+		err := os.WriteFile(a.Paths.P.JcloudFile.Name(), []byte(args[0]+" "+args[1]+" "+jhash.Hash(args[2])), 0600)
 		if err != nil {
 			return err
 		}
@@ -40,12 +40,12 @@ var loginCmd = &cobra.Command{
 			return err
 		}
 
-		err = cookies.WriteToFile(appCtx.PathsService.P.Jcookie.Name(), rawCookies)
+		err = cookies.WriteToFile(a.Paths.P.Jcookie.Name(), rawCookies)
 		if err != nil {
 			return err
 		}
 
-		appCtx.LoggerService.L.Info(fmt.Sprintf("new user %v logged in with email %v", args[0], args[1]))
+		a.Logger.L.Info(fmt.Sprintf("new user %v logged in with email %v", args[0], args[1]))
 
 		return nil
 	},

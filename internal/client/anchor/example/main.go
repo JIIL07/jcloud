@@ -18,7 +18,7 @@ func main() {
 	for i := 1; i <= 50; i++ {
 		file := models.File{
 			ID: i % 2,
-			Metadata: models.FileMetadata{
+			Meta: models.FileMetadata{
 				Name:      "example" + strconv.Itoa(i),
 				Extension: "txt",
 				Size:      1024,

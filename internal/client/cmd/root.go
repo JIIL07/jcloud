@@ -14,7 +14,7 @@ import (
 
 var (
 	ctx         context.Context
-	appCtx      *app.ClientContext
+	a           *app.ClientContext
 	c           *config.ClientConfig
 	versionFlag bool
 )
@@ -29,22 +29,22 @@ var RootCmd = &cobra.Command{
 	Short:   `Cloud is a cloud file manager CLI`,
 	GroupID: "",
 	Long: `Cloud is a cloud file manager CLI that provides various commands to manage files in the cloud.
-It supports commands like init to initialize the cloud, add to add files, and exit to exit the CLI.`,
+It supports commands like init to initialize the cloud, addFile to addFile files, and exit to exit the CLI.`,
 	Version: "0.0.1",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		var ok bool
-		appCtx, ok = jctx.FromContext[*app.ClientContext](ctx, "app-context")
+		a, ok = jctx.FromContext[*app.ClientContext](ctx, "app-context")
 		if !ok {
 			return fmt.Errorf("failed to get file context")
 		}
 
-		c = appCtx.Cfg
+		c = a.Cfg
 
 		if versionFlag || cmd.Name() == "login" || cmd == cmd.Root() {
 			return nil
 		}
 
-		content, err := io.ReadAll(appCtx.PathsService.P.JcloudFile)
+		content, err := io.ReadAll(a.Paths.P.JcloudFile)
 		if err != nil {
 			return fmt.Errorf("failed to read login file: %v", err)
 		}
