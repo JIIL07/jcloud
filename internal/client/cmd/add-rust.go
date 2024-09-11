@@ -13,7 +13,7 @@ type item struct {
 }
 
 func runRustApp() error {
-	cmd := exec.Command("D:/GoDev/jcloud/jcloud-main/cmd/cloud/interactive_file_selector.exe")
+	cmd := exec.Command(".list/interactive.exe")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -40,7 +40,7 @@ func readSelectedFilesList(filename string) ([]item, error) {
 	return files, nil
 }
 
-func withInteractive_v2(args []string) {
+func withInteractiveV2(args []string) {
 	err := runRustApp()
 	if err != nil {
 		fmt.Println("Error running Rust app:", err)

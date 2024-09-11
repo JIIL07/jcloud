@@ -127,38 +127,39 @@ impl eframe::App for MyApp {
 
                 let mut changes = vec![];
 
-                egui::Frame::default()
-                    .inner_margin(egui::style::Margin::symmetric(10.0, 10.0))
-                    .show(ui, |ui| {
-                        egui::ScrollArea::vertical()
-                            .max_height(250.0)
-                            .show(ui, |ui| {
-                                for (idx, item) in self.file_tree.iter_mut().enumerate() {
-                                    ui.horizontal(|ui| {
-                                        ui.add_space(item.depth as f32 * 20.0);
-                                        let label = if item.is_dir {
-                                            format!("📁 {}", item.name)
-                                        } else {
-                                            format!("📄 {}", item.name)
-                                        };
-                                        let selected = ui.checkbox(&mut item.selected, label.as_str()).changed();
-                                        if selected {
-                                            changes.push((idx, item.selected));
-                                        }
-                                    });
-                                }
-                            });
-                    });
-
-                for (idx, selected) in changes {
-                    self.update_selection(idx, selected);
-                }
+                ui.separator();
 
                 if self.show_save_button {
                     if ui.button("Save selection").clicked() {
                         self.save_selection();
                         self.show_save_button = false;
                     }
+                }
+
+                egui::ScrollArea::vertical()
+                    .auto_shrink([false; 2])
+                    .show(ui, |ui| {
+                        ui.set_min_height(ui.available_height());
+                        ui.set_min_width(ui.available_width());
+
+                        for (idx, item) in self.file_tree.iter_mut().enumerate() {
+                            ui.horizontal(|ui| {
+                                ui.add_space(item.depth as f32 * 20.0);
+                                let label = if item.is_dir {
+                                    format!("📁 {}", item.name)
+                                } else {
+                                    format!("📄 {}", item.name)
+                                };
+                                let selected = ui.checkbox(&mut item.selected, label.as_str()).changed();
+                                if selected {
+                                    changes.push((idx, item.selected));
+                                }
+                            });
+                        }
+                    });
+
+                for (idx, selected) in changes {
+                    self.update_selection(idx, selected);
                 }
             }
         });
@@ -167,8 +168,8 @@ impl eframe::App for MyApp {
 
 fn main() {
     let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(200.0, 370.0)),
-        resizable: false,
+        initial_window_size: Some(egui::vec2(400.0, 500.0)),
+        resizable: true,
         ..Default::default()
     };
     eframe::run_native("jcloud", options, Box::new(|_cc| Box::new(MyApp::default())))

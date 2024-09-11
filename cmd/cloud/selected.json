@@ -1,10 +1,44 @@
 [
   {
-    "path": "D:\\Dev\\dir1",
-    "selected": true
+    "name": "etc",
+    "path": "C:\\Ruby33-x64\\bin\\etc",
+    "selected": true,
+    "is_dir": true,
+    "depth": 2
   },
   {
-    "path": "D:\\Dev\\dir2",
-    "selected": true
+    "name": "ssl",
+    "path": "C:\\Ruby33-x64\\bin\\etc\\ssl",
+    "selected": true,
+    "is_dir": true,
+    "depth": 3
+  },
+  {
+    "name": "certs",
+    "path": "C:\\Ruby33-x64\\bin\\etc\\ssl\\certs",
+    "selected": true,
+    "is_dir": true,
+    "depth": 4
+  },
+  {
+    "name": "c_rehash.rb",
+    "path": "C:\\Ruby33-x64\\bin\\etc\\ssl\\certs\\c_rehash.rb",
+    "selected": true,
+    "is_dir": false,
+    "depth": 5
+  },
+  {
+    "name": "cert.pem",
+    "path": "C:\\Ruby33-x64\\bin\\etc\\ssl\\cert.pem",
+    "selected": true,
+    "is_dir": false,
+    "depth": 4
+  },
+  {
+    "name": "README-SSL.md",
+    "path": "C:\\Ruby33-x64\\bin\\etc\\ssl\\README-SSL.md",
+    "selected": true,
+    "is_dir": false,
+    "depth": 4
   }
 ]

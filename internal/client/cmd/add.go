@@ -29,7 +29,7 @@ var addCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		startTime := time.Now()
 		if interactiveV2 {
-			withInteractive_v2(args)
+			withInteractiveV2(args)
 		}
 
 		if len(args) == 0 && !allFlag && !dropFlag && !dryRun && !updateFlag {
