@@ -12,11 +12,11 @@ import (
 )
 
 var (
-	dropFlag     bool
-	updateFlag   bool
-	forceFlag    bool
-	targetDir    string
-	hintsEnabled = true
+	dropFlag      bool
+	updateFlag    bool
+	forceFlag     bool
+	interactiveV2 bool
+	hintsEnabled  = true
 
 	mutex      sync.Mutex
 	numWorkers = runtime.NumCPU() + 2
@@ -28,10 +28,13 @@ var addCmd = &cobra.Command{
 	Long:  `Add one or more files or directories to local storage (SQLite) before uploading to the server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		startTime := time.Now()
+		if interactiveV2 {
+			withInteractiveV2(args)
+		}
 
 		if len(args) == 0 && !allFlag && !dropFlag && !dryRun && !updateFlag {
 			if hintsEnabled {
-				hintMessage := h.DisplayHint("addFile", h.EmptyPath, nil)
+				hintMessage := h.DisplayHint("addFile", h.EmptyPath, c)
 				if hintMessage != "" {
 					cobra.WriteStringAndCheck(os.Stdout, hintMessage)
 				}
@@ -41,7 +44,7 @@ var addCmd = &cobra.Command{
 
 		if len(args) == 0 && !allFlag {
 			if hintsEnabled {
-				hintMessage := h.DisplayHint("addFile", h.AllFlagMissing, nil)
+				hintMessage := h.DisplayHint("addFile", h.AllFlagMissing, c)
 				if hintMessage != "" {
 					cobra.WriteStringAndCheck(os.Stdout, hintMessage)
 				}
@@ -72,7 +75,7 @@ var addCmd = &cobra.Command{
 func addFile(arg string) {
 	info, err := os.Stat(arg)
 	if os.IsNotExist(err) {
-		hintMessage := h.DisplayHint("addFile", h.NoFilesMatched, nil)
+		hintMessage := h.DisplayHint("addFile", h.NoFilesMatched, c)
 		if hintMessage != "" {
 			cobra.WriteStringAndCheck(os.Stdout, hintMessage)
 		}
@@ -114,6 +117,7 @@ func init() {
 	addCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force adding ignored files")
 	addCmd.Flags().BoolVarP(&verboseFlag, "verbose", "V", false, "Show detailed logs during file addition")
 	addCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactively choose files to addFile")
+	addCmd.Flags().BoolVar(&interactiveV2, "v2", false, "Interactively choose files to addFile")
 	addCmd.Flags().StringSliceVarP(&excludeFiles, "exclude", "e", []string{}, "Exclude specific files or directories")
 
 	addCmd.Flags().BoolVar(&hintsEnabled, "advice", true, "Enable or disable hints when nothing is specified")
