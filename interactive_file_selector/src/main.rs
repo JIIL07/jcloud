@@ -5,26 +5,37 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-// Структура для хранения информации о выбранных файлах
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct FileItem {
+    name: String,
     path: String,
     selected: bool,
+    is_dir: bool,
+    depth: usize,
 }
 
 impl FileItem {
-    fn new(path: String) -> Self {
+    fn new(path: PathBuf, is_dir: bool, depth: usize) -> Self {
+        let name = path
+            .file_name()
+            .unwrap_or_else(|| path.as_os_str())
+            .to_string_lossy()
+            .to_string();
+
         FileItem {
-            path,
+            name,
+            path: path.to_string_lossy().to_string(),
             selected: false,
+            is_dir,
+            depth,
         }
     }
 }
 
-// Основная структура приложения
 struct MyApp {
     root_dir: Option<PathBuf>,
     file_tree: Vec<FileItem>,
+    show_save_button: bool,
 }
 
 impl Default for MyApp {
@@ -32,32 +43,44 @@ impl Default for MyApp {
         Self {
             root_dir: None,
             file_tree: vec![],
+            show_save_button: false,
         }
     }
 }
 
 impl MyApp {
-    // Функция для построения дерева файлов
     fn build_file_tree(&mut self, dir: &Path) {
         self.file_tree.clear();
-        self.visit_dirs(dir);
+        self.visit_dirs(dir, 0);
     }
 
-    // Рекурсивная функция обхода директорий
-    fn visit_dirs(&mut self, dir: &Path) {
+    fn visit_dirs(&mut self, dir: &Path, depth: usize) {
         if dir.is_dir() {
+            self.file_tree.push(FileItem::new(dir.to_path_buf(), true, depth));
+
+            let mut dirs = vec![];
+            let mut files = vec![];
+
             for entry in fs::read_dir(dir).unwrap() {
                 let entry = entry.unwrap();
                 let path = entry.path();
                 if path.is_dir() {
-                    self.visit_dirs(&path);
+                    dirs.push(path);
+                } else {
+                    files.push(path);
                 }
-                self.file_tree.push(FileItem::new(path.to_string_lossy().to_string()));
+            }
+
+            for dir in dirs {
+                self.visit_dirs(&dir, depth + 1);
+            }
+
+            for file in files {
+                self.file_tree.push(FileItem::new(file, false, depth + 1));
             }
         }
     }
 
-    // Сохранение выбранных файлов в JSON
     fn save_selection(&self) {
         let selected_items: Vec<FileItem> = self
             .file_tree
@@ -70,38 +93,73 @@ impl MyApp {
         let mut file = File::create("selected.json").unwrap();
         file.write_all(json.as_bytes()).unwrap();
     }
+
+    fn update_selection(&mut self, idx: usize, selected: bool) {
+        self.file_tree[idx].selected = selected;
+        if self.file_tree[idx].is_dir {
+            let depth = self.file_tree[idx].depth;
+            for i in idx + 1..self.file_tree.len() {
+                if self.file_tree[i].depth > depth {
+                    self.file_tree[i].selected = selected;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
 }
 
-// Реализация пользовательского интерфейса
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Файловый менеджер");
+            ui.heading("Jcloud interactive");
 
-            // Кнопка для выбора директории
-            if ui.button("Выбрать директорию").clicked() {
+            if ui.button("Pick directory").clicked() {
                 if let Some(path) = FileDialog::new().pick_folder() {
                     self.root_dir = Some(path.clone());
                     self.build_file_tree(&path);
+                    self.show_save_button = true;
                 }
             }
 
-            // Если директория выбрана, строим дерево файлов
             if let Some(root) = &self.root_dir {
-                ui.label(format!("Выбранная директория: {}", root.display()));
+                ui.label(format!("Selected directory: {}", root.display()));
 
-                egui::ScrollArea::vertical().show(ui, |ui| {
-                    for item in &mut self.file_tree {
-                        ui.horizontal(|ui| {
-                            ui.checkbox(&mut item.selected, item.path.as_str());
-                        });
+                let mut changes = vec![];
+
+                egui::Frame::default()
+                    .inner_margin(egui::style::Margin::symmetric(10.0, 10.0))
+                    .show(ui, |ui| {
+                        egui::ScrollArea::vertical()
+                            .max_height(250.0)
+                            .show(ui, |ui| {
+                                for (idx, item) in self.file_tree.iter_mut().enumerate() {
+                                    ui.horizontal(|ui| {
+                                        ui.add_space(item.depth as f32 * 20.0);
+                                        let label = if item.is_dir {
+                                            format!("📁 {}", item.name)
+                                        } else {
+                                            format!("📄 {}", item.name)
+                                        };
+                                        let selected = ui.checkbox(&mut item.selected, label.as_str()).changed();
+                                        if selected {
+                                            changes.push((idx, item.selected));
+                                        }
+                                    });
+                                }
+                            });
+                    });
+
+                for (idx, selected) in changes {
+                    self.update_selection(idx, selected);
+                }
+
+                if self.show_save_button {
+                    if ui.button("Save selection").clicked() {
+                        self.save_selection();
+                        self.show_save_button = false;
                     }
-                });
-            }
-
-            // Кнопка для сохранения выбора
-            if ui.button("Save Selection").clicked() {
-                self.save_selection();
+                }
             }
         });
     }
@@ -109,8 +167,9 @@ impl eframe::App for MyApp {
 
 fn main() {
     let options = eframe::NativeOptions {
-        initial_window_size: Some(egui::vec2(600.0, 400.0)),
+        initial_window_size: Some(egui::vec2(200.0, 370.0)),
+        resizable: false,
         ..Default::default()
     };
-    eframe::run_native("Файловый менеджер", options, Box::new(|_cc| Box::new(MyApp::default())))
+    eframe::run_native("jcloud", options, Box::new(|_cc| Box::new(MyApp::default())))
 }
