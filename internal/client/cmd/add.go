@@ -12,11 +12,11 @@ import (
 )
 
 var (
-	dropFlag      bool
-	updateFlag    bool
-	forceFlag     bool
-	interactiveV2 bool
-	hintsEnabled  = true
+	dropFlag        bool
+	updateFlag      bool
+	forceFlag       bool
+	interactiveRust bool
+	hintsEnabled    = true
 
 	mutex      sync.Mutex
 	numWorkers = runtime.NumCPU() + 2
@@ -28,8 +28,8 @@ var addCmd = &cobra.Command{
 	Long:  `Add one or more files or directories to local storage (SQLite) before uploading to the server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		startTime := time.Now()
-		if interactiveV2 {
-			withInteractiveV2(args)
+		if interactiveRust {
+			rustInteractive()
 		}
 
 		if len(args) == 0 && !allFlag && !dropFlag && !dryRun && !updateFlag {
@@ -116,8 +116,8 @@ func init() {
 	addCmd.Flags().BoolVarP(&updateFlag, "update", "u", false, "Only addFile modified files, skip untracked ones")
 	addCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force adding ignored files")
 	addCmd.Flags().BoolVarP(&verboseFlag, "verbose", "V", false, "Show detailed logs during file addition")
-	addCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactively choose files to addFile")
-	addCmd.Flags().BoolVar(&interactiveV2, "v2", false, "Interactively choose files to addFile")
+	addCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Interactively choose files to add")
+	addCmd.Flags().BoolVarP(&interactiveRust, "interactive-app", "R", false, "Interactively choose files to add in the app interface")
 	addCmd.Flags().StringSliceVarP(&excludeFiles, "exclude", "e", []string{}, "Exclude specific files or directories")
 
 	addCmd.Flags().BoolVar(&hintsEnabled, "advice", true, "Enable or disable hints when nothing is specified")

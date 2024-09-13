@@ -13,18 +13,10 @@ type item struct {
 }
 
 func runRustApp() error {
-	cmd := exec.Command(".list/interactive.exe")
+	cmd := exec.Command("./interactive.exe")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
-}
-
-func saveInteractiveFilesList(filename string, files []item) error {
-	file, err := json.MarshalIndent(files, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filename, file, 0644)
 }
 
 func readSelectedFilesList(filename string) ([]item, error) {
@@ -40,7 +32,7 @@ func readSelectedFilesList(filename string) ([]item, error) {
 	return files, nil
 }
 
-func withInteractiveV2(args []string) {
+func rustInteractive() {
 	err := runRustApp()
 	if err != nil {
 		fmt.Println("Error running Rust app:", err)

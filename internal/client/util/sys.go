@@ -1,12 +1,15 @@
 package util
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	jhash "github.com/JIIL07/jcloud/pkg/hash"
 	"github.com/fsnotify/fsnotify"
+	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -158,6 +161,14 @@ func GetFileFromExplorer() (*models.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
 	}
+
+	var cBuf bytes.Buffer
+	gzipWriter := gzip.NewWriter(&cBuf)
+	_, err = gzipWriter.Write(fileData)
+	if err != nil {
+		log.Fatal("Error compressing data:", err)
+	}
+	gzipWriter.Close() // nolint:errcheck
 
 	meta.Size = len(fileData)
 	meta.HashSum = jhash.Hash(string(fileData))
