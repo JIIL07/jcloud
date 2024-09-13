@@ -14,6 +14,8 @@ func setupRouter(s *storage.Storage) *mux.Router {
 	router := mux.NewRouter()
 	router.Use(middleware.StorageMiddleware(s))
 
+	router.PathPrefix("/static/binary").Handler(http.StripPrefix("/static/binary", http.FileServer(http.Dir("./static"))))
+
 	router.HandleFunc("/", RootHandler).Methods(http.MethodGet).Name("root")
 	router.HandleFunc("/api/v1/healthcheck", HealthCheckHandler).Methods(http.MethodGet).Name("healthcheck")
 

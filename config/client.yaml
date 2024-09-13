@@ -7,7 +7,7 @@ client:
     password: ""
 
   # Environment in which the client is operating (e.g., development, production)
-  environment: "local"
+  environment: "prod"
 
   # API connection settings
   api:
