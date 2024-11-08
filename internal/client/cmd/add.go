@@ -34,7 +34,7 @@ var addCmd = &cobra.Command{
 
 		if len(args) == 0 && !allFlag && !dropFlag && !dryRun && !updateFlag {
 			if hintsEnabled {
-				hintMessage := h.DisplayHint("addFile", h.EmptyPath, c)
+				hintMessage := h.DisplayHint("add", h.EmptyPath, c)
 				if hintMessage != "" {
 					cobra.WriteStringAndCheck(os.Stdout, hintMessage)
 				}
@@ -44,7 +44,7 @@ var addCmd = &cobra.Command{
 
 		if len(args) == 0 && !allFlag {
 			if hintsEnabled {
-				hintMessage := h.DisplayHint("addFile", h.AllFlagMissing, c)
+				hintMessage := h.DisplayHint("add", h.AllFlagMissing, c)
 				if hintMessage != "" {
 					cobra.WriteStringAndCheck(os.Stdout, hintMessage)
 				}
@@ -94,7 +94,7 @@ func addFile(arg string) {
 		allFiles([]string{arg}, addFile)
 	} else {
 		if dryRun {
-			cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("Would addFile file %s\n", arg))
+			cobra.WriteStringAndCheck(os.Stdout, fmt.Sprintf("Would add file %s\n", arg))
 		} else {
 			mutex.Lock()
 			defer mutex.Unlock()
@@ -102,7 +102,7 @@ func addFile(arg string) {
 			logVerbose("Adding file", "file", arg)
 			err = jc.AddFileFromPath(a.File, arg)
 			if err != nil && !ignoreErrors {
-				cobra.CheckErr(fmt.Errorf("failed to addFile file: %w", err))
+				cobra.CheckErr(fmt.Errorf("failed to add file: %w", err))
 			}
 		}
 	}
