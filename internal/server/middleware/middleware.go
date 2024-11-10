@@ -18,7 +18,7 @@ func StorageMiddleware(s *storage.Storage) func(http.Handler) http.Handler {
 	}
 }
 
-func LoginMiddleware(next http.Handler) http.Handler {
+func UserMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s, ok := jctx.FromContext[*storage.Storage](r.Context(), "storage")
 		if !ok {
@@ -26,8 +26,9 @@ func LoginMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		session, err := cookies.Store.Get(r, "user-session")
-		if err != nil {
-			http.Error(w, fmt.Sprintf("Failed to get session: %v", err), http.StatusInternalServerError)
+		if err != nil || session.IsNew {
+			cookies.ClearSession(w, r)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 

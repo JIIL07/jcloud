@@ -12,6 +12,7 @@ type Config struct {
 	Env      string `yaml:"env" env-required:"true"`
 	Server   ServerConfig
 	Database DBConfig
+	Static   StaticPath
 	URL      string `yaml:"url" env-required:"true"`
 }
 
@@ -25,6 +26,10 @@ type ServerConfig struct {
 type DBConfig struct {
 	DriverName     string `yaml:"driverName" env-required:"true"`
 	DataSourceName string `yaml:"dataSourceName" env-required:"true"`
+}
+
+type StaticPath struct {
+	Path string `yaml:"path" env-required:"true"`
 }
 
 func MustLoad() *Config {

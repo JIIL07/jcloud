@@ -3,18 +3,19 @@ package server
 import (
 	"encoding/json"
 	"github.com/JIIL07/jcloud/internal/server/middleware"
-	"net/http"
-
 	"github.com/JIIL07/jcloud/internal/server/private/commandline"
+	"github.com/JIIL07/jcloud/internal/server/static"
 	"github.com/JIIL07/jcloud/internal/storage"
+	jctx "github.com/JIIL07/jcloud/pkg/ctx"
 	"github.com/gorilla/mux"
+	"net/http"
 )
 
-func setupRouter(s *storage.Storage) *mux.Router {
+func setupRouter(s *storage.Storage, b *static.Static) *mux.Router {
 	router := mux.NewRouter()
 	router.Use(middleware.StorageMiddleware(s))
 
-	router.PathPrefix("/static/binary").Handler(http.StripPrefix("/static/binary", http.FileServer(http.Dir("./static"))))
+	router.HandleFunc("/static/{filename}", b.BinaryHandler).Methods(http.MethodGet)
 
 	router.HandleFunc("/", RootHandler).Methods(http.MethodGet).Name("root")
 	router.HandleFunc("/api/v1/healthcheck", HealthCheckHandler).Methods(http.MethodGet).Name("healthcheck")
@@ -23,8 +24,12 @@ func setupRouter(s *storage.Storage) *mux.Router {
 	api.HandleFunc("/login", LoginHandler).Methods(http.MethodPost, http.MethodGet).Name("login")
 	api.HandleFunc("/logout", LogoutHandler).Methods(http.MethodGet).Name("logout")
 
-	f := api.PathPrefix("/files").Name("files").Subrouter()
-	f.Use(middleware.LoginMiddleware)
+	user := api.PathPrefix("/user").Name("user").Subrouter()
+	user.Use(middleware.UserMiddleware)
+	user.HandleFunc("/{user}", CurrentUserHandler).Methods(http.MethodGet).Name("current-user")
+
+	f := user.PathPrefix("/files").Name("files").Subrouter()
+	f.Use(middleware.UserMiddleware)
 	f.HandleFunc("/get", GetFilesHandler).Methods(http.MethodGet).Name("get-files")
 	f.HandleFunc("/upload", AddFileHandler).Methods(http.MethodPost).Name("add-file")
 	f.HandleFunc("/download", DownloadFileHandler).Methods(http.MethodGet).Name("download-file")
@@ -37,6 +42,27 @@ func setupRouter(s *storage.Storage) *mux.Router {
 	private.HandleFunc("/cmd", commandline.HandleCmdExec).Methods(http.MethodGet)
 
 	return router
+}
+
+func CurrentUserHandler(w http.ResponseWriter, r *http.Request) {
+	s, ok := jctx.FromContext[*storage.Storage](r.Context(), "storage")
+	if !ok {
+		http.Error(w, "Storage not found", http.StatusInternalServerError)
+	}
+
+	user := r.Context().Value("user").(string)
+	u, err := s.GetByUsername(user)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(u)
+	if err != nil {
+		http.Error(w, "Failed to encode user", http.StatusInternalServerError)
+		return
+	}
 }
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {

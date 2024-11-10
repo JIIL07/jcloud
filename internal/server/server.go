@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/JIIL07/jcloud/internal/server/static"
 	"net/http"
 
 	"github.com/JIIL07/jcloud/internal/config"
@@ -23,11 +24,11 @@ type CurrentUser struct {
 	NetworkDetails Connection
 }
 
-func New(c config.ServerConfig, s *storage.Storage) *Server {
+func New(c config.ServerConfig, s *storage.Storage, b *static.Static) *Server {
 	return &Server{
 		httpServer: &http.Server{
 			Addr:              c.Address,
-			Handler:           setupRouter(s),
+			Handler:           setupRouter(s, b),
 			ReadTimeout:       c.ReadTimeout,
 			WriteTimeout:      c.WriteTimeout,
 			IdleTimeout:       c.IdleTimeout,
@@ -42,5 +43,5 @@ func (s *Server) Start() error {
 
 func (s *Server) Stop(ctx context.Context) error {
 	s.httpServer.SetKeepAlivesEnabled(false)
-	return s.httpServer.Close()
+	return s.httpServer.Shutdown(ctx)
 }

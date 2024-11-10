@@ -10,4 +10,7 @@ database:
   driverName: "sqlite3"
   dataSourceName: "../../storage/storage.db"
 
+static:
+  path: "../../static"
+
 url: "https://cloudfiles.up.railway.app"

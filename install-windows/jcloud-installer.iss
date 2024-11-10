@@ -9,7 +9,7 @@ Compression=lzma
 SolidCompression=yes
 SetupIconFile=installer-icon.ico
 
-[Files]
+[Static]
 Source: "config/*.yaml"; DestDir: "{app}/config"; Flags: ignoreversion
 Source: "internal/client/*.*"; DestDir: "{app}/src"; Flags: ignoreversion recursesubdirs createallsubdirs
 

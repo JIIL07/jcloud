@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8d7da;
+            color: #721c24;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            background-color: #f8d7da;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+        }
+        p {
+            font-size: 1.2rem;
+        }
+        .error-message {
+            font-weight: bold;
+            color: #721c24;
+        }
+        .error-code {
+            font-size: 1rem;
+            color: #856404;
+        }
+    </style>
+    <script>
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const message = params.get('message') || 'An unexpected error occurred.';
+            const status = params.get('status') || '500';
+
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-code').textContent = 'Error code: ' + status;
+        };
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1>Error</h1>
+    <p class="error-message" id="error-message">An unexpected error occurred.</p>
+    <p class="error-code" id="error-code">Error code: 500</p>
+    <p><a href="/">Return to Home Page</a></p>
+</div>
+</body>
+</html>

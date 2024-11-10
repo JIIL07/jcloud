@@ -6,6 +6,7 @@ import (
 	"github.com/JIIL07/jcloud/internal/config"
 	"github.com/JIIL07/jcloud/internal/logger"
 	"github.com/JIIL07/jcloud/internal/server"
+	"github.com/JIIL07/jcloud/internal/server/static"
 	"github.com/JIIL07/jcloud/internal/storage"
 	"github.com/JIIL07/jcloud/pkg/cookies"
 	"github.com/JIIL07/jcloud/pkg/env"
@@ -39,11 +40,17 @@ func main() {
 	}
 	defer s.CloseDatabase()
 
+	binary, err := static.LoadStatic(cfg.Static.Path)
+	if err != nil {
+		log.Error("Failed to load static files", jlog.Err(err))
+		os.Exit(1)
+	}
+
 	//setup new cookie storage
 	cookies.SetNewCookieStore()
 
 	//init server
-	srv := server.New(cfg.Server, s)
+	srv := server.New(cfg.Server, s, binary)
 
 	//start server
 	go func() {
