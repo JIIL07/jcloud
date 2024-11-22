@@ -1,37 +1,15 @@
 package storage
 
 import (
+	"database/sql"
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/config"
+	"github.com/JIIL07/jcloud/internal/server/config"
 	"github.com/jmoiron/sqlx"
 	"os"
 )
 
 type Storage struct {
 	DB *sqlx.DB
-}
-
-type UserData struct {
-	UserID   int    `db:"id" json:"id"`
-	Username string `db:"username" json:"username"`
-	Email    string `db:"email" json:"email"`
-	Password string `db:"password" json:"password"`
-	Protocol string `db:"hashprotocol" json:"hashprotocol"`
-	Admin    int    `db:"admin" json:"admin"`
-}
-
-type File struct {
-	ID       int          `json:"id" db:"id"`
-	UserID   int          `json:"user_id" db:"user_id"`
-	Metadata FileMetadata `json:"metadata"`
-	Status   string       `json:"status" db:"status"`
-	Data     []byte       `json:"data" db:"data"`
-}
-
-type FileMetadata struct {
-	Name      string `json:"name" db:"filename"`
-	Extension string `json:"extension" db:"extension"`
-	Size      int    `json:"size" db:"filesize"`
 }
 
 func InitDatabase(config *config.Config) (*Storage, error) {
@@ -66,6 +44,10 @@ func InitDatabase(config *config.Config) (*Storage, error) {
 		"filesize" INTEGER NOT NULL, 
 		"status" TEXT, 
 		"data" BLOB,
+		"created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		"last_modified_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		"hash_sum" TEXT NOT NULL,
+		"description" TEXT,
 		FOREIGN KEY (user_id) REFERENCES users(id),
 		UNIQUE(user_id, filename)
 	);`)
@@ -79,4 +61,8 @@ func InitDatabase(config *config.Config) (*Storage, error) {
 
 func (s *Storage) CloseDatabase() error {
 	return s.DB.Close()
+}
+
+func (s *Storage) Query(command string) (*sql.Rows, error) {
+	return s.DB.Query(command)
 }

@@ -1,6 +1,7 @@
 package home
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -17,65 +18,27 @@ type Paths struct {
 func GetHome() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
+		fmt.Printf("Error getting home directory: %v\n", err)
 		return ""
 	}
 	return home
 }
 
-func CreateJcloudDir(home string) string {
-	jcloudDir := filepath.Join(home, ".jcloud")
-	err := os.MkdirAll(jcloudDir, 0750)
+func createDir(baseDir, subDir string) string {
+	dirPath := filepath.Join(baseDir, subDir)
+	err := os.MkdirAll(dirPath, 0750)
 	if err != nil {
+		fmt.Printf("Error creating directory %s: %v\n", dirPath, err)
 		return ""
 	}
-	return jcloudDir
+	return dirPath
 }
 
-func CreateJlogDir(jcloudDir string) string {
-	jlogDir := filepath.Join(jcloudDir, ".jlog")
-	err := os.MkdirAll(jlogDir, 0750)
+func createFile(dir, filename string) *os.File {
+	filePath := filepath.Join(dir, filename)
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
-		return ""
-	}
-	return jlogDir
-}
-
-func CreateAnchorDir(jcloudDir string) string {
-	anchorDir := filepath.Join(jcloudDir, ".anchor")
-	err := os.MkdirAll(anchorDir, 0750)
-	if err != nil {
-		return ""
-	}
-	return anchorDir
-}
-
-func CreateJcloudFile(jcloudDir string) *os.File {
-	file, err := os.OpenFile(filepath.Join(jcloudDir, ".jcloud"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
-		return nil
-	}
-	return file
-}
-
-func CreateLogFile(jlogDir string) *os.File {
-	file, err := os.OpenFile(filepath.Join(jlogDir, "jlog.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
-		return nil
-	}
-	return file
-}
-
-func CreateJcookieFile(jcloudDir string) *os.File {
-	file, err := os.OpenFile(filepath.Join(jcloudDir, ".jcookie"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
-		return nil
-	}
-	return file
-}
-
-func CreateAnchorFile(anchorDir string) *os.File {
-	file, err := os.OpenFile(filepath.Join(anchorDir, "anchor.log"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
+		fmt.Printf("Error creating/opening file %s: %v\n", filePath, err)
 		return nil
 	}
 	return file
@@ -83,14 +46,18 @@ func CreateAnchorFile(anchorDir string) *os.File {
 
 func SetPaths() *Paths {
 	homeDir := GetHome()
-	jcloudDir := CreateJcloudDir(homeDir)
-	jlogDir := CreateJlogDir(jcloudDir)
-	anchorDir := CreateAnchorDir(jcloudDir)
-	anchorLog := CreateAnchorFile(anchorDir)
+	if homeDir == "" {
+		return nil
+	}
 
-	jcloudFile := CreateJcloudFile(jcloudDir)
-	logFile := CreateLogFile(jlogDir)
-	jcookieFile := CreateJcookieFile(jcloudDir)
+	jcloudDir := createDir(homeDir, ".jcloud")
+	jlogDir := createDir(jcloudDir, ".jlog")
+	anchorDir := createDir(jcloudDir, ".anchor")
+
+	jcloudFile := createFile(jcloudDir, ".jcloud")
+	logFile := createFile(jlogDir, "jlog.log")
+	jcookieFile := createFile(jcloudDir, ".jcookie")
+	anchorLog := createFile(anchorDir, "anchor.log")
 
 	return &Paths{
 		Home:       homeDir,
@@ -102,20 +69,12 @@ func SetPaths() *Paths {
 }
 
 func (p *Paths) Close() {
-	err := p.JcloudFile.Close()
-	if err != nil {
-		return
-	}
-	err = p.Jcookie.Close()
-	if err != nil {
-		return
-	}
-	err = p.AnchorFile.Close()
-	if err != nil {
-		return
-	}
-	err = p.JlogFile.Close()
-	if err != nil {
-		return
+	files := []*os.File{p.JcloudFile, p.JlogFile, p.Jcookie, p.AnchorFile}
+	for _, file := range files {
+		if file != nil {
+			if err := file.Close(); err != nil {
+				fmt.Printf("Error closing file: %v\n", err)
+			}
+		}
 	}
 }

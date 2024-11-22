@@ -3,12 +3,12 @@ package main
 
 import (
 	"context"
-	"github.com/JIIL07/jcloud/internal/config"
-	"github.com/JIIL07/jcloud/internal/logger"
-	"github.com/JIIL07/jcloud/internal/server"
+	"github.com/JIIL07/jcloud/internal/server/config"
+	"github.com/JIIL07/jcloud/internal/server/cookies"
+	"github.com/JIIL07/jcloud/internal/server/logger"
+	"github.com/JIIL07/jcloud/internal/server/server"
 	"github.com/JIIL07/jcloud/internal/server/static"
-	"github.com/JIIL07/jcloud/internal/storage"
-	"github.com/JIIL07/jcloud/pkg/cookies"
+	"github.com/JIIL07/jcloud/internal/server/storage"
 	"github.com/JIIL07/jcloud/pkg/env"
 	"github.com/JIIL07/jcloud/pkg/log"
 	"os"

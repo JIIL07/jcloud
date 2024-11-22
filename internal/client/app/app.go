@@ -1,10 +1,10 @@
 package app
 
 import (
+	"github.com/JIIL07/jcloud/internal/client/config"
+	"github.com/JIIL07/jcloud/internal/client/logger"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/storage"
-	"github.com/JIIL07/jcloud/internal/config"
-	"github.com/JIIL07/jcloud/internal/logger"
 	"github.com/JIIL07/jcloud/pkg/home"
 	"log/slog"
 )

@@ -1,13 +1,14 @@
 package role
 
 const (
-	ADMIN = iota
+	NOTUSER = iota
 	USER
+	ADMIN
 )
 
 func Set(f bool) int {
 	if f {
-		return ADMIN
+		return USER
 	}
-	return USER
+	return NOTUSER
 }

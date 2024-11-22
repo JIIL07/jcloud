@@ -6,3 +6,4 @@ api/openapi/
 interactive_file_selector/target
 interactive_file_selector/*.lock
 cmd/server/static/
+api/req/cookies.txt

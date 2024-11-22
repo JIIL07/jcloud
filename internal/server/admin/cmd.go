@@ -1,30 +1,16 @@
-package commandline
+package admin
 
 import (
 	"fmt"
+	"github.com/JIIL07/jcloud/internal/server/cookies"
 	jjson "github.com/JIIL07/jcloud/pkg/json"
 	"net/http"
 	"os/exec"
 	"runtime"
-
-	"github.com/JIIL07/jcloud/internal/storage"
-	"github.com/JIIL07/jcloud/pkg/cookies"
-	"github.com/JIIL07/jcloud/pkg/ctx"
 )
 
 func HandleCmdExec(w http.ResponseWriter, r *http.Request) {
-	var ok bool
-	s, ok = jctx.FromContext[*storage.Storage](r.Context(), "storage")
-	if !ok {
-		http.Error(w, "Storage not found", http.StatusInternalServerError)
-		return
-	}
-
-	store, err := cookies.Store.Get(r, "admin")
-	if err != nil {
-		jjson.RespondWithError(w, err)
-		return
-	}
+	store := cookies.GetSession(r, "admin")
 
 	if store.IsNew {
 		w.WriteHeader(http.StatusUnauthorized)

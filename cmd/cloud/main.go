@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/app"
 	"github.com/JIIL07/jcloud/internal/client/cmd"
-	"github.com/JIIL07/jcloud/internal/config"
+	"github.com/JIIL07/jcloud/internal/client/config"
 	"github.com/JIIL07/jcloud/pkg/ctx"
 	"log"
 	"os"

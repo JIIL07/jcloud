@@ -2,21 +2,11 @@ package middleware
 
 import (
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/storage"
-	"github.com/JIIL07/jcloud/pkg/cookies"
+	"github.com/JIIL07/jcloud/internal/server/cookies"
+	"github.com/JIIL07/jcloud/internal/server/storage"
 	"github.com/JIIL07/jcloud/pkg/ctx"
 	"net/http"
 )
-
-func StorageMiddleware(s *storage.Storage) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := jctx.WithContext(r.Context(), "storage", s)
-			r = r.WithContext(ctx)
-			next.ServeHTTP(w, r)
-		})
-	}
-}
 
 func UserMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +18,7 @@ func UserMiddleware(next http.Handler) http.Handler {
 		session, err := cookies.Store.Get(r, "user-session")
 		if err != nil || session.IsNew {
 			cookies.ClearSession(w, r)
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			http.Redirect(w, r, "api/v1/login", http.StatusSeeOther)
 			return
 		}
 
@@ -43,7 +33,18 @@ func UserMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		r = r.WithContext(jctx.WithContext(r.Context(), "user", &u))
+		ctx := jctx.WithContext(r.Context(), "user", &u)
+		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
+}
+
+func StorageMiddleware(s *storage.Storage) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := jctx.WithContext(r.Context(), "storage", s)
+			r = r.WithContext(ctx)
+			next.ServeHTTP(w, r)
+		})
+	}
 }

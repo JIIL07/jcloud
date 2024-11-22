@@ -7,10 +7,10 @@ import (
 	"github.com/JIIL07/jcloud/internal/client/app"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/requests/jreq"
-	"github.com/JIIL07/jcloud/pkg/cookies"
 	"github.com/JIIL07/jcloud/pkg/params"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 type UserData struct {
@@ -56,11 +56,11 @@ func UploadFile(a *app.ClientContext, f *[]models.File) (*http.Response, error) 
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	cookieString, err := cookies.ReadFromFile(a.Paths.P.Jcookie.Name())
+	cookieString, err := ReadFromFile(a.Paths.P.Jcookie.Name())
 	if err != nil {
 		return nil, fmt.Errorf("error reading cookies: %w", err)
 	}
-	c, err := cookies.Deserialize(cookieString)
+	c, err := Deserialize(cookieString)
 	if err != nil {
 		return nil, fmt.Errorf("error deserializing cookies: %w", err)
 	}
@@ -117,4 +117,33 @@ func GetFiles() error {
 	}
 	fmt.Println(string(response))
 	return nil
+}
+
+func Serialize(cookies []*http.Cookie) (string, error) {
+	data, err := json.Marshal(cookies)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func Deserialize(data string) ([]*http.Cookie, error) {
+	var cookies []*http.Cookie
+	err := json.Unmarshal([]byte(data), &cookies)
+	if err != nil {
+		return nil, err
+	}
+	return cookies, nil
+}
+
+func WriteToFile(filename, data string) error {
+	return os.WriteFile(filename, []byte(data), 0600)
+}
+
+func ReadFromFile(filename string) (string, error) {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }

@@ -84,33 +84,3 @@ func ListFiles(fs *app.FileService) ([]models.File, error) {
 	err := fs.Context.Storage.S.GetAllFiles(&files)
 	return files, err
 }
-
-// DataInFile retrieves the file data from the database and sets it in the File struct.
-func DataInFile(fs *app.FileService) error {
-	fs.F.Meta.Split()
-
-	rows, err := fs.Context.Storage.S.DB.Query(
-		`SELECT data FROM local WHERE filename = ? AND extension = ?`,
-		fs.F.Meta.Name,
-		fs.F.Meta.Extension,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to query file data: %w", err)
-	}
-	defer rows.Close() // nolint:errcheck
-
-	return util.WriteData(rows, fs.F)
-}
-
-// SearchFile searches for a file in the database and prints its metadata if found.
-func SearchFile(fs *app.FileService) error {
-	err := fs.Context.Storage.S.DB.Get(fs.F, `SELECT * FROM local WHERE filename = ? AND extension = ?`,
-		fs.F.Meta.Name,
-		fs.F.Meta.Extension)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Found: %v\n", *fs.F)
-	return nil
-}

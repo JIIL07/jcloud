@@ -97,17 +97,17 @@ import (
 )
 
 func main() {
-   c := config.MustLoadClient()
-   appc, err := app.NewAppContext(c)
+   config := config.MustLoadClient()
+   appc, err := app.NewAppContext(config)
    if err != nil {
       log.Fatal(err)
    }
    ctx := jctx.WithContext(context.Background(), "app-context", appc)
    cmd.SetContext(ctx)
    switch {
-   case c.Env == "prod":
+   case config.Env == "prod":
       cmd.Execute()
-   case c.Env == "debug" || c.Env == "local":
+   case config.Env == "debug" || config.Env == "local":
       reader := bufio.NewReader(os.Stdin)
       for {
          dir, _ := os.Getwd()
@@ -165,9 +165,9 @@ func main() {
          os.Exit(1)
       }
    }()
-   c := make(chan os.Signal, 1)
-   signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-   <-c
+   config := make(chan os.Signal, 1)
+   signal.Notify(config, os.Interrupt, syscall.SIGTERM)
+   <-config
    ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
    defer cancel()
    if err := srv.Stop(ctx); err != nil {

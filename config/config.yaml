@@ -1,4 +1,4 @@
-env: "prod" #changable to debug or prod or local
+env: "local" #changable to debug or prod or local
 
 server:
   address: ":8080"

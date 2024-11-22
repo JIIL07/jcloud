@@ -8,15 +8,13 @@ import (
 	"path/filepath"
 )
 
-type Static struct {
-	Files map[string][]byte
-}
+type Files map[string][]byte
 
-func (sf *Static) BinaryHandler(w http.ResponseWriter, r *http.Request) {
+func (f Files) BinaryHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	filename := vars["filename"]
 
-	data, exists := sf.Files[filename]
+	data, exists := f[filename]
 	if !exists {
 		http.Error(w, "File not found", http.StatusNotFound)
 		return
@@ -24,11 +22,11 @@ func (sf *Static) BinaryHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
 	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Write(data)
+	w.Write(data) // nolint:errcheck
 }
 
-func LoadStatic(path string) (*Static, error) {
-	staticFiles := &Static{Files: make(map[string][]byte)}
+func LoadStatic(path string) (*Files, error) {
+	staticFiles := Files{}
 
 	err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -41,7 +39,7 @@ func LoadStatic(path string) (*Static, error) {
 			}
 
 			filename := filepath.Base(filePath)
-			staticFiles.Files[filename] = data
+			staticFiles[filename] = data
 		}
 		return nil
 	})
@@ -49,5 +47,5 @@ func LoadStatic(path string) (*Static, error) {
 		return nil, fmt.Errorf("failed to load static files: %w", err)
 	}
 
-	return staticFiles, nil
+	return &staticFiles, nil
 }

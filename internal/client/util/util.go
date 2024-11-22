@@ -28,5 +28,4 @@ func ReadFull(f *os.File) []byte {
 		return nil
 	}
 	return data
-
 }

@@ -2,7 +2,7 @@ package hints
 
 import (
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/config"
+	"github.com/JIIL07/jcloud/internal/client/config"
 )
 
 type Hint struct {

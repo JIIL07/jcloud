@@ -1,17 +1,15 @@
-package commandline
+package admin
 
 import (
 	"encoding/json"
-	jjson "github.com/JIIL07/jcloud/pkg/json"
+	"github.com/JIIL07/jcloud/internal/server/cookies"
+	"github.com/JIIL07/jcloud/internal/server/storage"
+	j "github.com/JIIL07/jcloud/pkg/json"
 	"net/http"
 	"os"
 
-	"github.com/JIIL07/jcloud/internal/storage"
-	"github.com/JIIL07/jcloud/pkg/cookies"
 	"github.com/gorilla/sessions"
 )
-
-var u storage.UserData
 
 func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -23,6 +21,8 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	a := r.URL.Query().Get("admin")
 
 	d := os.Getenv("ADMIN_USER")
+
+	var u storage.User
 	err := json.Unmarshal([]byte(d), &u)
 	if err != nil {
 		http.Error(w, "Invalid admin user configuration", http.StatusInternalServerError)
@@ -32,7 +32,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	if a == u.Username {
 		session, err := cookies.Store.Get(r, "admin")
 		if err != nil {
-			jjson.RespondWithError(w, err)
+			j.RespondWithError(w, err)
 			return
 		}
 
@@ -42,7 +42,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 
 		err = sessions.Save(r, w)
 		if err != nil {
-			jjson.RespondWithError(w, err)
+			j.RespondWithError(w, err)
 			return
 		}
 
@@ -57,7 +57,7 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 func CheckHandler(w http.ResponseWriter, r *http.Request) {
 	s, err := cookies.Store.Get(r, "admin")
 	if err != nil {
-		jjson.RespondWithError(w, err)
+		j.RespondWithError(w, err)
 		return
 	}
 

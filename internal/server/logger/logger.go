@@ -23,7 +23,3 @@ func NewLogger(env string) *slog.Logger {
 	}
 	return log
 }
-
-func NewClientLogger(f *os.File) *slog.Logger {
-	return slog.New(slog.NewTextHandler(f, &slog.HandlerOptions{Level: slog.LevelDebug}))
-}

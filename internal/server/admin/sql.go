@@ -1,30 +1,17 @@
-package commandline
+package admin
 
 import (
+	"github.com/JIIL07/jcloud/internal/server/cookies"
+	"github.com/JIIL07/jcloud/internal/server/utils"
 	jjson "github.com/JIIL07/jcloud/pkg/json"
 	"net/http"
 
-	"github.com/JIIL07/jcloud/internal/storage"
-	"github.com/JIIL07/jcloud/pkg/cookies"
-	"github.com/JIIL07/jcloud/pkg/ctx"
 	"github.com/JIIL07/jcloud/pkg/parsers"
 )
 
-var s *storage.Storage
-
 func HandleSQLQuery(w http.ResponseWriter, r *http.Request) {
-	var ok bool
-	s, ok = jctx.FromContext[*storage.Storage](r.Context(), "storage")
-	if !ok {
-		http.Error(w, "Storage not found", http.StatusInternalServerError)
-		return
-	}
-
-	store, err := cookies.Store.Get(r, "admin")
-	if err != nil {
-		jjson.RespondWithError(w, err)
-		return
-	}
+	s := utils.ProvideStorage(r, w)
+	store := cookies.GetSession(r, "admin")
 
 	if store.IsNew {
 		w.WriteHeader(http.StatusUnauthorized)

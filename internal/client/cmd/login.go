@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/requests"
-	"github.com/JIIL07/jcloud/pkg/cookies"
 	jhash "github.com/JIIL07/jcloud/pkg/hash"
 	"github.com/spf13/cobra"
 	"os"
@@ -35,12 +34,12 @@ var loginCmd = &cobra.Command{
 			return err
 		}
 
-		rawCookies, err := cookies.Serialize(resp.Cookies())
+		rawCookies, err := requests.Serialize(resp.Cookies())
 		if err != nil {
 			return err
 		}
 
-		err = cookies.WriteToFile(a.Paths.P.Jcookie.Name(), rawCookies)
+		err = requests.WriteToFile(a.Paths.P.Jcookie.Name(), rawCookies)
 		if err != nil {
 			return err
 		}
