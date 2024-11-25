@@ -50,7 +50,7 @@ func AddFileFromPath(fs *app.FileService, path string) error {
 	gzipWriter.Close() // nolint:errcheck
 
 	meta.Size = len(cBuf.Bytes())
-	meta.HashSum = jhash.Hash(string(data))
+	meta.HashSum = jhash.Hash(data)
 
 	file := &models.File{
 		Meta:       meta,

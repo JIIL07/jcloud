@@ -28,7 +28,7 @@ func InitDatabase(config *config.Config) (*Storage, error) {
 		"email" TEXT NOT NULL,
 		"password" TEXT NOT NULL,
 		"hashprotocol" TEXT,
-		"admin" INTEGER DEFAULT 1
+		"admin" INTEGER DEFAULT 0
 	);`)
 
 	if err != nil {

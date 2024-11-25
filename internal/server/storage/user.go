@@ -20,22 +20,22 @@ type User struct {
 	Admin    int    `db:"admin" json:"admin"`
 }
 
-func Admin(p *User) boolean.Wrapper {
+func Admin(u *User) boolean.Wrapper {
 	admin := os.Getenv("ADMIN_USER")
 	if admin == "" {
 		return boolean.Wrapper{Value: false}
 	}
 
-	var u *User
-	err := json.Unmarshal([]byte(admin), &u)
+	var a *User
+	err := json.Unmarshal([]byte(admin), &a)
 	if err != nil {
 		return boolean.Wrapper{Value: false}
 	}
 
-	return boolean.Wrapper{Value: p.Username == u.Username && p.Password == u.Password && p.Email == u.Email}
+	return boolean.Wrapper{Value: u.Username == a.Username && u.Password == a.Password && u.Email == a.Email}
 }
 
-func (s *Storage) CheckExistence(username string) (bool, error) {
+func (s *Storage) CheckUser(username string) (bool, error) {
 	var exists bool
 	query := `SELECT EXISTS(SELECT 1 FROM users WHERE username = ?)`
 	err := s.DB.Get(&exists, query, username)
@@ -45,7 +45,7 @@ func (s *Storage) CheckExistence(username string) (bool, error) {
 	return exists, nil
 }
 
-func (s *Storage) GetByUsername(username string) (User, error) {
+func (s *Storage) GetUser(username string) (User, error) {
 	var u User
 	query := `SELECT * FROM users WHERE username = ?`
 	err := s.DB.Get(&u, query, username)
@@ -56,6 +56,16 @@ func (s *Storage) GetByUsername(username string) (User, error) {
 		return u, fmt.Errorf("error querying user: %w", err)
 	}
 	return u, nil
+}
+
+func (s *Storage) GetAllUsers() ([]User, error) {
+	var users []User
+	query := `SELECT * FROM users`
+	err := s.DB.Select(&users, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all users: %v", err)
+	}
+	return users, nil
 }
 
 func (s *Storage) SaveNewUser(u *User) error {
@@ -70,16 +80,6 @@ func (s *Storage) SaveNewUser(u *User) error {
 	return nil
 }
 
-func (s *Storage) GetAllUsers() ([]User, error) {
-	var users []User
-	query := `SELECT * FROM users`
-	err := s.DB.Select(&users, query)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get all users: %v", err)
-	}
-	return users, nil
-}
-
 func (s *Storage) DeleteUser(username string) error {
 	query := `DELETE FROM users WHERE username = ?`
 	_, err := s.DB.Exec(query, username)
@@ -89,20 +89,20 @@ func (s *Storage) DeleteUser(username string) error {
 	return nil
 }
 
-func (s *Storage) UpdateUser(username string, updates map[string]interface{}) error {
+func (s *Storage) UpdateUserInfo(username string, updates map[string]interface{}) error {
 	if len(updates) == 0 {
 		return fmt.Errorf("no fields to update")
 	}
 
-	var setClauses []string
+	var clauses []string
 	args := make([]interface{}, 0, len(updates)+1)
 
 	for field, value := range updates {
-		setClauses = append(setClauses, fmt.Sprintf("%s = ?", field))
+		clauses = append(clauses, fmt.Sprintf("%s = ?", field))
 		args = append(args, value)
 	}
 
-	query := fmt.Sprintf(`UPDATE users SET %s WHERE username = ?`, strings.Join(setClauses, ", "))
+	query := fmt.Sprintf(`UPDATE users SET %s WHERE username = ?`, strings.Join(clauses, ", "))
 	args = append(args, username)
 
 	_, err := s.DB.Exec(query, args...)

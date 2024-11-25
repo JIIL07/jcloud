@@ -47,7 +47,7 @@ func SaveUser(w http.ResponseWriter, r *http.Request) *CurrentUser {
 		return nil
 	}
 
-	e, err := s.CheckExistence(user.UserData.Username)
+	e, err := s.CheckUser(user.UserData.Username)
 	if err != nil {
 		http.Error(w, "Failed to check user existence", http.StatusInternalServerError)
 		return nil
@@ -97,21 +97,6 @@ func CurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func UsersHandler(w http.ResponseWriter, r *http.Request) {
-	s := utils.ProvideStorage(r, w)
-	users, err := s.GetAllUsers()
-	if err != nil {
-		http.Error(w, "Failed to retrieve users", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(users)
-	if err != nil {
-		http.Error(w, "Failed to encode users", http.StatusInternalServerError)
-		return
-	}
-}
-
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	user := utils.ProvideUser(r, w)
 	w.Write([]byte(fmt.Sprintf("Current user: %v\n", user.Username))) // nolint:errcheck
@@ -130,5 +115,45 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte(fmt.Sprintf("\ntotal files: %d", t))) // nolint:errcheck
+}
 
+func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
+	u := utils.ProvideUser(r, w)
+	s := utils.ProvideStorage(r, w)
+	err := s.DeleteUser(u.Username)
+	if err != nil {
+		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("User deleted")) // nolint:errcheck
+}
+
+func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	u := utils.ProvideUser(r, w)
+	s := utils.ProvideStorage(r, w)
+	newPassword := r.URL.Query().Get("password")
+	newEmail := r.URL.Query().Get("email")
+	updates := make(map[string]interface{})
+
+	if newPassword == "" && newEmail == "" {
+		http.Error(w, "No updates provided", http.StatusBadRequest)
+		return
+	}
+
+	if newPassword != "" {
+		updates["password"] = newPassword
+	}
+
+	if newEmail != "" {
+		updates["email"] = newEmail
+	}
+
+	err := s.UpdateUserInfo(u.Username, updates)
+	if err != nil {
+		http.Error(w, "Failed to update user", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("User updated")) // nolint:errcheck
 }

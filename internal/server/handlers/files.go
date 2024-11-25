@@ -134,64 +134,7 @@ func ImageGalleryHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(html)) // nolint:errcheck
 }
 
-func FileExistsHandler(w http.ResponseWriter, r *http.Request) {
-	user := utils.ProvideUser(r, w)
-	s := utils.ProvideStorage(r, w)
-
-	fileName := r.URL.Query().Get("filename")
-	if fileName == "" {
-		http.Error(w, "Filename is required", http.StatusBadRequest)
-		return
-	}
-
-	f, err := s.GetFile(user.UserID, fileName)
-	if err != nil {
-		http.Error(w, "Failed to check file existence", http.StatusInternalServerError)
-		return
-	}
-
-	if f == nil {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("File not found")) // nolint:errcheck
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("File %s exists", fileName))) // nolint:errcheck
-}
-
-func RenameFileHandler(w http.ResponseWriter, r *http.Request) {
-	user := utils.ProvideUser(r, w)
-	s := utils.ProvideStorage(r, w)
-
-	oldName := r.URL.Query().Get("oldname")
-	newName := r.URL.Query().Get("newname")
-	if oldName == "" || newName == "" {
-		http.Error(w, "Both oldname and newname are required", http.StatusBadRequest)
-		return
-	}
-	f, err := s.GetFile(user.UserID, oldName)
-	if err != nil {
-		http.Error(w, "Failed to rename file", http.StatusInternalServerError)
-		return
-	}
-	if f == nil {
-		http.Error(w, "File not found", http.StatusNotFound)
-		return
-	}
-
-	f.Metadata.Name = newName
-	err = s.RenameFile(f)
-	if err != nil {
-		http.Error(w, "Failed to rename file", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("File renamed successfully")) // nolint:errcheck
-}
-
-func CheckSumHandler(w http.ResponseWriter, r *http.Request) {
+func HashSumHandler(w http.ResponseWriter, r *http.Request) {
 	user := utils.ProvideUser(r, w)
 	s := utils.ProvideStorage(r, w)
 
@@ -212,4 +155,99 @@ func CheckSumHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"filename": filename, "checksum": checksum}) // nolint:errcheck
+}
+
+func FileDataHandler(w http.ResponseWriter, r *http.Request) {
+	u := utils.ProvideUser(r, w)
+	s := utils.ProvideStorage(r, w)
+
+	f := &storage.File{}
+	json.NewDecoder(r.Body).Decode(&f)
+	f.UserID = u.UserID
+
+	err := s.UpdateFile(f, f.Data)
+	if err != nil {
+		http.Error(w, "Failed to save file data", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("File saved successfully")) // nolint:errcheck
+
+}
+
+func PartialUpdateHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func FileInfoHandler(w http.ResponseWriter, r *http.Request) {
+	s := utils.ProvideStorage(r, w)
+	u := utils.ProvideUser(r, w)
+
+	fileName := r.URL.Query().Get("filename")
+	if fileName == "" {
+		http.Error(w, "Filename is required", http.StatusBadRequest)
+		return
+	}
+
+	fileInfo, err := s.GetFile(u.UserID, fileName)
+	if err != nil {
+		http.Error(w, "Failed to retrieve file info", http.StatusInternalServerError)
+		return
+	}
+	if fileInfo == nil {
+		http.Error(w, "File not found", http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(fileInfo) // nolint:errcheck
+}
+
+func UpdatePermissionsHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func FilePermissionsHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func ShareFileHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func FileHistoryHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func UpdateMetadataHandler(w http.ResponseWriter, r *http.Request) {
+	s := utils.ProvideStorage(r, w)
+	u := utils.ProvideUser(r, w)
+
+	if r.Method != http.MethodPatch {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	req := struct {
+		Filename    string `json:"filename"`
+		Extension   string `json:"extension"`
+		Description string `json:"description"`
+		OldName     string `json:"oldname"`
+	}{}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	err := s.UpdateFileMetadata(u.UserID, req)
+	if err != nil {
+		http.Error(w, "Failed to update metadata", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Metadata updated successfully",
+	})
 }

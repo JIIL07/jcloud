@@ -27,7 +27,7 @@ func UserMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		u, err := s.GetByUsername(session.Values["username"].(string))
+		u, err := s.GetUser(session.Values["username"].(string))
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Failed to get user: %v", err), http.StatusInternalServerError)
 			return

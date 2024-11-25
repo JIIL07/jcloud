@@ -171,7 +171,7 @@ func GetFileFromExplorer() (*models.File, error) {
 	gzipWriter.Close() // nolint:errcheck
 
 	meta.Size = len(fileData)
-	meta.HashSum = jhash.Hash(string(fileData))
+	meta.HashSum = jhash.Hash(fileData)
 
 	f := &models.File{
 		Meta:       meta,

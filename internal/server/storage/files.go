@@ -4,26 +4,27 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	jhash "github.com/JIIL07/jcloud/pkg/hash"
 	"github.com/jmoiron/sqlx"
 	"time"
 )
 
 type File struct {
-	ID         int `db:"id"`
-	UserID     int `db:"user_id"`
+	ID         int `db:"id" json:"id"`
+	UserID     int `db:"user_id" json:"user_id"`
 	Metadata   FileMetadata
-	Status     string    `db:"status"`
-	Data       []byte    `db:"data"`
-	CreatedAt  time.Time `db:"created_at"`
-	ModifiedAt time.Time `db:"last_modified_at"`
+	Status     string    `db:"status" json:"status"`
+	Data       []byte    `db:"data" json:"data"`
+	CreatedAt  time.Time `db:"created_at" json:"created_at"`
+	ModifiedAt time.Time `db:"last_modified_at" json:"modified_at"`
 }
 
 type FileMetadata struct {
-	Name        string `db:"filename"`
-	Extension   string `db:"extension"`
-	Size        int    `db:"filesize"`
-	HashSum     string `db:"hash_sum"`
-	Description string `db:"description,omitempty"`
+	Name        string `db:"filename" json:"filename"`
+	Extension   string `db:"extension" json:"extension"`
+	Size        int    `db:"filesize" json:"filesize"`
+	HashSum     string `db:"hash_sum" json:"hash_sum"`
+	Description string `db:"description,omitempty" json:"description,omitempty"`
 }
 
 func (s *Storage) GetAllFiles(userID int) ([]File, error) {
@@ -97,6 +98,71 @@ func (s *Storage) DeleteAllFiles(userID int) error {
 	query := `DELETE FROM files WHERE user_id = ?`
 	_, err := s.DB.Exec(query, userID)
 	return err
+}
+
+func (s *Storage) UpdateFile(f *File, newData []byte) error {
+	params := map[string]interface{}{
+		"userID":     f.UserID,
+		"filename":   f.Metadata.Name,
+		"status":     "modified",
+		"modifiedAt": time.Now(),
+		"data":       newData,
+		"size":       len(newData),
+		"hashSum":    jhash.Hash(newData),
+	}
+
+	query := `
+		UPDATE files
+		SET 
+			status = :status,
+			last_modified_at = :modifiedAt,
+			data = :data, 
+			filesize = :size, 
+			hash_sum = :hashSum
+		WHERE user_id = :userID AND filename = :filename
+	`
+
+	_, err := s.DB.NamedExec(query, params)
+	if err != nil {
+		return fmt.Errorf("failed to update file: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Storage) UpdateFileMetadata(userID int, req struct {
+	Filename    string `json:"filename"`
+	Extension   string `json:"extension"`
+	Description string `json:"description"`
+	OldName     string `json:"oldname"`
+}) error {
+
+	params := map[string]interface{}{
+		"userID":      userID,
+		"oldName":     req.OldName,
+		"filename":    req.Filename,
+		"extension":   req.Extension,
+		"description": req.Description,
+		"status":      "metadata modified",
+		"modifiedAt":  time.Now(),
+	}
+
+	query := `
+		UPDATE files
+		SET 
+		    filename = :filename,
+			extension = :extension,
+			description = :description,
+			status = :status,
+			last_modified_at = :modifiedAt
+		WHERE filename = :oldName AND user_id = :userID
+	`
+
+	_, err := s.DB.NamedExec(query, params)
+	if err != nil {
+		return fmt.Errorf("failed to update metadata: %w", err)
+	}
+	return nil
 }
 
 func (s *Storage) RenameFile(f *File) error {

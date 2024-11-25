@@ -1,3 +1,5 @@
 curl -X POST http://localhost:8080/api/v1/login -H "Content-Type: application/json" -d "{\"username\": \"aida\", \"email\": \"maida05.am@gmail.com\", \"password\": \"Tyutyu17\"}" -c cookies.txt -v
 
 curl -X GET "http://localhost:8080/api/v1/login?username={user}"
+
+curl -X POST http://localhost:8080/check -H "Content-Type: application/json" -d "{\"metadata\": { \"filename\": \"example\", \"description\": \"Updated file description\"}, \"data\": \"VXBkYXRlZCBmaWxlIGNvbnRlbnQ=\"}"

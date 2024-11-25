@@ -19,7 +19,7 @@ var loginCmd = &cobra.Command{
 			return errors.New("not enough arguments")
 		}
 
-		err := os.WriteFile(a.Paths.P.JcloudFile.Name(), []byte(args[0]+" "+args[1]+" "+jhash.Hash(args[2])), 0600)
+		err := os.WriteFile(a.Paths.P.JcloudFile.Name(), []byte(args[0]+" "+args[1]+" "+jhash.Hash([]byte(args[2]))), 0600)
 		if err != nil {
 			return err
 		}
@@ -27,7 +27,7 @@ var loginCmd = &cobra.Command{
 		u := &requests.UserData{
 			Username: args[0],
 			Email:    args[1],
-			Password: jhash.Hash(args[2]),
+			Password: jhash.Hash([]byte(args[2])),
 		}
 		resp, err := requests.Login(u)
 		if err != nil {
