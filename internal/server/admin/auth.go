@@ -2,11 +2,12 @@ package admin
 
 import (
 	"encoding/json"
+	"net/http"
+	"os"
+
 	"github.com/JIIL07/jcloud/internal/server/cookies"
 	"github.com/JIIL07/jcloud/internal/server/storage"
 	j "github.com/JIIL07/jcloud/pkg/json"
-	"net/http"
-	"os"
 
 	"github.com/gorilla/sessions"
 )
@@ -14,7 +15,7 @@ import (
 func AuthHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Only method GET is allowed")) // nolint:errcheck
+		_, _ = w.Write([]byte("Only method GET is allowed"))
 		return
 	}
 
@@ -46,12 +47,12 @@ func AuthHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		w.Write([]byte("Session established")) // nolint:errcheck
+		_, _ = w.Write([]byte("Session established"))
 		return
 	}
 
 	w.WriteHeader(http.StatusUnauthorized)
-	w.Write([]byte("Unauthorized")) // nolint:errcheck
+	_, _ = w.Write([]byte("Unauthorized"))
 }
 
 func CheckHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,9 +64,9 @@ func CheckHandler(w http.ResponseWriter, r *http.Request) {
 
 	if s.IsNew {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Unauthorized")) // nolint:errcheck
+		_, _ = w.Write([]byte("Unauthorized"))
 		return
 	}
 
-	w.Write([]byte("Admin authorized")) // nolint:errcheck
+	_, _ = w.Write([]byte("Admin authorized"))
 }

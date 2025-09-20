@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// protoCmd represents the proto command
 var protoCmd = &cobra.Command{
 	Use:   "proto",
 	Short: "A brief description of your command",

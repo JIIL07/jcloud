@@ -4,11 +4,12 @@ import (
 	"crypto"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/JIIL07/jcloud/internal/server/cookies"
 	"github.com/JIIL07/jcloud/internal/server/storage"
 	"github.com/JIIL07/jcloud/internal/server/utils"
 	"github.com/JIIL07/jcloud/pkg/ip"
-	"net/http"
 )
 
 type CurrentUser struct {
@@ -78,13 +79,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("Authorization successful")) // nolint:errcheck
+	_, _ = w.Write([]byte("Authorization successful"))
 
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookies.ClearSession(w, r)
-	w.Write([]byte("Session cleared")) // nolint:errcheck
+	_, _ = w.Write([]byte("Session cleared"))
 }
 
 func CurrentUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +100,7 @@ func CurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 
 func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	user := utils.ProvideUser(r, w)
-	w.Write([]byte(fmt.Sprintf("Current user: %v\n", user.Username))) // nolint:errcheck
+	_, _ = w.Write([]byte(fmt.Sprintf("Current user: %v\n", user.Username)))
 
 	s := utils.ProvideStorage(r, w)
 	files, err := s.GetAllFiles(user.UserID)
@@ -111,10 +112,10 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var t int
 	for i := range files {
 		t += 1
-		json.NewEncoder(w).Encode(files[i].Metadata.Name + "." + files[i].Metadata.Extension) // nolint:errcheck
+		_ = json.NewEncoder(w).Encode(files[i].Metadata.Name + "." + files[i].Metadata.Extension)
 	}
 
-	w.Write([]byte(fmt.Sprintf("\ntotal files: %d", t))) // nolint:errcheck
+	_, _ = w.Write([]byte(fmt.Sprintf("\ntotal files: %d", t)))
 }
 
 func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -126,7 +127,7 @@ func DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("User deleted")) // nolint:errcheck
+	_, _ = w.Write([]byte("User deleted"))
 }
 
 func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -155,5 +156,5 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("User updated")) // nolint:errcheck
+	_, _ = w.Write([]byte("User updated"))
 }

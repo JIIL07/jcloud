@@ -1,15 +1,15 @@
-// nolint:errcheck
 package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+
 	"github.com/JIIL07/jcloud/internal/client/anchor"
 	"github.com/JIIL07/jcloud/internal/client/delta"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/pkg/home"
-	"os"
-	"path/filepath"
-	"strconv"
 )
 
 func main() {

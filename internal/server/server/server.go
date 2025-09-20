@@ -19,7 +19,7 @@ func New(config config.ServerConfig, storage *storage.Storage, binary *static.Fi
 	return &Server{
 		httpServer: &http.Server{
 			Addr:              config.Address,
-			Handler:           routes.SetupRouter(binary, storage),
+			Handler:           routes.LegacySetupRouter(binary, storage),
 			ReadTimeout:       config.ReadTimeout,
 			WriteTimeout:      config.WriteTimeout,
 			IdleTimeout:       config.IdleTimeout,

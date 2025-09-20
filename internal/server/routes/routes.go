@@ -1,27 +1,42 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/JIIL07/jcloud/internal/server/admin"
 	"github.com/JIIL07/jcloud/internal/server/handlers"
 	"github.com/JIIL07/jcloud/internal/server/middleware"
 	"github.com/JIIL07/jcloud/internal/server/static"
 	"github.com/JIIL07/jcloud/internal/server/storage"
-	"github.com/JIIL07/jcloud/internal/server/utils"
+	"github.com/JIIL07/jcloud/internal/server/types"
 	"github.com/gorilla/mux"
-	"net/http"
-	"time"
 )
 
-func SetupRouter(b *static.Files, s *storage.Storage) *mux.Router {
-	router := mux.NewRouter()
+type RouterConfig struct {
+	StorageService    types.StorageService
+	FileService       types.FileService
+	ResponseService   types.ResponseService
+	ValidationService types.ValidationService
+	StaticFiles       *static.Files
+}
 
-	router.Use(middleware.StorageMiddleware(s))
+func SetupRouter(config *RouterConfig) *mux.Router {
+	router := mux.NewRouter()
+	fileHandler := handlers.NewFileHandler(config.FileService, config.ResponseService)
+	fileVersionHandler := handlers.NewFileVersionHandler(config.StorageService, config.ResponseService)
+
+	storageConcrete := config.StorageService.(*handlers.StorageAdapter).Storage
+	router.Use(middleware.StorageMiddleware(storageConcrete))
+
 	router.HandleFunc("/", handlers.RootHandler).Methods(http.MethodGet).Name("root")
-	router.HandleFunc("/static/{filename}", b.BinaryHandler).Methods(http.MethodGet)
-	router.HandleFunc("/check", CheckerHandler).Methods(http.MethodPost, http.MethodGet)
+	router.HandleFunc("/static/{filename}", config.StaticFiles.BinaryHandler).Methods(http.MethodGet)
+	router.HandleFunc("/check", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("OK"))
+	}).Methods(http.MethodPost, http.MethodGet)
 
 	api := router.PathPrefix("/api/v1").Name("api").Subrouter()
-	api.Use(middleware.StorageMiddleware(s))
+	api.Use(middleware.StorageMiddleware(storageConcrete))
 	api.HandleFunc("/login", handlers.LoginHandler).Methods(http.MethodPost).Name("login")
 	api.HandleFunc("/logout", handlers.LogoutHandler).Methods(http.MethodGet).Name("logout")
 	api.HandleFunc("/healthcheck", handlers.HealthCheckHandler).Methods(http.MethodGet).Name("healthcheck")
@@ -35,33 +50,27 @@ func SetupRouter(b *static.Files, s *storage.Storage) *mux.Router {
 
 	files := user.PathPrefix("/files").Name("files").Subrouter()
 	files.Use(middleware.UserMiddleware)
-	files.HandleFunc("/upload", handlers.AddFileHandler).Methods(http.MethodPost).Name("add-file")
 
-	files.HandleFunc("/list", handlers.ListFilesHandler).Methods(http.MethodGet).Name("list-files")
-	files.HandleFunc("/images", handlers.ImageGalleryHandler).Methods(http.MethodGet).Name("list-images")
+	files.HandleFunc("/upload", fileHandler.AddFileHandler).Methods(http.MethodPost).Name("add-file")
+	files.HandleFunc("/list", fileHandler.ListFilesHandler).Methods(http.MethodGet).Name("list-files")
+	files.HandleFunc("/images", fileHandler.ImageGalleryHandler).Methods(http.MethodGet).Name("list-images")
 
 	currentFile := files.PathPrefix("/{filename}").Name("current-file").Subrouter()
 	currentFile.Use(middleware.UserMiddleware)
 
-	currentFile.HandleFunc("/versions", handlers.AddFileVersionHandler).Methods(http.MethodPost)
-	currentFile.HandleFunc("/versions", handlers.GetFileVersionsHandler).Methods(http.MethodGet)
-	currentFile.HandleFunc("/versions/{version}", handlers.GetFileVersionHandler).Methods(http.MethodGet)
-	currentFile.HandleFunc("/versions/last", handlers.GetLastFileVersionHandler).Methods(http.MethodGet)
-	currentFile.HandleFunc("/versions/{version}", handlers.DeleteFileVersionHandler).Methods(http.MethodDelete)
-	currentFile.HandleFunc("/versions", handlers.DeleteFileVersionsHandler).Methods(http.MethodDelete)
-	currentFile.HandleFunc("/restore", handlers.RestoreFileToVersionHandler).Methods(http.MethodGet)
-	currentFile.HandleFunc("/history", handlers.GetFileHistoryHandler).Methods(http.MethodGet)
+	currentFile.HandleFunc("/versions", fileVersionHandler.AddFileVersionHandler).Methods(http.MethodPost)
+	currentFile.HandleFunc("/versions", fileVersionHandler.GetFileVersionsHandler).Methods(http.MethodGet)
+	currentFile.HandleFunc("/versions/{version}", fileVersionHandler.GetFileVersionHandler).Methods(http.MethodGet)
+	currentFile.HandleFunc("/versions/last", fileVersionHandler.GetLastFileVersionHandler).Methods(http.MethodGet)
+	currentFile.HandleFunc("/versions/{version}", fileVersionHandler.DeleteFileVersionHandler).Methods(http.MethodDelete)
+	currentFile.HandleFunc("/versions", fileVersionHandler.DeleteFileVersionsHandler).Methods(http.MethodDelete)
+	currentFile.HandleFunc("/restore", fileVersionHandler.RestoreFileToVersionHandler).Methods(http.MethodGet)
 
-	currentFile.HandleFunc("/metadata", handlers.UpdateMetadataHandler).Methods(http.MethodPatch).Name("update-metadata")
-	currentFile.HandleFunc("/share", handlers.ShareFileHandler).Methods(http.MethodPost).Name("share-file")
-	currentFile.HandleFunc("/permissions", handlers.FilePermissionsHandler).Methods(http.MethodGet).Name("file-permissions")
-	currentFile.HandleFunc("/permissions", handlers.UpdatePermissionsHandler).Methods(http.MethodPatch).Name("update-permissions")
-	currentFile.HandleFunc("/info", handlers.FileInfoHandler).Methods(http.MethodGet).Name("file-info")
-	currentFile.HandleFunc("/partial-update", handlers.PartialUpdateHandler).Methods(http.MethodPatch).Name("partial-update")
-	currentFile.HandleFunc("/hash-sum", handlers.HashSumHandler).Methods(http.MethodGet).Name("hash-sum")
-	currentFile.HandleFunc("/download", handlers.DownloadFileHandler).Methods(http.MethodGet).Name("download-file")
-	currentFile.HandleFunc("/delete", handlers.DeleteFileHandler).Methods(http.MethodDelete).Name("delete-file")
-	currentFile.HandleFunc("/data", handlers.FileDataHandler).Methods(http.MethodPost).Name("file-data")
+	currentFile.HandleFunc("/metadata", fileHandler.UpdateMetadataHandler).Methods(http.MethodPatch).Name("update-metadata")
+	currentFile.HandleFunc("/info", fileHandler.FileInfoHandler).Methods(http.MethodGet).Name("file-info")
+	currentFile.HandleFunc("/hash-sum", fileHandler.HashSumHandler).Methods(http.MethodGet).Name("hash-sum")
+	currentFile.HandleFunc("/download", fileHandler.DownloadFileHandler).Methods(http.MethodGet).Name("download-file")
+	currentFile.HandleFunc("/delete", fileHandler.DeleteFileHandler).Methods(http.MethodDelete).Name("delete-file")
 
 	private := router.PathPrefix("/admin").Subrouter()
 	private.HandleFunc("/admin", admin.AuthHandler).Methods(http.MethodGet)
@@ -73,41 +82,19 @@ func SetupRouter(b *static.Files, s *storage.Storage) *mux.Router {
 	return router
 }
 
-func CheckerHandler(w http.ResponseWriter, r *http.Request) {
-	s := utils.ProvideStorage(r, w)
+func LegacySetupRouter(b *static.Files, s *storage.Storage) *mux.Router {
+	responseService := handlers.NewResponseService()
+	validationService := handlers.NewValidationService()
+	storageAdapter := handlers.NewStorageAdapter(s)
+	fileService := handlers.NewFileService(storageAdapter, validationService, responseService)
 
-	//f := &storage.File{
-	//	UserID:        1,
-	//	LastVersionID: 0,
-	//	Metadata: storage.FileMetadata{
-	//		Name:        "test",
-	//		Extension:   "txt",
-	//		Size:        len("test file"),
-	//		HashSum:     jhash.Hash([]byte("test file")),
-	//		Description: "test description",
-	//	},
-	//	Data:       []byte("test file"),
-	//	Status:     "upload",
-	//	CreatedAt:  time.Now(),
-	//	ModifiedAt: time.Now(),
-	//}
-
-	v := storage.FileVersion{
-		FileID:      1,
-		UserID:      1,
-		Version:     1,
-		FullVersion: true,
-		Delta:       []byte("test file"),
-		ChangeType:  "upload",
-		CreatedAt:   time.Now(),
+	config := &RouterConfig{
+		StorageService:    storageAdapter,
+		FileService:       fileService,
+		ResponseService:   responseService,
+		ValidationService: validationService,
+		StaticFiles:       b,
 	}
 
-	err := s.AddFileVersion(v)
-	if err != nil {
-		http.Error(w, "Failed to add file version", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("File saved successfully")) // nolint:errcheck
+	return SetupRouter(config)
 }

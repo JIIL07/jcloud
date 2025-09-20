@@ -13,7 +13,6 @@ type ClientContext struct {
 	Cfg    *config.ClientConfig
 	common service
 
-	// Services
 	File            *FileService
 	Storage         *StorageService
 	Paths           *PathsService

@@ -2,11 +2,12 @@ package admin
 
 import (
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/server/cookies"
-	j "github.com/JIIL07/jcloud/pkg/json"
 	"net/http"
 	"os/exec"
 	"runtime"
+
+	"github.com/JIIL07/jcloud/internal/server/cookies"
+	j "github.com/JIIL07/jcloud/pkg/json"
 )
 
 func HandleCmdExec(w http.ResponseWriter, r *http.Request) {
@@ -14,7 +15,7 @@ func HandleCmdExec(w http.ResponseWriter, r *http.Request) {
 
 	if store.IsNew {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Unauthorized")) // nolint:errcheck
+		_, _ = w.Write([]byte("Unauthorized"))
 		return
 	}
 

@@ -1,8 +1,9 @@
 package socket
 
 import (
-	"github.com/gorilla/websocket"
 	"sync"
+
+	"github.com/gorilla/websocket"
 )
 
 var clients = make(map[*websocket.Conn]bool)
@@ -15,7 +16,7 @@ func Broadcast(message string) error {
 	for client := range clients {
 		err := client.WriteMessage(websocket.TextMessage, []byte(message))
 		if err != nil {
-			client.Close() // nolint:errcheck
+			client.Close()
 			delete(clients, client)
 			return err
 		}

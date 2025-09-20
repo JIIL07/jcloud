@@ -38,23 +38,6 @@ It supports commands like init to initialize the cloud, addFile to addFile files
 
 		c = a.Cfg
 
-		//if versionFlag || cmd.Name() == "login" || cmd == cmd.Root() {
-		//	return nil
-		//}
-		//
-		//content, err := io.ReadAll(a.Paths.P.JcloudFile)
-		//if err != nil {
-		//	return fmt.Errorf("failed to read login file: %v", err)
-		//}
-		//
-		//if len(content) == 0 {
-		//	hintMessage := h.DisplayHint("login", h.LoginRequired, c)
-		//	if hintMessage != "" {
-		//		cobra.WriteStringAndCheck(os.Stdout, hintMessage)
-		//	}
-		//	os.Exit(0)
-		//}
-
 		return nil
 	},
 

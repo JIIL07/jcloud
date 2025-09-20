@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
+	"os"
+
 	"github.com/JIIL07/jcloud/internal/client/app"
 	"github.com/JIIL07/jcloud/internal/client/models"
 	"github.com/JIIL07/jcloud/internal/client/requests/jreq"
 	"github.com/JIIL07/jcloud/pkg/params"
-	"net/http"
-	"net/url"
-	"os"
 )
 
 type UserData struct {
@@ -22,7 +23,6 @@ type UserData struct {
 	Admin    int    `db:"admin" json:"admin"`
 }
 
-// var URL = "http://localhost:8080"
 var URL = "https://jcloud.up.railway.app"
 
 func Login(u *UserData) (*http.Response, error) {
@@ -94,7 +94,7 @@ func DeleteFile(f *models.File) error {
 	if err != nil {
 		return fmt.Errorf("error executing request: %w", err)
 	}
-	defer resp.Body.Close() // nolint:errcheck
+	defer resp.Body.Close()
 
 	return nil
 }
@@ -108,7 +108,7 @@ func GetFiles() error {
 	if err != nil {
 		return fmt.Errorf("error executing request: %w", err)
 	}
-	defer resp.Body.Close() // nolint:errcheck
+	defer resp.Body.Close()
 
 	response := make([]byte, resp.ContentLength)
 	_, err = resp.Body.Read(response)

@@ -3,12 +3,12 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+	"os"
+
 	"github.com/JIIL07/jcloud/internal/server/config"
 	"github.com/jmoiron/sqlx"
-	"os"
 )
 
-// Tx represents a database transaction
 type Tx struct {
 	*sqlx.Tx
 }
@@ -92,7 +92,6 @@ func (s *Storage) Query(command string) (*sql.Rows, error) {
 	return s.DB.Query(command)
 }
 
-// BeginTx starts a new transaction
 func (s *Storage) BeginTx() (*Tx, error) {
 	tx, err := s.DB.Beginx()
 	if err != nil {

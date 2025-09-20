@@ -2,10 +2,11 @@ package static
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/gorilla/mux"
 )
 
 type Files map[string][]byte
@@ -22,7 +23,7 @@ func (f Files) BinaryHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
 	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Write(data) // nolint:errcheck
+	_, _ = w.Write(data)
 }
 
 func LoadStatic(path string) (*Files, error) {

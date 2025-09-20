@@ -6,7 +6,7 @@ import (
 )
 
 func RootHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(`Welcome to CloudFiles API`)) // nolint:errcheck
+	_, _ = w.Write([]byte(`Welcome to CloudFiles API`))
 }
 
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {

@@ -1,10 +1,11 @@
 package admin
 
 import (
+	"net/http"
+
 	"github.com/JIIL07/jcloud/internal/server/cookies"
 	"github.com/JIIL07/jcloud/internal/server/utils"
 	jjson "github.com/JIIL07/jcloud/pkg/json"
-	"net/http"
 
 	"github.com/JIIL07/jcloud/pkg/parsers"
 )
@@ -15,7 +16,7 @@ func HandleSQLQuery(w http.ResponseWriter, r *http.Request) {
 
 	if store.IsNew {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Unauthorized")) // nolint:errcheck
+		_, _ = w.Write([]byte("Unauthorized"))
 		return
 	}
 
@@ -27,7 +28,7 @@ func HandleSQLQuery(w http.ResponseWriter, r *http.Request) {
 		jjson.RespondWithError(w, err)
 		return
 	}
-	defer rows.Close() // nolint:errcheck
+	defer rows.Close()
 
 	var results []map[string]interface{}
 	results, err = parsers.ParseRows(rows)

@@ -1,17 +1,17 @@
-// nolint:errcheck
 package main
 
 import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/client/app"
-	"github.com/JIIL07/jcloud/internal/client/cmd"
-	"github.com/JIIL07/jcloud/internal/client/config"
-	"github.com/JIIL07/jcloud/pkg/ctx"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/JIIL07/jcloud/internal/client/app"
+	"github.com/JIIL07/jcloud/internal/client/cmd"
+	"github.com/JIIL07/jcloud/internal/client/config"
+	jctx "github.com/JIIL07/jcloud/pkg/ctx"
 )
 
 func main() {

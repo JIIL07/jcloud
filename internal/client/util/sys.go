@@ -6,15 +6,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/JIIL07/jcloud/internal/client/models"
-	jhash "github.com/JIIL07/jcloud/pkg/hash"
-	"github.com/fsnotify/fsnotify"
 	"log"
 	"os"
 	"os/exec"
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/JIIL07/jcloud/internal/client/models"
+	jhash "github.com/JIIL07/jcloud/pkg/hash"
+	"github.com/fsnotify/fsnotify"
 )
 
 const (
@@ -104,7 +105,7 @@ func WaitForFile(tempDir string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer watcher.Close() // nolint:errcheck
+	defer watcher.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), tempDirTimeout)
 	defer cancel()
@@ -122,8 +123,6 @@ func WaitForFile(tempDir string) (string, error) {
 	return detectedFile, nil
 }
 
-// GetFileFromExplorer opens the file explorer, waits for the user to create or modify a file,
-// reads the file, and returns the file's data wrapped in a models.File object.
 func GetFileFromExplorer() (*models.File, error) {
 	dir, err := CreateTempDir()
 	if err != nil {
@@ -168,7 +167,7 @@ func GetFileFromExplorer() (*models.File, error) {
 	if err != nil {
 		log.Fatal("Error compressing data:", err)
 	}
-	gzipWriter.Close() // nolint:errcheck
+	gzipWriter.Close()
 
 	meta.Size = len(fileData)
 	meta.HashSum = jhash.Hash(fileData)
