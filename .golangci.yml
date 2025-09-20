@@ -32,6 +32,8 @@ linters-settings:
           - github.com/fsnotify
           - github.com/gorilla
           - github.com/joho
+          - gopkg.in
+          - google.golang.org
 
         deny:
           - pkg: io/ioutil
