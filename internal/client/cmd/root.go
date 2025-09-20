@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/client/app"
 	"github.com/JIIL07/jcloud/internal/client/config"
-	h "github.com/JIIL07/jcloud/internal/client/hints"
 	"github.com/JIIL07/jcloud/pkg/ctx"
 	"github.com/spf13/cobra"
-	"io"
 	"os"
 )
 
@@ -40,22 +38,22 @@ It supports commands like init to initialize the cloud, addFile to addFile files
 
 		c = a.Cfg
 
-		if versionFlag || cmd.Name() == "login" || cmd == cmd.Root() {
-			return nil
-		}
-
-		content, err := io.ReadAll(a.Paths.P.JcloudFile)
-		if err != nil {
-			return fmt.Errorf("failed to read login file: %v", err)
-		}
-
-		if len(content) == 0 {
-			hintMessage := h.DisplayHint("login", h.LoginRequired, c)
-			if hintMessage != "" {
-				cobra.WriteStringAndCheck(os.Stdout, hintMessage)
-			}
-			os.Exit(0)
-		}
+		//if versionFlag || cmd.Name() == "login" || cmd == cmd.Root() {
+		//	return nil
+		//}
+		//
+		//content, err := io.ReadAll(a.Paths.P.JcloudFile)
+		//if err != nil {
+		//	return fmt.Errorf("failed to read login file: %v", err)
+		//}
+		//
+		//if len(content) == 0 {
+		//	hintMessage := h.DisplayHint("login", h.LoginRequired, c)
+		//	if hintMessage != "" {
+		//		cobra.WriteStringAndCheck(os.Stdout, hintMessage)
+		//	}
+		//	os.Exit(0)
+		//}
 
 		return nil
 	},
@@ -76,6 +74,7 @@ It supports commands like init to initialize the cloud, addFile to addFile files
 func init() {
 	RootCmd.PersistentFlags().BoolP("help", "h", false, "Help")
 	RootCmd.PersistentFlags().BoolVarP(&versionFlag, "version", "v", false, "Version")
+	RootCmd.Flags().BoolVar(&hintsEnabled, "advice", true, "Enable or disable hints when nothing is specified")
 }
 
 func Execute() {

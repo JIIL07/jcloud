@@ -3,7 +3,7 @@ package admin
 import (
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/server/cookies"
-	jjson "github.com/JIIL07/jcloud/pkg/json"
+	j "github.com/JIIL07/jcloud/pkg/json"
 	"net/http"
 	"os/exec"
 	"runtime"
@@ -18,16 +18,16 @@ func HandleCmdExec(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req jjson.Request
+	var req j.Request
 	req.Command = r.URL.Query().Get("command")
 
 	output, err := ExecuteCommand(req.Command)
 	if err != nil {
-		jjson.RespondWithError(w, err)
+		j.RespondWithError(w, err)
 		return
 	}
 
-	jjson.RespondWithJSON(w, output)
+	j.RespondWithJSON(w, output)
 
 }
 

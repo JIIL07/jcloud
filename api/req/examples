@@ -3,3 +3,17 @@ curl -X POST http://localhost:8080/api/v1/login -H "Content-Type: application/js
 curl -X GET "http://localhost:8080/api/v1/login?username={user}"
 
 curl -X POST http://localhost:8080/check -H "Content-Type: application/json" -d "{\"metadata\": { \"filename\": \"example\", \"description\": \"Updated file description\"}, \"data\": \"VXBkYXRlZCBmaWxlIGNvbnRlbnQ=\"}"
+
+curl -X POST http://localhost:8080/api/v1/user/1/files/example/versions -H "Content-Type: application/json" -d "{\"file_id\": 123, \"user_id\": 1, \"version\": 2, \"full_version\": false, \"delta\": \"base64encodedelta\", \"change_type\": \"update\"}"
+
+curl -X GET http://localhost:8080/api/v1/user/1/files/example/versions
+curl -X GET http://localhost:8080/api/v1/user/1/files/example/versions/2
+curl -X GET http://localhost:8080/api/v1/user/1/files/example/versions/last
+
+curl -X DELETE http://localhost:8080/api/v1/user/1/files/example/versions/2
+curl -X DELETE http://localhost:8080/api/v1/user/1/files/example/versions
+
+curl -X GET http://localhost:8080/api/v1/user/1/files/example/restore?version=2
+
+curl -X GET http://localhost:8080/api/v1/user/1/files/example/history
+

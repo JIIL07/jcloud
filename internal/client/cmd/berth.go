@@ -10,7 +10,6 @@ import (
 	"io"
 )
 
-// berthCmd represents the berth command
 var berthCmd = &cobra.Command{
 	Use:   "berth",
 	Short: "A brief description of your command",

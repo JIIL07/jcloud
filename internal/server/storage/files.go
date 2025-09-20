@@ -10,13 +10,14 @@ import (
 )
 
 type File struct {
-	ID         int `db:"id" json:"id"`
-	UserID     int `db:"user_id" json:"user_id"`
-	Metadata   FileMetadata
-	Status     string    `db:"status" json:"status"`
-	Data       []byte    `db:"data" json:"data"`
-	CreatedAt  time.Time `db:"created_at" json:"created_at"`
-	ModifiedAt time.Time `db:"last_modified_at" json:"modified_at"`
+	ID            int `db:"id" json:"id"`
+	UserID        int `db:"user_id" json:"user_id"`
+	LastVersionID int `db:"last_version_id" json:"last_version_id"`
+	Metadata      FileMetadata
+	Status        string    `db:"status" json:"status"`
+	Data          []byte    `db:"data" json:"data"`
+	CreatedAt     time.Time `db:"created_at" json:"created_at"`
+	ModifiedAt    time.Time `db:"last_modified_at" json:"modified_at"`
 }
 
 type FileMetadata struct {
@@ -25,6 +26,9 @@ type FileMetadata struct {
 	Size        int    `db:"filesize" json:"filesize"`
 	HashSum     string `db:"hash_sum" json:"hash_sum"`
 	Description string `db:"description,omitempty" json:"description,omitempty"`
+}
+
+type Properties struct {
 }
 
 func (s *Storage) GetAllFiles(userID int) ([]File, error) {

@@ -1,14 +1,15 @@
 package handlers
 
 import (
-	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/JIIL07/jcloud/internal/server/storage"
 	"github.com/JIIL07/jcloud/internal/server/utils"
+	jhash "github.com/JIIL07/jcloud/pkg/hash"
+	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -150,8 +151,7 @@ func HashSumHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hash := sha256.Sum256(file.Data)
-	checksum := hex.EncodeToString(hash[:])
+	checksum := jhash.Hash(file.Data)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"filename": filename, "checksum": checksum}) // nolint:errcheck
@@ -215,10 +215,6 @@ func ShareFileHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func FileHistoryHandler(w http.ResponseWriter, r *http.Request) {
-
-}
-
 func UpdateMetadataHandler(w http.ResponseWriter, r *http.Request) {
 	s := utils.ProvideStorage(r, w)
 	u := utils.ProvideUser(r, w)
@@ -249,5 +245,180 @@ func UpdateMetadataHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Metadata updated successfully",
-	})
+	}) // nolint:errcheck
+}
+
+func AddFileVersionHandler(w http.ResponseWriter, r *http.Request) {
+	s := utils.ProvideStorage(r, w)
+	var version storage.FileVersion
+	if err := json.NewDecoder(r.Body).Decode(&version); err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	if err := s.AddFileVersion(version); err != nil {
+		http.Error(w, "Failed to add file version", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}
+
+func RestoreFileToVersionHandler(w http.ResponseWriter, r *http.Request) {
+	s := utils.ProvideStorage(r, w)
+
+	vars := mux.Vars(r)
+	fileIDStr := vars["filename"]
+	fileID, err := strconv.Atoi(fileIDStr)
+	if err != nil {
+		http.Error(w, "Invalid file ID", http.StatusBadRequest)
+		return
+	}
+
+	targetVersion, err := strconv.Atoi(r.URL.Query().Get("version"))
+	if err != nil {
+		http.Error(w, "Invalid version", http.StatusBadRequest)
+		return
+	}
+
+	fileContent, err := s.RestoreFileToVersion(fileID, targetVersion)
+	if err != nil {
+		http.Error(w, "Failed to restore file", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Write(fileContent) // nolint:errcheck
+}
+
+func GetFileHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	s := utils.ProvideStorage(r, w)
+
+	vars := mux.Vars(r)
+	fileIDStr := vars["filename"]
+	fileID, err := strconv.Atoi(fileIDStr)
+	if err != nil {
+		http.Error(w, "Invalid file ID", http.StatusBadRequest)
+		return
+	}
+
+	history, err := s.GetFileHistory(fileID)
+	if err != nil {
+		http.Error(w, "Failed to fetch file history", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(history) // nolint:errcheck
+}
+
+func GetFileVersionsHandler(w http.ResponseWriter, r *http.Request) {
+	s := utils.ProvideStorage(r, w)
+
+	vars := mux.Vars(r)
+	fileIDStr := vars["filename"]
+	fileID, err := strconv.Atoi(fileIDStr)
+	if err != nil {
+		http.Error(w, "Invalid file ID", http.StatusBadRequest)
+		return
+	}
+
+	versions, err := s.GetFileVersions(fileID)
+	if err != nil {
+		http.Error(w, "Failed to fetch file versions", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(versions) // nolint:errcheck
+}
+
+func GetFileVersionHandler(w http.ResponseWriter, r *http.Request) {
+	s := utils.ProvideStorage(r, w)
+
+	vars := mux.Vars(r)
+	fileIDStr := vars["filename"]
+	fileID, err := strconv.Atoi(fileIDStr)
+	if err != nil {
+		http.Error(w, "Invalid file ID", http.StatusBadRequest)
+		return
+	}
+
+	versionStr := vars["version"]
+	version, err := strconv.Atoi(versionStr)
+	if err != nil {
+		http.Error(w, "Invalid version", http.StatusBadRequest)
+		return
+	}
+
+	versionData, err := s.GetFileVersion(fileID, version)
+	if err != nil {
+		http.Error(w, "Failed to fetch file version", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(versionData) // nolint:errcheck
+}
+
+func GetLastFileVersionHandler(w http.ResponseWriter, r *http.Request) {
+	s := utils.ProvideStorage(r, w)
+
+	vars := mux.Vars(r)
+	fileID, err := strconv.Atoi(vars["filename"])
+	if err != nil {
+		http.Error(w, "Invalid file ID", http.StatusBadRequest)
+		return
+	}
+
+	versionData, err := s.GetLastFileVersion(fileID)
+	if err != nil {
+		http.Error(w, "Failed to fetch last file version", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(versionData) // nolint:errcheck
+}
+
+func DeleteFileVersionHandler(w http.ResponseWriter, r *http.Request) {
+	s := utils.ProvideStorage(r, w)
+
+	vars := mux.Vars(r)
+	fileID, err := strconv.Atoi(vars["filename"])
+	if err != nil {
+		http.Error(w, "Invalid file ID", http.StatusBadRequest)
+		return
+	}
+
+	version, err := strconv.Atoi(vars["version"])
+	if err != nil {
+		http.Error(w, "Invalid version", http.StatusBadRequest)
+		return
+	}
+
+	if err := s.DeleteFileVersion(fileID, version); err != nil {
+		http.Error(w, "Failed to delete file version", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func DeleteFileVersionsHandler(w http.ResponseWriter, r *http.Request) {
+	s := utils.ProvideStorage(r, w)
+
+	vars := mux.Vars(r)
+	fileID, err := strconv.Atoi(vars["filename"])
+	if err != nil {
+		http.Error(w, "Invalid file ID", http.StatusBadRequest)
+		return
+	}
+
+	if err := s.DeleteFileVersions(fileID); err != nil {
+		http.Error(w, "Failed to delete file versions", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

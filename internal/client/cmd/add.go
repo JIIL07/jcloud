@@ -120,9 +120,5 @@ func init() {
 	addCmd.Flags().BoolVarP(&interactiveRust, "interactive-app", "R", false, "Interactively choose files to add in the app interface")
 	addCmd.Flags().StringSliceVarP(&excludeFiles, "exclude", "e", []string{}, "Exclude specific files or directories")
 
-	addCmd.Flags().BoolVar(&hintsEnabled, "advice", true, "Enable or disable hints when nothing is specified")
-
-	addCmd.Args = cobra.MinimumNArgs(0)
-
 	RootCmd.AddCommand(addCmd)
 }

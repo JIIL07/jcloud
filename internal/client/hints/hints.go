@@ -5,11 +5,6 @@ import (
 	"github.com/JIIL07/jcloud/internal/client/config"
 )
 
-type Hint struct {
-	Message string   `json:"message"`
-	Hint    []string `json:"hint"`
-}
-
 type HintCondition string
 
 const (

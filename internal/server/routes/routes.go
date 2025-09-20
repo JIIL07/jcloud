@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"encoding/base64"
-	"fmt"
 	"github.com/JIIL07/jcloud/internal/server/admin"
 	"github.com/JIIL07/jcloud/internal/server/handlers"
 	"github.com/JIIL07/jcloud/internal/server/middleware"
@@ -11,6 +9,7 @@ import (
 	"github.com/JIIL07/jcloud/internal/server/utils"
 	"github.com/gorilla/mux"
 	"net/http"
+	"time"
 )
 
 func SetupRouter(b *static.Files, s *storage.Storage) *mux.Router {
@@ -44,8 +43,16 @@ func SetupRouter(b *static.Files, s *storage.Storage) *mux.Router {
 	currentFile := files.PathPrefix("/{filename}").Name("current-file").Subrouter()
 	currentFile.Use(middleware.UserMiddleware)
 
+	currentFile.HandleFunc("/versions", handlers.AddFileVersionHandler).Methods(http.MethodPost)
+	currentFile.HandleFunc("/versions", handlers.GetFileVersionsHandler).Methods(http.MethodGet)
+	currentFile.HandleFunc("/versions/{version}", handlers.GetFileVersionHandler).Methods(http.MethodGet)
+	currentFile.HandleFunc("/versions/last", handlers.GetLastFileVersionHandler).Methods(http.MethodGet)
+	currentFile.HandleFunc("/versions/{version}", handlers.DeleteFileVersionHandler).Methods(http.MethodDelete)
+	currentFile.HandleFunc("/versions", handlers.DeleteFileVersionsHandler).Methods(http.MethodDelete)
+	currentFile.HandleFunc("/restore", handlers.RestoreFileToVersionHandler).Methods(http.MethodGet)
+	currentFile.HandleFunc("/history", handlers.GetFileHistoryHandler).Methods(http.MethodGet)
+
 	currentFile.HandleFunc("/metadata", handlers.UpdateMetadataHandler).Methods(http.MethodPatch).Name("update-metadata")
-	currentFile.HandleFunc("/history", handlers.FileHistoryHandler).Methods(http.MethodGet).Name("file-history")
 	currentFile.HandleFunc("/share", handlers.ShareFileHandler).Methods(http.MethodPost).Name("share-file")
 	currentFile.HandleFunc("/permissions", handlers.FilePermissionsHandler).Methods(http.MethodGet).Name("file-permissions")
 	currentFile.HandleFunc("/permissions", handlers.UpdatePermissionsHandler).Methods(http.MethodPatch).Name("update-permissions")
@@ -69,24 +76,38 @@ func SetupRouter(b *static.Files, s *storage.Storage) *mux.Router {
 func CheckerHandler(w http.ResponseWriter, r *http.Request) {
 	s := utils.ProvideStorage(r, w)
 
-	files, err := s.GetImageFiles(1)
+	//f := &storage.File{
+	//	UserID:        1,
+	//	LastVersionID: 0,
+	//	Metadata: storage.FileMetadata{
+	//		Name:        "test",
+	//		Extension:   "txt",
+	//		Size:        len("test file"),
+	//		HashSum:     jhash.Hash([]byte("test file")),
+	//		Description: "test description",
+	//	},
+	//	Data:       []byte("test file"),
+	//	Status:     "upload",
+	//	CreatedAt:  time.Now(),
+	//	ModifiedAt: time.Now(),
+	//}
+
+	v := storage.FileVersion{
+		FileID:      1,
+		UserID:      1,
+		Version:     1,
+		FullVersion: true,
+		Delta:       []byte("test file"),
+		ChangeType:  "upload",
+		CreatedAt:   time.Now(),
+	}
+
+	err := s.AddFileVersion(v)
 	if err != nil {
-		http.Error(w, "Failed to retrieve images", http.StatusInternalServerError)
+		http.Error(w, "Failed to add file version", http.StatusInternalServerError)
 		return
 	}
 
-	html := "<html><body><h1>Image Gallery</h1><div style='display: flex; flex-wrap: wrap;'>"
-	for _, file := range files {
-		imageDataURL := fmt.Sprintf("data:image/%s;base64,%s", file.Metadata.Extension, base64.StdEncoding.EncodeToString(file.Data))
-		html += fmt.Sprintf(
-			"<div style='margin: 10px;'><img src='%s' alt='%s' style='width: 200px; height: auto;'></div>",
-			imageDataURL,
-			file.Metadata.Name,
-		)
-	}
-	html += "</div></body></html>"
-
-	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(html)) // nolint:errcheck
+	w.Write([]byte("File saved successfully")) // nolint:errcheck
 }

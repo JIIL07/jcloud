@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	c := config.MustLoadClient()
+	c := config.MustLoad()
 
 	appc, err := app.NewAppContext(c)
 	if err != nil {

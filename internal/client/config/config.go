@@ -96,7 +96,7 @@ type Metrics struct {
 	IntervalSeconds int    `yaml:"interval_seconds"`
 }
 
-func MustLoadClient() *ClientConfig {
+func MustLoad() *ClientConfig {
 	configPath := os.Getenv("CLIENT_CONFIG_PATH")
 	if configPath == "" {
 		log.Fatal("CONFIG_PATH is not set")
