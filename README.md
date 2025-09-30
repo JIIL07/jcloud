@@ -330,12 +330,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [SQLx](https://github.com/jmoiron/sqlx) - SQL toolkit
 - [Egui](https://github.com/emilk/egui) - Rust GUI framework
 
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/JIIL07/jcloud/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/JIIL07/jcloud/discussions)
-- **Email**: support@jcloud.dev
-
 ---
 
 <div align="center">
